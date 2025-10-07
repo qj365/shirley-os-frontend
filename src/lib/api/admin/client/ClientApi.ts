@@ -7,11 +7,13 @@ import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { AdminService } from './services/AdminService';
 import { HealthService } from './services/HealthService';
+import { ProductService } from './services/ProductService';
 import { UploadService } from './services/UploadService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ClientApi {
   public readonly admin: AdminService;
   public readonly health: HealthService;
+  public readonly product: ProductService;
   public readonly upload: UploadService;
   public readonly request: BaseHttpRequest;
   constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
@@ -28,6 +30,7 @@ export class ClientApi {
     });
     this.admin = new AdminService(this.request);
     this.health = new HealthService(this.request);
+    this.product = new ProductService(this.request);
     this.upload = new UploadService(this.request);
   }
 }

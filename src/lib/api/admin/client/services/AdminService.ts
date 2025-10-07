@@ -32,7 +32,7 @@ export class AdminService {
    */
   public adminCategoryGetAll({
     page = 1,
-    pageSize = 20,
+    pageSize = 10,
     name,
   }: {
     page?: number,
