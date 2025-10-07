@@ -11,8 +11,12 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { _36_Enums_UserRole } from './models/_36_Enums_UserRole';
+export type { AdminGetCategoriesDto } from './models/AdminGetCategoriesDto';
+export type { AdminGetCategoriesResponse } from './models/AdminGetCategoriesResponse';
 export type { AdminGetMeResponse } from './models/AdminGetMeResponse';
+export type { AdminModifyCategoryDto } from './models/AdminModifyCategoryDto';
 export type { CreateUploadDto } from './models/CreateUploadDto';
+export type { NumberedPagingResponse_AdminGetCategoriesResponse_Array_ } from './models/NumberedPagingResponse_AdminGetCategoriesResponse_Array_';
 export type { Omit_User_createdAt_or_updatedAt_ } from './models/Omit_User_createdAt_or_updatedAt_';
 export type { Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__ } from './models/Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__';
 
