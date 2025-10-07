@@ -10,7 +10,11 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export { _36_Enums_UserRole } from './models/_36_Enums_UserRole';
+export type { AdminGetMeResponse } from './models/AdminGetMeResponse';
 export type { CreateUploadDto } from './models/CreateUploadDto';
+export type { Omit_User_createdAt_or_updatedAt_ } from './models/Omit_User_createdAt_or_updatedAt_';
+export type { Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__ } from './models/Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__';
 
 export { HealthService } from './services/HealthService';
 export { UploadService } from './services/UploadService';

@@ -1,4 +1,4 @@
-import { getToken } from "../../lib/firebase";
+import { getToken } from "@/lib/firebase";
 import { ClientApi as _ClientApi, ApiError, OpenAPI } from "./client";
 
 if (process.env.NEXT_PUBLIC_API_URL) {

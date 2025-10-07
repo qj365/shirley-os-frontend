@@ -5,10 +5,12 @@
 import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
+import { AdminService } from './services/AdminService';
 import { HealthService } from './services/HealthService';
 import { UploadService } from './services/UploadService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ClientApi {
+  public readonly admin: AdminService;
   public readonly health: HealthService;
   public readonly upload: UploadService;
   public readonly request: BaseHttpRequest;
@@ -24,6 +26,7 @@ export class ClientApi {
       HEADERS: config?.HEADERS,
       ENCODE_PATH: config?.ENCODE_PATH,
     });
+    this.admin = new AdminService(this.request);
     this.health = new HealthService(this.request);
     this.upload = new UploadService(this.request);
   }
