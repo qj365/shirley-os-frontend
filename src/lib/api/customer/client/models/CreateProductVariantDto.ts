@@ -9,5 +9,6 @@ export type CreateProductVariantDto = {
   compareAtPrice: number;
   image: string;
   variantOptionIds: PrismaJson_VariantOptionIds;
+  stock: number;
 };
 

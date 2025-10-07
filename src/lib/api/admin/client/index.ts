@@ -10,6 +10,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export { _36_Enums_ProductStatus } from './models/_36_Enums_ProductStatus';
 export { _36_Enums_UserRole } from './models/_36_Enums_UserRole';
 export type { AdminGetCategoriesDto } from './models/AdminGetCategoriesDto';
 export type { AdminGetCategoriesResponse } from './models/AdminGetCategoriesResponse';
@@ -30,6 +31,8 @@ export type { PrismaJson_ProductImages } from './models/PrismaJson_ProductImages
 export type { PrismaJson_VariantOption } from './models/PrismaJson_VariantOption';
 export type { PrismaJson_VariantOptionIds } from './models/PrismaJson_VariantOptionIds';
 export type { PrismaJson_VariantOptions } from './models/PrismaJson_VariantOptions';
+export type { ProductStatsResponse } from './models/ProductStatsResponse';
+export type { ProductStatus } from './models/ProductStatus';
 export type { TemplateVariantOptionsResponse } from './models/TemplateVariantOptionsResponse';
 export type { VariantOptionsDto } from './models/VariantOptionsDto';
 

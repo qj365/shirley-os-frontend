@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { _36_Enums_ProductStatus } from './_36_Enums_ProductStatus';
 import type { PrismaJson_ProductImages } from './PrismaJson_ProductImages';
 import type { PrismaJson_VariantOptions } from './PrismaJson_VariantOptions';
 export type GetProductResponse = {
@@ -19,6 +20,7 @@ export type GetProductResponse = {
     id: number;
   }>;
   variantOptions: PrismaJson_VariantOptions;
+  status: _36_Enums_ProductStatus;
   description: string;
   sku: string;
   images: PrismaJson_ProductImages;

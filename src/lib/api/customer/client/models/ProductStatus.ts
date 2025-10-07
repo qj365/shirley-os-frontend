@@ -3,11 +3,4 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { _36_Enums_ProductStatus } from './_36_Enums_ProductStatus';
-export type GetProductsDto = {
-  page?: number;
-  pageSize?: number;
-  keyword?: string;
-  categoryId?: number;
-  status?: _36_Enums_ProductStatus;
-};
-
+export type ProductStatus = _36_Enums_ProductStatus;

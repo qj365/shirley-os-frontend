@@ -2,12 +2,15 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { _36_Enums_ProductStatus } from './_36_Enums_ProductStatus';
 import type { Dimension } from './Dimension';
 export type GetProductsResponse = {
+  stock: Dimension;
   category: {
     name: string;
     id: number;
   };
+  status: _36_Enums_ProductStatus;
   image: string;
   prices: Dimension;
   sku: string;

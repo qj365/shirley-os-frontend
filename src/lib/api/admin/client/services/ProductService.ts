@@ -2,9 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { _36_Enums_ProductStatus } from '../models/_36_Enums_ProductStatus';
 import type { CreateProductDto } from '../models/CreateProductDto';
 import type { GetProductResponse } from '../models/GetProductResponse';
 import type { NumberedPagingResponse_GetProductsResponse_Array_ } from '../models/NumberedPagingResponse_GetProductsResponse_Array_';
+import type { ProductStatsResponse } from '../models/ProductStatsResponse';
 import type { TemplateVariantOptionsResponse } from '../models/TemplateVariantOptionsResponse';
 import type { VariantOptionsDto } from '../models/VariantOptionsDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -68,11 +70,13 @@ export class ProductService {
     pageSize = 10,
     keyword,
     categoryId,
+    status,
   }: {
     page?: number,
     pageSize?: number,
     keyword?: string,
     categoryId?: number,
+    status?: _36_Enums_ProductStatus,
   }): CancelablePromise<NumberedPagingResponse_GetProductsResponse_Array_> {
     return this.httpRequest.request({
       method: 'GET',
@@ -82,6 +86,7 @@ export class ProductService {
         'pageSize': pageSize,
         'keyword': keyword,
         'categoryId': categoryId,
+        'status': status,
       },
       errors: {
         400: `Bad request`,
@@ -106,6 +111,42 @@ export class ProductService {
       url: '/admin/products/check-existing-sku/{sku}',
       path: {
         'sku': sku,
+      },
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns ProductStatsResponse Ok
+   * @throws ApiError
+   */
+  public getProductStats({
+    page = 1,
+    pageSize = 10,
+    keyword,
+    categoryId,
+    status,
+  }: {
+    page?: number,
+    pageSize?: number,
+    keyword?: string,
+    categoryId?: number,
+    status?: _36_Enums_ProductStatus,
+  }): CancelablePromise<ProductStatsResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/admin/products/stats',
+      query: {
+        'page': page,
+        'pageSize': pageSize,
+        'keyword': keyword,
+        'categoryId': categoryId,
+        'status': status,
       },
       errors: {
         400: `Bad request`,
