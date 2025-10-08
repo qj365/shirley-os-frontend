@@ -8,6 +8,7 @@ import type { GetProductResponse } from '../models/GetProductResponse';
 import type { NumberedPagingResponse_GetProductsResponse_Array_ } from '../models/NumberedPagingResponse_GetProductsResponse_Array_';
 import type { ProductStatsResponse } from '../models/ProductStatsResponse';
 import type { TemplateVariantOptionsResponse } from '../models/TemplateVariantOptionsResponse';
+import type { UpdateProductDto } from '../models/UpdateProductDto';
 import type { VariantOptionsDto } from '../models/VariantOptionsDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -172,6 +173,36 @@ export class ProductService {
       path: {
         'id': id,
       },
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns any Ok
+   * @throws ApiError
+   */
+  public updateProduct({
+    id,
+    requestBody,
+  }: {
+    id: number,
+    requestBody: UpdateProductDto,
+  }): CancelablePromise<{
+    id: number;
+  }> {
+    return this.httpRequest.request({
+      method: 'PUT',
+      url: '/admin/products/{id}',
+      path: {
+        'id': id,
+      },
+      body: requestBody,
+      mediaType: 'application/json',
       errors: {
         400: `Bad request`,
         401: `Invalid token`,

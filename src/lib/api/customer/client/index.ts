@@ -34,6 +34,8 @@ export type { PrismaJson_VariantOptions } from './models/PrismaJson_VariantOptio
 export type { ProductStatsResponse } from './models/ProductStatsResponse';
 export type { ProductStatus } from './models/ProductStatus';
 export type { TemplateVariantOptionsResponse } from './models/TemplateVariantOptionsResponse';
+export type { UpdateProductDto } from './models/UpdateProductDto';
+export type { UpdateProductVariantDto } from './models/UpdateProductVariantDto';
 export type { VariantOptionsDto } from './models/VariantOptionsDto';
 
 export { HealthService } from './services/HealthService';
