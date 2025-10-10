@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { _36_Enums_ProductStatus } from '../models/_36_Enums_ProductStatus';
 import type { CreateProductDto } from '../models/CreateProductDto';
+import type { CursorPagingResponse_GetProductsByCategoryResponse_Array_ } from '../models/CursorPagingResponse_GetProductsByCategoryResponse_Array_';
 import type { GetProductResponse } from '../models/GetProductResponse';
 import type { NumberedPagingResponse_GetProductsResponse_Array_ } from '../models/NumberedPagingResponse_GetProductsResponse_Array_';
 import type { ProductStatsResponse } from '../models/ProductStatsResponse';
@@ -14,6 +15,35 @@ import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ProductService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
+  /**
+   * @returns CursorPagingResponse_GetProductsByCategoryResponse_Array_ Ok
+   * @throws ApiError
+   */
+  public getProductsByCategory({
+    categoryId,
+    cursor,
+    pageSize = 10,
+  }: {
+    categoryId: number,
+    cursor?: string,
+    pageSize?: number,
+  }): CancelablePromise<CursorPagingResponse_GetProductsByCategoryResponse_Array_> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/products',
+      query: {
+        'cursor': cursor,
+        'pageSize': pageSize,
+        'categoryId': categoryId,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
   /**
    * @returns TemplateVariantOptionsResponse Ok
    * @throws ApiError
