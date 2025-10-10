@@ -8,5 +8,6 @@ export type GetProductsByCategoryResponse = {
   name: string;
   image: string;
   price: number;
+  compareAtPrice: number;
 };
 

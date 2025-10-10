@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { CursorPagingResponse_GetProductsByCategoryResponse_Array_ } from '../models/CursorPagingResponse_GetProductsByCategoryResponse_Array_';
+import type { GetProductBySlugResponse } from '../models/GetProductBySlugResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ProductService {
@@ -27,6 +28,29 @@ export class ProductService {
         'cursor': cursor,
         'pageSize': pageSize,
         'categoryId': categoryId,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetProductBySlugResponse Ok
+   * @throws ApiError
+   */
+  public getProductBySlug({
+    slug,
+  }: {
+    slug: string,
+  }): CancelablePromise<GetProductBySlugResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/products/{slug}',
+      path: {
+        'slug': slug,
       },
       errors: {
         400: `Bad request`,
