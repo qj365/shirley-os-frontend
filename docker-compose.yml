@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    # container_name: shirleys-foods-web
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules  # Prevent node_modules override from host
+    env_file:
+      - .env
+    restart: unless-stopped

@@ -1,0 +1,30 @@
+name: Deploy to Production on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  deploy-production:
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH for production
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ vars.REMOTE_HOST }} >> ~/.ssh/known_hosts
+
+      - name: SSH into production directory and deploy
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ vars.REMOTE_USER }}@${{ vars.REMOTE_HOST }} << 'EOF'
+            export TERM=xterm
+            cd ${{ vars.PRODUCTION_DIR }}
+            git reset --hard
+            git pull
+            make restart-d
+          EOF

@@ -1,0 +1,121 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Styles the entire scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Styles the scrollbar thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9999;
+}
+
+/* Styles the scrollbar track (the background) */
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
+  cursor: default; /* Set default cursor for body */
+  width: 100%;
+}
+
+/* Hide Next.js floating debug icon */
+#__next-build-watcher,
+nextjs-portal {
+  display: none !important;
+}
+
+/* Reset cursor for all elements to default */
+* {
+  cursor: inherit;
+}
+
+/* Proper cursor styles for interactive elements */
+button,
+[role='button'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Links should only have pointer cursor when they have href */
+a[href] {
+  cursor: pointer;
+}
+
+/* Input fields should have text cursor */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
+textarea {
+  cursor: text;
+}
+
+/* Global placeholder text styling - muted color for all inputs */
+input::placeholder,
+textarea::placeholder {
+  color: #666;
+  opacity: 1; /* Ensure consistent opacity across browsers */
+  font-weight: normal;
+}
+
+/* Disabled elements should have not-allowed cursor */
+:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* For adding dark mode styles that can't be handled in the config */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  /* Add other dark mode variables as needed */
+}
+
+.container {
+  @apply mx-auto max-w-[1578px] px-6;
+}
+
+.shadow-card {
+  @apply overflow-hidden rounded-[10px] bg-white shadow-[0_4px_13px_0_rgba(148,_147,_239,_0.2)] md:rounded-[20px];
+}
+
+.btn-gradient--yellow {
+  border-radius: 999px;
+  border: 2px solid #ffd56a;
+  background: var(--linear, linear-gradient(157deg, #f3c03f 11.78%, #ffba0a 88.22%));
+  box-shadow: 3px -5px 11px 0 rgba(0, 0, 0, 0.25) inset;
+}
+
+.our-recipes-bg-gradient--yellow {
+  background: linear-gradient(180deg, rgb(243, 192, 63) 0%, rgb(255, 186, 10) 100%);
+  box-shadow:
+    inset 0 9px 10px 0 rgb(210, 151, 2),
+    inset 0 -9px 15px 0 rgba(210, 151, 2, 0.25);
+}
+
+.sh-text-input {
+  @apply w-full rounded-[5px] border-2 border-[#797979] bg-transparent p-2 text-base font-semibold text-black outline-none placeholder:text-[#797979];
+}
