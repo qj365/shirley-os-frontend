@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 
 body {
-  font-family: 'Raleway', sans-serif;
-  width: 100%;  
+  font-family: "Raleway", sans-serif;
+  width: 100%;
   margin: auto;
   overflow-x: hidden;
   cursor: default; /* Set default cursor for body */
@@ -15,14 +15,13 @@ nextjs-portal {
   display: none !important;
 }
 
-
 /* Reset cursor for all elements to default */
 * {
   cursor: inherit;
 }
 
 /* Proper cursor styles for interactive elements */
-button, 
+button,
 [role="button"],
 input[type="submit"],
 input[type="button"],
@@ -68,4 +67,36 @@ textarea::placeholder {
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   /* Add other dark mode variables as needed */
+}
+
+.container {
+  @apply mx-auto max-w-[1578px] px-6;
+}
+
+.shadow-card {
+  @apply overflow-hidden rounded-[10px] bg-white shadow-[0_4px_13px_0_rgba(148,_147,_239,_0.2)] md:rounded-[20px];
+}
+
+.btn-gradient--yellow {
+  border-radius: 999px;
+  border: 2px solid #ffd56a;
+  background: var(
+    --linear,
+    linear-gradient(157deg, #f3c03f 11.78%, #ffba0a 88.22%)
+  );
+  box-shadow: 3px -5px 11px 0 rgba(0, 0, 0, 0.25) inset;
+}
+
+.our-recipes-bg-gradient--yellow {
+  background: linear-gradient(
+    180deg,
+    rgb(243, 192, 63) 0%,
+    rgb(255, 186, 10) 100%
+  );
+  box-shadow: inset 0 9px 10px 0 rgb(210, 151, 2),
+    inset 0 -9px 15px 0 rgba(210, 151, 2, 0.25);
+}
+
+.sh-text-input {
+  @apply w-full rounded-[5px] border-2 border-[#797979] bg-transparent p-2 text-base font-semibold text-black outline-none placeholder:text-[#797979];
 }

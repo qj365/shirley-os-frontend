@@ -1,42 +1,59 @@
-"use client";
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { ShoppingCart } from "lucide-react";
-import { CartSheet } from "@/components/shared/cart-sheet";
-import { Button } from "@/components/ui/button";
-import { Badge } from "../ui/badge";
-import Logout from "@/components/auth/logout";
-import { useAuth } from "@/hooks/auth";
-import { useCart } from "@/services/cart-service";
+'use client';
+import Logout from '@/components/auth/logout';
+import { CartSheet } from '@/components/shared/cart-sheet';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/auth';
+import { useCart } from '@/services/cart-service';
+import { ShoppingCart } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 // Helper functions for cleaner code
 const getRouteStyles = (pathname: string) => {
-  const isLightRoute = ['/checkout', '/', '/dashboard', '/order-confirmation'].includes(pathname) || 
-                      pathname.startsWith('/recipe') || 
-                      pathname.includes('/shop/product_detail');
-  const isDarkRoute = ['/shop', '/wholesale', '/about', '/faq'].includes(pathname);
+  const isCookingClassBookingPage =
+    pathname.startsWith('/cooking-classes/') && pathname.endsWith('/booking');
+
+  const isWhiteMode =
+    ['/shop', '/wholesale', '/about', '/faq', '/cooking-classes'].includes(
+      pathname
+    ) || isCookingClassBookingPage;
 
   return {
-    textColor: isLightRoute ? "text-black" : isDarkRoute ? "text-white" : "text-black",
-    logoSrc: isLightRoute ? "/image/Logo_Charcoal_Black.png" : "/image/Logo_white.png",
-    buttonStyles: isLightRoute || isDarkRoute 
-      ? "bg-black text-white hover:bg-black hover:text-white border-black" 
-      : "bg-black text-white hover:bg-white hover:text-black border-black",
-    isLightRoute,
-    isDarkRoute
+    textColor: isWhiteMode ? 'text-white' : 'text-black',
+    logoSrc: isWhiteMode
+      ? '/image/Logo_white.png'
+      : '/image/Logo_Charcoal_Black.png',
+    buttonStyles: isWhiteMode
+      ? 'bg-white text-black hover:opacity-80 border-white'
+      : 'bg-black text-white hover:opacity-80 border-black',
+    isWhiteMode,
   };
 };
 
-const CartButton = ({ totalQuantity, size = 24, className = "" }: { totalQuantity: number; size?: number; className?: string }) => (
+const CartButton = ({
+  totalQuantity,
+  size = 24,
+  className = '',
+}: {
+  totalQuantity: number;
+  size?: number;
+  className?: string;
+}) => (
   <CartSheet>
-    <Button variant="ghost" size="icon" className={`relative h-10 w-10 ${className}`}>
+    <Button
+      variant="ghost"
+      size="icon"
+      className={`relative h-10 w-10 ${className}`}
+    >
       <ShoppingCart size={size} color="red" />
       {totalQuantity > 0 && (
         <Badge
           variant="secondary"
-          className={`absolute text-red-500 -right-2 -top-2 ${size > 30 ? 'h-7 w-7' : 'h-5 w-5'} rounded-full p-0 flex items-center justify-center ${size > 30 ? '' : 'text-xs'}`}
+          className={`absolute -top-2 -right-2 text-red-500 ${size > 30 ? 'h-7 w-7' : 'h-5 w-5'} flex items-center justify-center rounded-full p-0 ${size > 30 ? '' : 'text-xs'}`}
         >
           {totalQuantity}
         </Badge>
@@ -45,52 +62,69 @@ const CartButton = ({ totalQuantity, size = 24, className = "" }: { totalQuantit
   </CartSheet>
 );
 
-const NavigationLinks = ({ pathname, textColor, onLinkClick }: { pathname: string; textColor: string; onLinkClick?: () => void }) => {
-  const linkClass = (path: string) => 
+const NavigationLinks = ({
+  pathname,
+  textColor,
+  onLinkClick,
+}: {
+  pathname: string;
+  textColor: string;
+  onLinkClick?: () => void;
+}) => {
+  const linkClass = (path: string) =>
     `font-semibold text-lg lg:text-xl xl:text-2xl transition-colors hover:text-red-600 ${
-      pathname === path ? "text-red-600" : textColor
+      pathname === path ? 'text-red-600' : textColor
     }`;
 
   return (
     <>
-      <Link href="/" className={linkClass("/")} onClick={onLinkClick}>
+      <Link href="/" className={linkClass('/')} onClick={onLinkClick}>
         Home
       </Link>
-      <Link href="/shop" className={linkClass("/shop")} onClick={onLinkClick}>
+      <Link href="/shop" className={linkClass('/shop')} onClick={onLinkClick}>
         Shop
       </Link>
-      <Link href="/about" className={linkClass("/about")} onClick={onLinkClick}>
+      <Link
+        href="/cooking-classes"
+        className={linkClass('/cooking-classes')}
+        onClick={onLinkClick}
+      >
+        Class
+      </Link>
+      <Link href="/about" className={linkClass('/about')} onClick={onLinkClick}>
         About
       </Link>
-      <Link href="/faq" className={linkClass("/faq")} onClick={onLinkClick}>
+      <Link href="/faq" className={linkClass('/faq')} onClick={onLinkClick}>
         FAQ
       </Link>
     </>
   );
 };
 
-const AuthSection = ({ 
-  isAuthenticated, 
-  buttonStyles, 
-  router, 
+const AuthSection = ({
+  isAuthenticated,
+  buttonStyles,
+  router,
   isMobile = false,
   onActionComplete,
-  isDarkRoute = false
+  isWhiteMode = false,
 }: {
   isAuthenticated: boolean;
   buttonStyles: string;
   router: ReturnType<typeof useRouter>;
   isMobile?: boolean;
   onActionComplete?: () => void;
-  isDarkRoute?: boolean;
+  isWhiteMode?: boolean;
 }) => {
   if (!isAuthenticated) {
     return (
       <Link href="/login">
         <button
-          className={`font-semibold ${isMobile ? 'text-xl py-2 px-8' : 'text-lg lg:text-xl xl:text-2xl py-1 px-4 lg:py-2 lg:px-6'} rounded-full border-2 ${
-            isMobile ? 'bg-[#fabc20] text-black hover:bg-black hover:text-white border-[#fabc20]' : buttonStyles
-          } active:scale-95 transition-colors ${isMobile ? 'mt-2' : ''}`}
+          className={`font-semibold ${isMobile ? 'px-8 py-2 text-xl' : 'px-4 py-1 text-lg lg:px-6 lg:py-2 lg:text-xl xl:text-2xl'} rounded-full border-2 ${
+            isMobile
+              ? 'border-[#fabc20] bg-[#fabc20] text-black hover:bg-black hover:text-white'
+              : buttonStyles
+          } transition-colors active:scale-95 ${isMobile ? 'mt-2' : ''}`}
         >
           Login
         </button>
@@ -106,11 +140,14 @@ const AuthSection = ({
             router.push('/dashboard');
             onActionComplete?.();
           }}
-          className="font-semibold text-xl py-2 px-8 rounded-full border-2 bg-[#fabc20] text-black hover:bg-black hover:text-white border-[#fabc20] active:scale-95 transition-colors mt-2"
+          className="mt-2 rounded-full border-2 border-[#fabc20] bg-[#fabc20] px-8 py-2 text-xl font-semibold text-black transition-colors hover:bg-black hover:text-white active:scale-95"
         >
           Account
         </button>
-        <Logout onLogoutSuccess={onActionComplete} textColor="text-black hover:text-gray-700" />
+        <Logout
+          onLogoutSuccess={onActionComplete}
+          textColor="text-black hover:text-gray-700"
+        />
       </>
     );
   }
@@ -120,26 +157,32 @@ const AuthSection = ({
     <div className="flex items-center gap-4">
       <button
         onClick={() => router.push('/dashboard')}
-        className={`font-semibold text-lg lg:text-xl xl:text-2xl py-1 px-4 lg:py-2 lg:px-6 rounded-full border-2 ${buttonStyles} active:scale-95 transition-colors`}
+        className={`rounded-full border-2 px-4 py-1 text-lg font-semibold lg:px-6 lg:py-2 lg:text-xl xl:text-2xl ${buttonStyles} transition-colors active:scale-95`}
       >
         Account
       </button>
-      <Logout textColor={isDarkRoute ? "text-white hover:text-gray-300" : "text-gray-700 hover:text-gray-900"} />
+      <Logout
+        textColor={
+          isWhiteMode
+            ? 'text-white hover:text-gray-300'
+            : 'text-gray-700 hover:text-gray-900'
+        }
+      />
     </div>
   );
 };
 
 const SimplifiedAuthHeader = ({ pathname }: { pathname: string }) => (
-  <div className="bg-white shadow-sm py-2">
-    <div className="container mx-auto px-4 flex justify-between items-center">
+  <div className="bg-white py-2 shadow-sm">
+    <div className="container mx-auto flex items-center justify-between px-4">
       <Link href="/">
-        <div className="w-[150px] h-[34px] flex justify-center items-center">
+        <div className="flex h-[34px] w-[150px] items-center justify-center">
           <Image
             src="/image/Logo_Charcoal_Black.png"
             alt="Shirley's Logo"
             width={150}
             height={34}
-            className="object-contain w-full h-full"
+            className="h-full w-full object-contain"
           />
         </div>
       </Link>
@@ -147,13 +190,13 @@ const SimplifiedAuthHeader = ({ pathname }: { pathname: string }) => (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Link href="/login">
-            <button className="px-4 py-1 border border-[#592FF4] text-[#592FF4] rounded-md hover:bg-[#592FF4] hover:text-white transition-colors">
+            <button className="rounded-md border border-[#592FF4] px-4 py-1 text-[#592FF4] transition-colors hover:bg-[#592FF4] hover:text-white">
               Login
             </button>
           </Link>
-          {pathname !== "/signup" && (
+          {pathname !== '/signup' && (
             <Link href="/signup">
-              <button className="px-4 py-1 bg-[#fabc20] text-black rounded-md hover:bg-[#f5c508] transition-colors">
+              <button className="rounded-md bg-[#fabc20] px-4 py-1 text-black transition-colors hover:bg-[#f5c508]">
                 Sign Up
               </button>
             </Link>
@@ -164,31 +207,56 @@ const SimplifiedAuthHeader = ({ pathname }: { pathname: string }) => (
   </div>
 );
 
+const initCustomNavStyles = {
+  textColor: 'text-black',
+  logoSrc: '/image/Logo_Charcoal_Black.png',
+  buttonStyles:
+    'bg-black text-white hover:bg-black hover:text-white border-black',
+  isWhiteMode: false,
+};
+
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showFloatingCart, setShowFloatingCart] = useState(false);
+
   const { cart } = useCart();
-  const totalQuantity = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
-  
+  const totalQuantity =
+    cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  
-  const isFullNavbar = pathname !== "/login" && pathname !== "/signup";
-  const routeStyles = getRouteStyles(pathname);
 
-  // Handle scroll event for floating cart
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowFloatingCart(window.scrollY > 200);
-    };
+  const isFullNavbar = pathname !== '/login' && pathname !== '/signup';
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const [customNavStyles, setCustomNavStyles] = useState(initCustomNavStyles);
+  const [isMenuScrolled, setIsMenuScrolled] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
+
+  const handleScroll = useCallback(() => {
+    if (window.scrollY > 80) {
+      setIsMenuScrolled(true);
+    } else {
+      setIsMenuScrolled(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (isMenuScrolled) {
+      setCustomNavStyles(initCustomNavStyles);
+      return;
+    }
+    setCustomNavStyles(getRouteStyles(pathname));
+  }, [isMenuScrolled, pathname]);
 
   // Simplified auth header for login/signup pages
   if (!isFullNavbar) {
@@ -198,81 +266,97 @@ function Navbar() {
   // Main navbar
   return (
     <>
-      <div className="absolute top-6 sm:top-8 md:top-10 lg:top-12 w-full px-6 z-50">
-        <div className="flex justify-between items-center w-full mx-auto transition-all duration-500">
+      <div
+        className={cn(
+          'fixed top-0 right-0 left-0 z-[90] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
+          isMenuScrolled && 'bg-white !py-4 shadow'
+        )}
+      >
+        <div className="mx-auto flex w-full items-center justify-between transition-all duration-500">
           {/* Logo */}
-          <Link href="/" className="w-[150px] h-[34px] sm:w-[170px] sm:h-[38px] md:w-[190px] md:h-[43px] lg:w-[210px] lg:h-[47px] flex justify-center items-center">
+          <Link
+            href="/"
+            className="flex h-[34px] w-[150px] items-center justify-center sm:h-[38px] sm:w-[170px] md:h-[43px] md:w-[190px] lg:h-[47px] lg:w-[210px]"
+          >
             <Image
-              src={routeStyles.logoSrc}
+              src={customNavStyles.logoSrc}
               alt="Shirley's Logo"
               width={210}
               height={47}
-              className="object-contain w-full h-full"
+              className="h-full w-full object-contain"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8">
-            <NavigationLinks pathname={pathname} textColor={routeStyles.textColor} />
+          <nav className="hidden items-center gap-4 md:flex lg:gap-6 xl:gap-8">
+            <NavigationLinks
+              pathname={pathname}
+              textColor={customNavStyles.textColor}
+            />
             <CartButton totalQuantity={totalQuantity} size={50} />
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-4 md:hidden">
             <CartButton totalQuantity={totalQuantity} />
-            <button 
-              onClick={toggleMenu} 
-              className={`text-2xl focus:outline-none ${routeStyles.isLightRoute ? "text-black" : "text-white"}`}
+            <button
+              onClick={toggleMenu}
+              className={`text-2xl focus:outline-none ${customNavStyles.isWhiteMode ? 'text-white' : 'text-black'}`}
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? "✕" : "☰"}
+              {isMenuOpen ? '✕' : '☰'}
             </button>
           </div>
 
           {/* Desktop Auth Section */}
           <div className="hidden md:block">
-            <AuthSection 
+            <AuthSection
               isAuthenticated={isAuthenticated}
-              buttonStyles={routeStyles.buttonStyles}
+              buttonStyles={customNavStyles.buttonStyles}
               router={router}
-              isDarkRoute={routeStyles.isDarkRoute}
+              isWhiteMode={customNavStyles.isWhiteMode}
             />
           </div>
         </div>
 
         {/* Mobile Menu */}
         <div
-          className={`md:hidden bg-[#fffbf0] border border-gray-200 w-full absolute left-0 mt-2 overflow-hidden transition-all duration-300 ease-in-out z-50
-          ${isMenuOpen ? "max-h-[400px] opacity-100 pb-4 px-6" : "max-h-0 opacity-0 py-0 px-6"}`}
+          className={`absolute left-0 z-50 mt-2 w-full overflow-hidden border border-gray-200 bg-[#fffbf0] transition-all duration-300 ease-in-out md:hidden ${isMenuOpen ? 'max-h-[400px] px-6 pb-4 opacity-100' : 'max-h-0 px-6 py-0 opacity-0'}`}
         >
-          <nav className={`flex flex-col items-center gap-6 transition-transform duration-300 ${isMenuOpen ? "translate-y-0" : "-translate-y-10"}`}>
-            <div className="w-full pb-2 mb-2"></div>
-            <NavigationLinks pathname={pathname} textColor="text-black" onLinkClick={closeMenu} />
-            <AuthSection 
+          <nav
+            className={`flex flex-col items-center gap-6 transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-10'}`}
+          >
+            <div className="mb-2 w-full pb-2"></div>
+            <NavigationLinks
+              pathname={pathname}
+              textColor="text-black"
+              onLinkClick={closeMenu}
+            />
+            <AuthSection
               isAuthenticated={isAuthenticated}
-              buttonStyles={routeStyles.buttonStyles}
+              buttonStyles={customNavStyles.buttonStyles}
               router={router}
               isMobile={true}
               onActionComplete={closeMenu}
-              isDarkRoute={routeStyles.isDarkRoute}
+              isWhiteMode={customNavStyles.isWhiteMode}
             />
           </nav>
         </div>
       </div>
 
       {/* Floating Cart Button for Mobile */}
-      {totalQuantity > 0 && showFloatingCart && (
-        <div className="fixed bottom-6 right-6 md:hidden z-50">
+      {totalQuantity > 0 && isMenuScrolled && (
+        <div className="fixed right-6 bottom-6 z-50 md:hidden">
           <CartSheet>
-            <Button 
-              variant="default" 
-              size="icon" 
-              className="h-14 w-14 rounded-full shadow-lg bg-red-600 hover:bg-red-700 transition-all duration-300 flex items-center justify-center"
+            <Button
+              variant="default"
+              size="icon"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-lg transition-all duration-300 hover:bg-red-700"
             >
               <ShoppingCart size={24} color="white" className="relative" />
               <Badge
                 variant="secondary"
-                className="absolute -right-1 -top-1 h-6 w-6 bg-[#fabc20] text-black rounded-full p-0 flex items-center justify-center text-xs font-bold"
+                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#fabc20] p-0 text-xs font-bold text-black"
               >
                 {totalQuantity}
               </Badge>
