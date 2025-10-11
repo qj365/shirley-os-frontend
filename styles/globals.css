@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+body {
+  font-family: 'Raleway', sans-serif;
+  width: 100%;  
+  margin: auto;
+  overflow-x: hidden;
+  cursor: default; /* Set default cursor for body */
+}
+
+/* Hide Next.js floating debug icon */
+#__next-build-watcher,
+nextjs-portal {
+  display: none !important;
+}
+
+
+/* Reset cursor for all elements to default */
+* {
+  cursor: inherit;
+}
+
+/* Proper cursor styles for interactive elements */
+button, 
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Links should only have pointer cursor when they have href */
+a[href] {
+  cursor: pointer;
+}
+
+/* Input fields should have text cursor */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea {
+  cursor: text;
+}
+
+/* Global placeholder text styling - muted color for all inputs */
+input::placeholder,
+textarea::placeholder {
+  color: #666;
+  opacity: 1; /* Ensure consistent opacity across browsers */
+  font-weight: normal;
+}
+
+/* Disabled elements should have not-allowed cursor */
+:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* For adding dark mode styles that can't be handled in the config */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  /* Add other dark mode variables as needed */
+}

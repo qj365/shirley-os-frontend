@@ -1,0 +1,192 @@
+
+> shirleys-foods-web@0.1.0 build
+> next build
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/IbrahimShore/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/IbrahimShore/Documents/Stuff/Shirleys/tech/github/shirleys-foods-web/package-lock.json
+
+   ▲ Next.js 15.5.4
+   - Environments: .env.local, .env.production
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 921ms
+
+./app/dashboard/page.tsx
+Attempted import error: 'getAuthenticatedCustomerOrders' is not exported from '@/services/product-service' (imported as 'getAuthenticatedCustomerOrders').
+
+Import trace for requested module:
+./app/dashboard/page.tsx
+
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ⚠ Compiled with warnings in 847ms
+
+./app/dashboard/page.tsx
+Attempted import error: 'getAuthenticatedCustomerOrders' is not exported from '@/services/product-service' (imported as 'getAuthenticatedCustomerOrders').
+
+Import trace for requested module:
+./app/dashboard/page.tsx
+
+ ✓ Compiled successfully in 1827ms
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./app/api/newsletter-subscribe/route.ts
+20:11  Error: 'response' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+30:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/dashboard/page.tsx
+5:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+19:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+59:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+188:54  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+192:37  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/auth/reset.tsx
+71:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+110:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/auth/signup.tsx
+422:25  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+448:27  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./components/checkout/medusa/checkout-address-step.tsx
+38:21  Error: 'propValidationErrors' is defined but never used.  @typescript-eslint/no-unused-vars
+43:64  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+85:6  Warning: React Hook React.useEffect has missing dependencies: 'setShippingAddress' and 'shippingAddress'. Either include them or remove the dependency array. If 'setShippingAddress' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+175:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+191:6  Warning: React Hook React.useEffect has a missing dependency: 'fetchShippingOptions'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/checkout/medusa/checkout-billing-step.tsx
+44:21  Error: 'propValidationErrors' is defined but never used.  @typescript-eslint/no-unused-vars
+67:6  Warning: React Hook React.useEffect has missing dependencies: 'billingAddress', 'setBillingAddress', and 'setUseSameForShipping'. Either include them or remove the dependency array. If 'setBillingAddress' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+185:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/checkout/medusa/checkout-email-step.tsx
+34:6  Warning: React Hook useEffect has missing dependencies: 'email' and 'setEmail'. Either include them or remove the dependency array. If 'setEmail' changes too often, find the parent component that defines it and wrap that definition in useCallback.  react-hooks/exhaustive-deps
+
+./components/checkout/medusa/checkout-payment-option-step.tsx
+26:17  Error: 'formatPrice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+41:9  Error: 'getSubscriptionPrice' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/checkout/medusa/checkout-payment-step.tsx
+81:13  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+111:39  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+141:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+149:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+184:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/checkout/medusa/medusa-checkout.tsx
+22:8  Error: 'ValidationResult' is defined but never used.  @typescript-eslint/no-unused-vars
+29:3  Error: 'loadCheckoutField' is defined but never used.  @typescript-eslint/no-unused-vars
+88:10  Error: 'isValidating' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/checkout/medusa/medusa-right-checkout.tsx
+62:34  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+70:51  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/checkout/medusa/order-confirmation.tsx
+2:87  Error: 'ArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+3:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+15:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:68  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+139:43  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+143:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/checkout/medusa/stripe-payment-form.tsx
+96:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/landing/hero-section.tsx
+10:10  Error: 'isHovered' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+10:21  Error: 'setIsHovered' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+327:26  Error: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/landing/hot-seller.tsx
+13:9  Error: 'isXSmall' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/landing/our-recipes.tsx
+4:10  Error: 'ArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/landing/west-african-brand.tsx
+8:10  Error: 'isMobile' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/layout/footer.tsx
+28:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/layout/navbar.tsx
+76:3  Error: 'pathname' is defined but never used.  @typescript-eslint/no-unused-vars
+83:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/action-buttons-section.tsx
+7:14  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/additional-products-section.tsx
+3:10  Error: 'useRouter' is defined but never used.  @typescript-eslint/no-unused-vars
+11:14  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/cart-summary-section.tsx
+8:14  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/image-gallery.tsx
+18:9  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/product-detail/main-product-cta.tsx
+10:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/main-product-info.tsx
+13:45  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+16:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/main-section.tsx
+43:80  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+46:78  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/payment-icons.tsx
+2:8  Error: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+3:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/product-detail/product-details-modal.tsx
+3:10  Error: 'ProductFlavour' is defined but never used.  @typescript-eslint/no-unused-vars
+13:47  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+14:46  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+25:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+104:39  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/product-detail/quantity-controls.tsx
+7:12  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/recipe/recipe-details.tsx
+16:130  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+31:123  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+57:128  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./components/recipe/recipe-testimonial.tsx
+64:17  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+64:41  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/shared/cart-sheet.tsx
+39:44  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/shop/shopBundles.tsx
+53:16  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./components/shop/shopProductSection.tsx
+5:10  Error: 'SetStateAction' is defined but never used.  @typescript-eslint/no-unused-vars
+16:10  Error: 'activeCategoryId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+20:9  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+64:6  Warning: React Hook useEffect has a missing dependency: 'sortCategories'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+158:36  Error: 'index' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/ui/image-with-fallback.tsx
+29:10  Error: 'hasError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./lib/checkout-storage.ts
+72:24  Error: '_' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
