@@ -9,6 +9,7 @@ export type GetProductBySlugResponse = {
   images: Array<string>;
   description: string;
   productVariants: Array<{
+    variantOptionIds: Array<number>;
     image: string;
     stock: number;
     compareAtPrice: number;
