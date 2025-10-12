@@ -17,7 +17,7 @@ async function fetchCategories() {
   }
 }
 
-export async function fetchProductsByCategory(
+async function fetchProductsByCategory(
   categoryId?: string,
   queryParams?: ObjectType
 ) {

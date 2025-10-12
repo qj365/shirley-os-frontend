@@ -3,7 +3,7 @@ import ProductDetailEmptyData from '@/components/product-detail/ProductDetailEmp
 import EmptyShop from '@/components/shop/EmptyShop';
 import { api } from '@/src/lib/api/customer';
 
-export async function fetchProductsByCategory(slug: string) {
+async function fetchProductsByCategory(slug: string) {
   try {
     return await api.product.getProductBySlug({
       slug,
