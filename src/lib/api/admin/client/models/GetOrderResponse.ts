@@ -5,8 +5,8 @@
 export type GetOrderResponse = {
   id: number;
   total: number;
-  fulfillmentStatus: string;
-  paymentStatus: string;
+  fulfillmentStatus: string | null;
+  paymentStatus: string | null;
   trackingNumber?: string;
   courierCode?: string;
   courierName?: string;
