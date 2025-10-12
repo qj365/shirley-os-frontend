@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import Image from "next/image";
-import { useState } from "react";
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface ImageWithFallbackProps {
   src: string;
-  fallbackSrc: string;
+  fallbackSrc?: string;
   alt: string;
   width?: number;
   height?: number;
@@ -14,15 +14,15 @@ interface ImageWithFallbackProps {
   onLoad?: () => void;
 }
 
-export function ImageWithFallback({ 
-  src, 
-  fallbackSrc, 
-  alt, 
-  width, 
-  height, 
-  className, 
+export function ImageWithFallback({
+  src,
+  fallbackSrc = '/image/default-placeholder.png',
+  alt,
+  width,
+  height,
+  className,
   priority = false,
-  onLoad
+  onLoad,
 }: ImageWithFallbackProps) {
   const [imgSrc, setImgSrc] = useState(src);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,8 +44,8 @@ export function ImageWithFallback({
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse rounded">
-          <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex animate-pulse items-center justify-center rounded bg-gray-100">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
         </div>
       )}
       <Image

@@ -45,3 +45,17 @@ next-env.d.ts
 subscription-manual.md
 subscription-manual-2.md
 subscription-manual-3.md
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.vscode
+*.sw?
+
+ 

@@ -37,8 +37,7 @@ export default function ClientLayout({
     // Special case for product detail page
     if (pathname?.includes('/shop/product_detail')) return true;
 
-    // Other shop pages don't show navbar
-    if (pathname?.startsWith('/shop/')) return false;
+    if (pathname?.startsWith('/shop/')) return true;
 
     if (pathname?.startsWith('/recipe/')) return true; // Show navbar for dynamic recipe routes
 
@@ -54,7 +53,7 @@ export default function ClientLayout({
   };
 
   return (
-    <html lang="en" className={raleway.className}>
+    <html lang="en" className={raleway.className} suppressHydrationWarning>
       <body className="relative">
         {/* Sonner Toaster component */}
         <Toaster position="top-right" closeButton richColors />

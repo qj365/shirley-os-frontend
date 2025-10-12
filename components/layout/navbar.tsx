@@ -268,7 +268,7 @@ function Navbar() {
     <>
       <div
         className={cn(
-          'fixed top-0 right-0 left-0 z-[90] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
+          'fixed top-0 right-0 left-0 z-[40] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
           isMenuScrolled && 'bg-white !py-4 shadow'
         )}
       >

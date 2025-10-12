@@ -1,12 +1,48 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgb(0 0 0 / 2%);
+  box-shadow:
+    inset -0.5px 0 0 rgb(0 0 0 / 7%),
+    inset -1px 0 0 rgb(0 0 0 / 2%),
+    inset 1px 0 0 rgb(0 0 0 / 2%),
+    inset 0.5px 0 0 rgb(0 0 0 / 7%);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #a9a9a9;
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #969696;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a9a9a9 transparent;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
 
 body {
-  font-family: "Raleway", sans-serif;
-  width: 100%;
-  margin: auto;
+  font-family: 'Raleway', sans-serif;
+  padding: 0;
+  margin: 0;
   overflow-x: hidden;
   cursor: default; /* Set default cursor for body */
+  width: 100%;
 }
 
 /* Hide Next.js floating debug icon */
@@ -22,10 +58,10 @@ nextjs-portal {
 
 /* Proper cursor styles for interactive elements */
 button,
-[role="button"],
-input[type="submit"],
-input[type="button"],
-input[type="reset"],
+[role='button'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'],
 .cursor-pointer {
   cursor: pointer !important;
 }
@@ -36,12 +72,12 @@ a[href] {
 }
 
 /* Input fields should have text cursor */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
 textarea {
   cursor: text;
 }
@@ -56,7 +92,7 @@ textarea::placeholder {
 
 /* Disabled elements should have not-allowed cursor */
 :disabled,
-[aria-disabled="true"] {
+[aria-disabled='true'] {
   cursor: not-allowed;
 }
 
@@ -93,7 +129,8 @@ textarea::placeholder {
     rgb(243, 192, 63) 0%,
     rgb(255, 186, 10) 100%
   );
-  box-shadow: inset 0 9px 10px 0 rgb(210, 151, 2),
+  box-shadow:
+    inset 0 9px 10px 0 rgb(210, 151, 2),
     inset 0 -9px 15px 0 rgba(210, 151, 2, 0.25);
 }
 
