@@ -152,14 +152,18 @@ export default function Demo({ product, onAddToCart }: Props) {
               return (
                 <div
                   key={opt.id}
-                  onClick={() => toggleOption(group.id, opt.id)}
+                  onClick={() => {
+                    if (disabled) return;
+                    toggleOption(group.id, opt.id);
+                  }}
                   className={cn(
                     selected
                       ? 'btn-gradient--yellow'
-                      : 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-[#F3C03F] hover:text-black',
+                      : !disabled
+                        ? 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-[#F3C03F] hover:text-black'
+                        : '',
                     'block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-100 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg',
-                    disabled &&
-                      'pointer-events-none cursor-not-allowed opacity-30'
+                    disabled && '!cursor-not-allowed opacity-30'
                   )}
                 >
                   {opt.value}
