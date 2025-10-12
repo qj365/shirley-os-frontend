@@ -108,6 +108,49 @@ export class OrderService {
     });
   }
   /**
+   * @returns any Ok
+   * @throws ApiError
+   */
+  public adminOrderGetStats({
+    page = 1,
+    pageSize = 10,
+    orderCode,
+    startDate,
+    endDate,
+    fulfillmentStatus,
+  }: {
+    page?: number,
+    pageSize?: number,
+    orderCode?: string,
+    startDate?: string,
+    endDate?: string,
+    fulfillmentStatus?: _36_Enums_FulfillmentStatus,
+  }): CancelablePromise<{
+    cancelled: number;
+    fulfilled: number;
+    unfulfilled: number;
+  }> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/admin/orders/stats',
+      query: {
+        'page': page,
+        'pageSize': pageSize,
+        'orderCode': orderCode,
+        'startDate': startDate,
+        'endDate': endDate,
+        'fulfillmentStatus': fulfillmentStatus,
+      },
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
    * @returns AdminGetOrderByIdResponse Ok
    * @throws ApiError
    */
