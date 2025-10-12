@@ -22,6 +22,7 @@ export type { AdminGetCookingClassByIdResponse } from './models/AdminGetCookingC
 export type { AdminGetCookingClassesDto } from './models/AdminGetCookingClassesDto';
 export type { AdminGetCookingClassesResponse } from './models/AdminGetCookingClassesResponse';
 export type { AdminGetMeResponse } from './models/AdminGetMeResponse';
+export type { AdminGetNotificationSetting } from './models/AdminGetNotificationSetting';
 export type { AdminModifyCategoryDto } from './models/AdminModifyCategoryDto';
 export type { AdminUpdateCookingClassDto } from './models/AdminUpdateCookingClassDto';
 export type { AdminUpdateCookingClassScheduleDto } from './models/AdminUpdateCookingClassScheduleDto';

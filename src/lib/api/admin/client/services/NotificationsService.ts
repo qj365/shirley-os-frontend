@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { AdminGetNotificationSetting } from '../models/AdminGetNotificationSetting';
 import type { CursorPagingResponse_AdminGetAllNotificationResponse_Array_ } from '../models/CursorPagingResponse_AdminGetAllNotificationResponse_Array_';
 import type { UpdateNotificationSettingDto } from '../models/UpdateNotificationSettingDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -36,17 +37,10 @@ export class NotificationsService {
     });
   }
   /**
-   * @returns any Ok
+   * @returns AdminGetNotificationSetting Ok
    * @throws ApiError
    */
-  public adminNotificationGetSettings(): CancelablePromise<{
-    userId: number;
-    lowStockValue: number;
-    lowStockNotification: boolean;
-    updatedAt: string;
-    createdAt: string;
-    id: number;
-  }> {
+  public adminNotificationGetSettings(): CancelablePromise<AdminGetNotificationSetting> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/admin/notifications/notification-settings',
@@ -68,9 +62,9 @@ export class NotificationsService {
   }: {
     requestBody: UpdateNotificationSettingDto,
   }): CancelablePromise<{
-    userId: number;
     lowStockValue: number;
     lowStockNotification: boolean;
+    userId: number;
     updatedAt: string;
     createdAt: string;
     id: number;
