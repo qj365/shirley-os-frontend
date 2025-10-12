@@ -7,6 +7,7 @@ export type GetAllProductsResponse = Array<{
     compareAtPrice: number;
     price: number;
     image: string;
+    slug: string;
     name: string;
     id: number;
   }>;
