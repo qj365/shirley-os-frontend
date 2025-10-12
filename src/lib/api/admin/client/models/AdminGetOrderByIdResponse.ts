@@ -22,6 +22,7 @@ export type AdminGetOrderByIdResponse = {
     name: string | null;
   } | null;
   orderItems: Array<{
+    productName: string;
     total: number;
     quantity: number;
     price: number;
