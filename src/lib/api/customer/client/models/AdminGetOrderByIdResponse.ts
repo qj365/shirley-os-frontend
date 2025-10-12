@@ -22,6 +22,7 @@ export type AdminGetOrderByIdResponse = {
     name: string | null;
   } | null;
   orderItems: Array<{
+    productName: string;
     total: number;
     quantity: number;
     price: number;
@@ -29,6 +30,7 @@ export type AdminGetOrderByIdResponse = {
     name: string;
     id: number;
   }>;
+  orderCancelNote: string | null;
   courierName: string | null;
   courierCode: string | null;
   trackingNumber: string | null;
