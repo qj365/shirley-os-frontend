@@ -30,6 +30,7 @@ export type AdminGetOrderByIdResponse = {
     name: string;
     id: number;
   }>;
+  orderCancelNote: string | null;
   courierName: string | null;
   courierCode: string | null;
   trackingNumber: string | null;
