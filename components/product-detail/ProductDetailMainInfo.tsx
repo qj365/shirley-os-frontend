@@ -1,24 +1,26 @@
 'use client';
 
-import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GetProductBySlugResponse } from '@/src/lib/api/customer';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
+import { Minus, Plus } from 'lucide-react';
+import * as React from 'react';
+import { toast } from 'sonner';
+import ProductDetailDescription from './ProductDetailDescription';
+import { useCartStore } from '@/stores/cart-store';
 
 type Props = {
   product: GetProductBySlugResponse;
-  onAddToCart?: (variant: {
-    variant: GetProductBySlugResponse['productVariants'][number];
-    quantity: number;
-  }) => void;
+  onVariantImageChange?: (imageIndex: number) => void;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Demo({ product, onAddToCart }: Props) {
-  const { name, productVariants, variantOptions } = product || {};
+export default function ProductDetailMainInfo({
+  product,
+  onVariantImageChange,
+}: Props) {
+  const { name, productVariants, variantOptions, images, id } = product || {};
+  const addItem = useCartStore(state => state.addItem);
 
   const isOutOfStock = productVariants?.every(item => item.stock === 0);
 
@@ -28,7 +30,6 @@ export default function Demo({ product, onAddToCart }: Props) {
   >(() => Object.fromEntries(variantOptions.map(opt => [opt.id, null])));
   const [quantity, setQuantity] = React.useState(1);
 
-  // --- tìm variant phù hợp ---
   const matchedVariants = React.useMemo(() => {
     const selectedIds = Object.values(selectedOptions).filter(Boolean);
     if (selectedIds.length === 0) return productVariants;
@@ -38,7 +39,6 @@ export default function Demo({ product, onAddToCart }: Props) {
     );
   }, [selectedOptions, productVariants]);
 
-  // --- giá hiển thị ---
   const displayPrice =
     matchedVariants.length === 1
       ? matchedVariants[0].price
@@ -73,7 +73,17 @@ export default function Demo({ product, onAddToCart }: Props) {
     return result;
   }, [selectedOptions, productVariants, variantOptions]);
 
-  // --- toggle chọn option ---
+  // --- update image when variant changes ---
+  React.useEffect(() => {
+    if (matchedVariants.length === 1 && images && onVariantImageChange) {
+      const variantImage = matchedVariants[0].image;
+      const imageIndex = images.findIndex(img => img === variantImage);
+      if (imageIndex !== -1) {
+        onVariantImageChange(imageIndex);
+      }
+    }
+  }, [matchedVariants, images, onVariantImageChange]);
+
   const toggleOption = (groupId: number, optionId: number) => {
     setSelectedOptions(prev => ({
       ...prev,
@@ -106,11 +116,42 @@ export default function Demo({ product, onAddToCart }: Props) {
         return;
       }
 
-      //   toast.success('Added to cart');
+      // Build variant title from selected options
+      const variantTitle = variantOptions
+        .map(group => {
+          const selectedOption = group.options.find(
+            opt => opt.id === selectedOptions[group.id]
+          );
+          return selectedOption ? `${group.name}: ${selectedOption.value}` : '';
+        })
+        .filter(Boolean)
+        .join(', ');
 
-      //   onAddToCart?.({ variant: matched, quantity });
+      // Add to cart
+      addItem({
+        productId: id,
+        productName: name,
+        variantId: matched.variantOptionIds[0] || 0, // Use first option ID as variant ID
+        variantOptionIds: matched.variantOptionIds,
+        variantTitle,
+        quantity,
+        price: matched.price,
+        compareAtPrice: matched.compareAtPrice,
+        image: matched.image,
+        stock: matched.stock,
+      });
+
+      toast.success('Added to cart successfully!');
+
+      // Reset selections
+      setSelectedOptions(
+        Object.fromEntries(variantOptions.map(opt => [opt.id, null]))
+      );
+      setQuantity(1);
     } catch (e) {
-      console.log(e);
+      const error = e as Error;
+      toast.error(error.message || 'Failed to add item to cart');
+      console.error(e);
     }
   };
 
@@ -130,15 +171,8 @@ export default function Demo({ product, onAddToCart }: Props) {
         {isOutOfStock && (
           <div className="text-sm font-semibold text-red-600">Out of Stock</div>
         )}
-        {/* <p className="text-base lg:text-xl">
-          Earthy and aromatic with deep herbal notes that transform any lamb
-          dish into something extraordinary. This premium Lamb Jollof Paste
-          features carefully selected spices that mirror pastoral imagery and
-          fresh herbs traditionally used in lamb preparation. Perfect for slow
-          cooking, special occasions, or when you want that extra layer of
-          authenticity. Each vegan and halal-friendly jar brings
-          professional-quality results to your kitchen.
-        </p> */}
+
+        <ProductDetailDescription description={product?.description} />
       </div>
 
       {/* VARIANT OPTIONS */}

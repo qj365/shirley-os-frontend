@@ -3,16 +3,27 @@
 import { GetProductBySlugResponse } from '@/src/lib/api/customer';
 import ProductDetailMainInfo from './ProductDetailMainInfo';
 import ProductImageSlider from './ProductImageSlider';
+import { useState } from 'react';
 
 type Props = {
   data: GetProductBySlugResponse;
 };
 export default function ProductDetail({ data }: Props) {
   console.log(data, '______');
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+
+  const handleVariantImageChange = (imageIndex: number) => {
+    setSelectedImageIndex(imageIndex);
+  };
+
   return (
     <div className="container pb-7">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
-        <ProductImageSlider images={data?.images} />
+        <ProductImageSlider
+          images={data?.images}
+          externalSelectedIndex={selectedImageIndex}
+          onIndexChange={setSelectedImageIndex}
+        />
         <div className="flex flex-col gap-6 md:gap-8">
           <div className="hidden items-center justify-center lg:flex">
             <h1 className="text-2xl font-bold md:text-[45px]">
@@ -20,16 +31,12 @@ export default function ProductDetail({ data }: Props) {
             </h1>
           </div>
 
-          <ProductDetailMainInfo product={data} />
+          <ProductDetailMainInfo
+            product={data}
+            onVariantImageChange={handleVariantImageChange}
+          />
         </div>
       </div>
-
-      <section className="pt-7 md:pt-10">
-        <h2 className="text-xl font-bold capitalize md:text-3xl">
-          Product Description
-        </h2>
-        <div dangerouslySetInnerHTML={{ __html: data?.description || '' }} />
-      </section>
     </div>
   );
 }

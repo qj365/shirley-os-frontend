@@ -3,14 +3,18 @@ import Logout from '@/components/auth/logout';
 import { CartSheet } from '@/components/shared/cart-sheet';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth';
-import { useCart } from '@/services/cart-service';
+import { useCartStore } from '@/stores/cart-store';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+
+// Use useLayoutEffect on client, useEffect on server (SSR-safe)
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 // Helper functions for cleaner code
 const getRouteStyles = (pathname: string) => {
@@ -52,8 +56,9 @@ const CartButton = ({
       <ShoppingCart size={size} color="red" />
       {totalQuantity > 0 && (
         <Badge
-          variant="secondary"
-          className={`absolute -top-2 -right-2 text-red-500 ${size > 30 ? 'h-7 w-7' : 'h-5 w-5'} flex items-center justify-center rounded-full p-0 ${size > 30 ? '' : 'text-xs'}`}
+          className={cn(
+            'absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-[#F3C03F] p-0 text-xs font-bold text-black shadow-md'
+          )}
         >
           {totalQuantity}
         </Badge>
@@ -218,9 +223,10 @@ const initCustomNavStyles = {
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { cart } = useCart();
-  const totalQuantity =
-    cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+  // Subscribe to cart items to get reactive updates
+  const totalQuantity = useCartStore(state =>
+    state.items.reduce((total, item) => total + item.quantity, 0)
+  );
 
   const pathname = usePathname();
   const router = useRouter();
@@ -228,35 +234,46 @@ function Navbar() {
 
   const isFullNavbar = pathname !== '/login' && pathname !== '/signup';
 
-  const [customNavStyles, setCustomNavStyles] = useState(initCustomNavStyles);
   const [isMenuScrolled, setIsMenuScrolled] = useState(false);
+
+  // Derive custom nav styles from scroll state and pathname
+  const customNavStyles = isMenuScrolled
+    ? initCustomNavStyles
+    : getRouteStyles(pathname);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  const handleScroll = useCallback(() => {
-    if (window.scrollY > 80) {
-      setIsMenuScrolled(true);
-    } else {
-      setIsMenuScrolled(false);
-    }
+  // Set initial scroll state before paint (synchronously on client)
+  useIsomorphicLayoutEffect(() => {
+    const scrolled = window.scrollY > 80;
+    setIsMenuScrolled(scrolled);
   }, []);
 
+  // Re-check scroll position when pathname changes (for navigation)
   useEffect(() => {
-    handleScroll();
+    const scrolled = window.scrollY > 80;
+    setIsMenuScrolled(scrolled);
+  }, [pathname]);
 
-    window.addEventListener('scroll', handleScroll);
+  // Handle scroll events
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 80;
+      setIsMenuScrolled(prevScrolled => {
+        // Only update if value changed to prevent unnecessary re-renders
+        if (prevScrolled !== scrolled) {
+          return scrolled;
+        }
+        return prevScrolled;
+      });
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
-
-  useEffect(() => {
-    if (isMenuScrolled) {
-      setCustomNavStyles(initCustomNavStyles);
-      return;
-    }
-    setCustomNavStyles(getRouteStyles(pathname));
-  }, [isMenuScrolled, pathname]);
+  }, []);
 
   // Simplified auth header for login/signup pages
   if (!isFullNavbar) {
@@ -343,27 +360,6 @@ function Navbar() {
           </nav>
         </div>
       </div>
-
-      {/* Floating Cart Button for Mobile */}
-      {totalQuantity > 0 && isMenuScrolled && (
-        <div className="fixed right-6 bottom-6 z-50 md:hidden">
-          <CartSheet>
-            <Button
-              variant="default"
-              size="icon"
-              className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-lg transition-all duration-300 hover:bg-red-700"
-            >
-              <ShoppingCart size={24} color="white" className="relative" />
-              <Badge
-                variant="secondary"
-                className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#fabc20] p-0 text-xs font-bold text-black"
-              >
-                {totalQuantity}
-              </Badge>
-            </Button>
-          </CartSheet>
-        </div>
-      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
-export default function formatDisplayCurrency(price: number, currency = 'USD') {
+export default function formatDisplayCurrency(price: number, currency = 'GBP') {
   const config: Intl.NumberFormatOptions = {
     style: 'currency',
-    currency: currency || 'USD',
+    currency: currency || 'GBP',
   };
 
   let locale: string;
@@ -10,8 +10,11 @@ export default function formatDisplayCurrency(price: number, currency = 'USD') {
     case 'USD':
       locale = 'en-US';
       break;
+    case 'GBP':
+      locale = 'en-GB';
+      break;
     default:
-      locale = 'en-US';
+      locale = 'en-GB';
   }
 
   return price !== undefined

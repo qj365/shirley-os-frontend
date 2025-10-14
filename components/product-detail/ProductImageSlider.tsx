@@ -7,35 +7,59 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Props = {
   images: string[];
   alt?: string;
+  externalSelectedIndex?: number;
+  onIndexChange?: (index: number) => void;
 };
 
-export default function ImageGallery({ images, alt = 'Gallery image' }: Props) {
+export default function ProductImageSlider({
+  images,
+  alt = 'Gallery image',
+  externalSelectedIndex,
+  onIndexChange,
+}: Props) {
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [canScrollPrev, setCanScrollPrev] = React.useState(false);
+  const [canScrollNext, setCanScrollNext] = React.useState(false);
 
-  // refs cho main & thumbnail carousel
+  React.useEffect(() => {
+    if (
+      externalSelectedIndex !== undefined &&
+      externalSelectedIndex !== selectedIndex
+    ) {
+      setSelectedIndex(externalSelectedIndex);
+      mainCarouselRef.current?.scrollTo(externalSelectedIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalSelectedIndex]);
+
   const mainCarouselRef = React.useRef<any>(null);
   const thumbCarouselRef = React.useRef<any>(null);
 
-  // khi main carousel thay đổi -> cập nhật thumbnail scroll + state
-  const handleMainSelect = React.useCallback((emblaApi: any) => {
-    if (!emblaApi) return;
-    const index = emblaApi.selectedScrollSnap();
-    setSelectedIndex(index);
-    thumbCarouselRef.current?.scrollTo(index);
-  }, []);
+  const handleMainSelect = React.useCallback(
+    (emblaApi: any) => {
+      if (!emblaApi) return;
+      const index = emblaApi.selectedScrollSnap();
+      setSelectedIndex(index);
+      thumbCarouselRef.current?.scrollTo(index);
+      setCanScrollPrev(emblaApi.canScrollPrev());
+      setCanScrollNext(emblaApi.canScrollNext());
+      onIndexChange?.(index);
+    },
+    [onIndexChange]
+  );
 
-  // click thumbnail -> scroll main tới index đó
   const scrollTo = (index: number) => {
     setSelectedIndex(index);
     mainCarouselRef.current?.scrollTo(index);
+    onIndexChange?.(index);
   };
 
   return (
@@ -45,9 +69,14 @@ export default function ImageGallery({ images, alt = 'Gallery image' }: Props) {
         opts={{ loop: true, align: 'center' }}
         setApi={api => {
           mainCarouselRef.current = api;
-          if (api) api.on('select', () => handleMainSelect(api));
+          if (api) {
+            api.on('select', () => handleMainSelect(api));
+            // Initialize scroll state
+            setCanScrollPrev(api.canScrollPrev());
+            setCanScrollNext(api.canScrollNext());
+          }
         }}
-        className="w-full"
+        className="relative w-full"
       >
         <CarouselContent>
           {images.map((img, index) => (
@@ -67,9 +96,26 @@ export default function ImageGallery({ images, alt = 'Gallery image' }: Props) {
           ))}
         </CarouselContent>
 
-        {/* arrows */}
-        <CarouselPrevious className="left-1 bg-white hover:bg-amber-50" />
-        <CarouselNext className="right-1 bg-white hover:bg-amber-50" />
+        {/* Custom arrows with Chevron icons */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute top-1/2 left-[4px] z-10 size-10 -translate-y-1/2 rounded-full border-none bg-transparent shadow-md hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50"
+          onClick={() => mainCarouselRef.current?.scrollPrev()}
+          disabled={!canScrollPrev}
+        >
+          <ChevronLeft className="size-8 text-gray-800" />
+          <span className="sr-only">Previous slide</span>
+        </Button>
+        <Button
+          variant="outline"
+          className="absolute top-1/2 right-[4px] z-10 size-10 -translate-y-1/2 rounded-full border-none bg-transparent shadow-md hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50"
+          onClick={() => mainCarouselRef.current?.scrollNext()}
+          disabled={!canScrollNext}
+        >
+          <ChevronRight className="size-8 text-gray-800" />
+          <span className="sr-only">Next slide</span>
+        </Button>
       </Carousel>
 
       {/* THUMBNAIL CAROUSEL */}

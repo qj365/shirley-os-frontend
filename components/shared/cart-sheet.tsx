@@ -1,11 +1,10 @@
+'use client';
 
-"use client"
+import type React from 'react';
 
-import type React from "react"
+import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
 
-import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -14,48 +13,38 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { useCart } from "@/services/cart-service"
+} from '@/components/ui/sheet';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useCartStore } from '@/stores/cart-store';
+import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 
-export function CartSheet({ 
-  children, 
-  open, 
-  onOpenChange 
-}: { 
+export function CartSheet({
+  children,
+  open,
+  onOpenChange,
+}: {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const { cart, loading, removeItem, updateItem, formatPrice } = useCart()
-  const router = useRouter()
-  
-  // Cast cart to any since this component uses the full Medusa cart structure
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fullCart = cart as any;
-  
-  // Calculate total quantity
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalQuantity = fullCart?.items?.reduce((total: number, item: any) => total + item.quantity, 0) || 0
+  const router = useRouter();
+  const items = useCartStore(state => state.items);
+  const removeItem = useCartStore(state => state.removeItem);
+  const updateQuantity = useCartStore(state => state.updateQuantity);
+  const getTotalItems = useCartStore(state => state.getTotalItems);
+  const getSubtotal = useCartStore(state => state.getSubtotal);
 
-  // Get background color for product image
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getProductBackgroundColor = (item: any) => {
-    if (item.product?.metadata?.color) {
-      return item.product.metadata.color as string
-    }
-    return '#ffedc3' // Default background color
-  }
+  const totalQuantity = getTotalItems();
+  const subtotal = getSubtotal();
 
-  
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full sm:w-md bg-white flex flex-col h-full border-none">
+      <SheetContent className="flex h-full w-full flex-col border-none bg-white sm:w-md">
         {/* Header with proper spacing to avoid close button overlap */}
-        <SheetHeader className="px-4 pt-4 pb-2 pr-12 border border-gray-200">
+        <SheetHeader className="border border-gray-200 px-4 pt-4 pr-12 pb-2">
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center">
               <ShoppingCart className="mr-2 h-5 w-5" />
@@ -63,32 +52,32 @@ export function CartSheet({
             </div>
           </SheetTitle>
           <SheetDescription>
-            {!fullCart?.items?.length 
-              ? "Your cart is empty." 
-              : `${totalQuantity} total item${totalQuantity !== 1 ? 's' : ''} in your cart`
-            }
+            {!items.length
+              ? 'Your cart is empty.'
+              : `${totalQuantity} total item${totalQuantity !== 1 ? 's' : ''} in your cart`}
           </SheetDescription>
         </SheetHeader>
 
         {/* Scrollable cart items area */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
-          {loading ? (
-            <div className="flex h-full min-h-[200px] items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFC020]"></div>
-            </div>
-          ) : !fullCart?.items?.length ? (
+          {!items.length ? (
             <div className="flex h-full min-h-[400px] flex-col items-center justify-center">
-              <div className="text-center max-w-sm">
-                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <div className="max-w-sm text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                   <ShoppingCart className="h-8 w-8 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-                <p className="text-sm text-gray-600 mb-6">
+                <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                  Your cart is empty
+                </h3>
+                <p className="mb-6 text-sm text-gray-600">
                   Add items to your cart to see them here.
                 </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.href = '/shop'}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange?.(false);
+                    router.push('/shop');
+                  }}
                   className="rounded-full"
                 >
                   Continue Shopping
@@ -97,23 +86,22 @@ export function CartSheet({
             </div>
           ) : (
             <div className="space-y-3">
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {fullCart.items.map((item: any) => {
-                const backgroundColor = getProductBackgroundColor(item)
-                
+              {items.map(item => {
+                const itemTotal = item.price * item.quantity;
+
                 return (
-                  <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                  <div
+                    key={item.id}
+                    className="rounded-lg border border-gray-200 p-4"
+                  >
                     {/* Product Row: Image + Details + Price */}
-                    <div className="flex items-start gap-4 mb-4">
+                    <div className="mb-4 flex items-start gap-4">
                       {/* Product Image */}
-                      <div 
-                        className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor }}
-                      >
+                      <div className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#ffedc3]">
                         <div className="relative h-14 w-14">
                           <Image
-                            src={item.thumbnail || ""}
-                            alt={item.title || "Product"}
+                            src={item.image || ''}
+                            alt={item.productName || 'Product'}
                             fill
                             className="object-contain"
                           />
@@ -121,119 +109,141 @@ export function CartSheet({
                       </div>
 
                       {/* Product Details */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base leading-tight text-gray-900 mb-1">
-                          {item.title}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mb-1 text-base leading-tight font-semibold text-gray-900">
+                          {item.productName}
                         </h3>
-                        {item.variant?.title && item.variant.title !== "Default Variant" && (
-                          <p className="text-sm text-gray-600 mb-2">{item.variant.title}</p>
+                        {item.variantTitle && (
+                          <p className="mb-2 text-sm text-gray-600">
+                            {item.variantTitle}
+                          </p>
                         )}
-                        
+
                         {/* Price Information */}
                         <div className="flex items-baseline gap-2">
                           <span className="text-base font-semibold text-gray-900">
-                            {formatPrice(item.unit_price)}
+                            {formatDisplayCurrency(item.price)}
                           </span>
-                          {item.original_total && item.original_total > item.total && (
+                          {item.compareAtPrice > item.price && (
                             <span className="text-sm text-gray-500 line-through">
-                              {formatPrice(item.original_total)}
+                              {formatDisplayCurrency(item.compareAtPrice)}
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Subtotal: {formatPrice(item.total)}
+                        <p className="mt-1 text-sm text-gray-600">
+                          Subtotal: {formatDisplayCurrency(itemTotal)}
                         </p>
                       </div>
                     </div>
 
                     {/* Actions Row: Quantity Controls + Remove */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600 mr-2">Qty:</span>
-                        <div className="flex items-center border border-gray-200 rounded-md">
+                        <span className="mr-2 text-sm text-gray-600">Qty:</span>
+                        <div className="flex items-center rounded-md border border-gray-200">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 hover:bg-gray-50 rounded-none border-r border-gray-200"
-                            onClick={() => updateItem(item.id, item.quantity - 1)}
+                            className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50"
+                            onClick={() => {
+                              try {
+                                updateQuantity(item.id, item.quantity - 1);
+                              } catch (e) {
+                                toast.error((e as Error).message);
+                              }
+                            }}
                             disabled={item.quantity <= 1}
                           >
                             <Minus className="h-3 w-3" />
                             <span className="sr-only">Decrease quantity</span>
                           </Button>
-                          
-                          <span className="px-3 py-1 text-sm font-medium text-gray-900 min-w-[2rem] text-center">
+
+                          <span className="min-w-[2rem] px-3 py-1 text-center text-sm font-medium text-gray-900">
                             {item.quantity}
                           </span>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 hover:bg-gray-50 rounded-none border-l border-gray-200"
-                            onClick={() => updateItem(item.id, item.quantity + 1)}
+                            className="h-8 w-8 rounded-none border-l border-gray-200 p-0 hover:bg-gray-50"
+                            onClick={() => {
+                              try {
+                                updateQuantity(item.id, item.quantity + 1);
+                              } catch (e) {
+                                toast.error((e as Error).message);
+                              }
+                            }}
                           >
                             <Plus className="h-3 w-3" />
                             <span className="sr-only">Increase quantity</span>
                           </Button>
                         </div>
                       </div>
-                      
+
                       {/* Remove Button */}
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => removeItem(item.id)}
+                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => {
+                          removeItem(item.id);
+                          toast.success('Item removed from cart');
+                        }}
                       >
-                        <Trash2 className="h-4 w-4 mr-1" />
+                        <Trash2 className="mr-1 h-4 w-4" />
                         Remove
                       </Button>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
         </div>
 
         {/* Fixed Footer with Total and Checkout */}
-        { totalQuantity > 0 && (
-          <SheetFooter className="px-4 py-4 border-t border-gray-200">
+        {totalQuantity > 0 && (
+          <SheetFooter className="border-t border-gray-200 px-4 py-4">
             <div className="w-full space-y-4">
               {/* Order Summary */}
-              <div className="bg-white rounded-lg p-4 space-y-3">
+              <div className="space-y-3 rounded-lg bg-white p-4">
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Subtotal ({totalQuantity} {totalQuantity > 1 ? 'items' : 'item'})</span>
-                  <span className="font-medium text-gray-900">{formatPrice(fullCart?.item_subtotal)}</span>
+                  <span>
+                    Subtotal ({totalQuantity}{' '}
+                    {totalQuantity > 1 ? 'items' : 'item'})
+                  </span>
+                  <span className="font-medium text-gray-900">
+                    {formatDisplayCurrency(subtotal)}
+                  </span>
                 </div>
-                {(fullCart?.shipping_total ?? 0) > 0 ? (
-                  <>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Shipping</span>
-                      <span>{formatPrice(fullCart?.shipping_total)}</span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-base font-semibold text-gray-900">Total</span>
-                        <span className="text-lg font-bold text-gray-900">{formatPrice(cart?.total)}</span>
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-                {/* <div className="border-t border-gray-200 pt-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-base font-semibold text-gray-900">Total</span>
-                    <span className="text-lg font-bold text-gray-900">{formatPrice(cart?.total)}</span>
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-semibold text-gray-900">
+                      Total
+                    </span>
+                    <span className="text-lg font-bold text-gray-900">
+                      {formatDisplayCurrency(subtotal)}
+                    </span>
                   </div>
-                </div> */}
+                </div>
               </div>
 
               {/* Minimum Order Notice */}
-              {totalQuantity < Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY) && (
-                <div className="bg-gray-200 border border-gray-200 rounded-lg px-3 py-5">
-                  <p className="text-sm text-gray-800 text-center">
-                    Please select {Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY) - totalQuantity} more item{Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY) - totalQuantity !== 1 ? 's' : ''} to proceed to checkout
+              {totalQuantity <
+                Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) && (
+                <div className="rounded-lg border border-gray-200 bg-gray-200 px-3 py-5">
+                  <p className="text-center text-sm text-gray-800">
+                    Please select{' '}
+                    {Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) -
+                      totalQuantity}{' '}
+                    more item
+                    {Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) -
+                      totalQuantity !==
+                    1
+                      ? 's'
+                      : ''}{' '}
+                    to proceed to checkout
                   </p>
                 </div>
               )}
@@ -241,14 +251,23 @@ export function CartSheet({
               {/* Checkout Button */}
               <Button
                 onClick={() => {
-                  if (totalQuantity >= Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY)) {
-                    router.push("/checkout");
+                  const minQty = Number(
+                    process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3
+                  );
+                  if (totalQuantity >= minQty) {
+                    onOpenChange?.(false);
+                    router.push('/checkout');
                   } else {
-                    toast.info("Please select at least 3 items before proceeding to checkout.");
+                    toast.info(
+                      `Please select at least ${minQty} items before proceeding to checkout.`
+                    );
                   }
                 }}
-                disabled={totalQuantity < Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY)}
-                className="w-full h-12 text-base font-semibold bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] border-2 border-[#FFD56A] rounded-full shadow-inner shadow-black/25 disabled:opacity-50 disabled:cursor-not-allowed hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 transition-all"
+                disabled={
+                  totalQuantity <
+                  Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3)
+                }
+                className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Proceed to Checkout
               </Button>
@@ -257,5 +276,5 @@ export function CartSheet({
         )}
       </SheetContent>
     </Sheet>
-  )
+  );
 }

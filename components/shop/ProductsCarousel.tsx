@@ -24,13 +24,13 @@ export default function ProductsCarousel({
 }) {
   const isMobile = useMediaQuery('(max-width: 639px)');
   const isTablet = useMediaQuery('(min-width: 640px) and (max-width: 1023px)');
-  const isXLarge = useMediaQuery('(min-width: 1536px)');
+  const isXLarge = useMediaQuery('(min-width: 1440px)');
 
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
 
-  const slidesPerView = isMobile ? 1 : isTablet ? 2 : 4;
+  const slidesPerView = isMobile ? 1 : isTablet ? 2 : isXLarge ? 4 : 3;
 
   const carouselOptions = {
     align: 'start' as const,
