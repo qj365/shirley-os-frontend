@@ -10,5 +10,6 @@ export type CreateProductVariantDto = {
   image: string;
   variantOptionIds: PrismaJson_VariantOptionIds;
   stock: number;
+  minOrder: number;
 };
 

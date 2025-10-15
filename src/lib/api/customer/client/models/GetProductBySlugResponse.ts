@@ -9,6 +9,7 @@ export type GetProductBySlugResponse = {
   images: Array<string>;
   description: string;
   productVariants: Array<{
+    minOrder: number;
     variantOptionIds: Array<number>;
     image: string;
     stock: number;

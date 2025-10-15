@@ -5,7 +5,9 @@
 import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
+import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
+import { CustomerService } from './services/CustomerService';
 import { HealthService } from './services/HealthService';
 import { OrderService } from './services/OrderService';
 import { ProductService } from './services/ProductService';
@@ -13,7 +15,9 @@ import { UploadService } from './services/UploadService';
 import { WebhookService } from './services/WebhookService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ClientApi {
+  public readonly auth: AuthService;
   public readonly category: CategoryService;
+  public readonly customer: CustomerService;
   public readonly health: HealthService;
   public readonly order: OrderService;
   public readonly product: ProductService;
@@ -32,7 +36,9 @@ export class ClientApi {
       HEADERS: config?.HEADERS,
       ENCODE_PATH: config?.ENCODE_PATH,
     });
+    this.auth = new AuthService(this.request);
     this.category = new CategoryService(this.request);
+    this.customer = new CustomerService(this.request);
     this.health = new HealthService(this.request);
     this.order = new OrderService(this.request);
     this.product = new ProductService(this.request);

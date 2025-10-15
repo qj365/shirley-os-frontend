@@ -6,6 +6,7 @@ import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { AdminService } from './services/AdminService';
+import { AuthService } from './services/AuthService';
 import { CategoryService } from './services/CategoryService';
 import { CookingClassService } from './services/CookingClassService';
 import { HealthService } from './services/HealthService';
@@ -17,6 +18,7 @@ import { WebhookService } from './services/WebhookService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ClientApi {
   public readonly admin: AdminService;
+  public readonly auth: AuthService;
   public readonly category: CategoryService;
   public readonly cookingClass: CookingClassService;
   public readonly health: HealthService;
@@ -39,6 +41,7 @@ export class ClientApi {
       ENCODE_PATH: config?.ENCODE_PATH,
     });
     this.admin = new AdminService(this.request);
+    this.auth = new AuthService(this.request);
     this.category = new CategoryService(this.request);
     this.cookingClass = new CookingClassService(this.request);
     this.health = new HealthService(this.request);

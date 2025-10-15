@@ -11,6 +11,7 @@ export type GetProductResponse = {
     id: number;
   };
   productVariants: Array<{
+    minOrder: number;
     compareAtPrice: number;
     price: number;
     variantOptionIds: Array<number>;

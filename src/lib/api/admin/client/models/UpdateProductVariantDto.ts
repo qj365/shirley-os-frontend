@@ -8,5 +8,6 @@ export type UpdateProductVariantDto = {
   compareAtPrice: number;
   image: string;
   stock: number;
+  minOrder: number;
 };
 
