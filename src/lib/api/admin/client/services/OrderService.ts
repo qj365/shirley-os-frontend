@@ -6,42 +6,12 @@ import type { _36_Enums_FulfillmentStatus } from '../models/_36_Enums_Fulfillmen
 import type { AdminCancelOrderDto } from '../models/AdminCancelOrderDto';
 import type { AdminFulfillOrderDto } from '../models/AdminFulfillOrderDto';
 import type { AdminGetOrderByIdResponse } from '../models/AdminGetOrderByIdResponse';
-import type { CursorPagingResponse_GetOrdersResponse_Array_ } from '../models/CursorPagingResponse_GetOrdersResponse_Array_';
 import type { GetOrderResponse } from '../models/GetOrderResponse';
 import type { NumberedPagingResponse_AdminGetOrdersResponse_Array_ } from '../models/NumberedPagingResponse_AdminGetOrdersResponse_Array_';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class OrderService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
-  /**
-   * Get user orders
-   * Get all orders for authenticated user
-   * @returns CursorPagingResponse_GetOrdersResponse_Array_ Ok
-   * @throws ApiError
-   */
-  public getOrders({
-    cursor,
-    pageSize = 10,
-  }: {
-    cursor?: string,
-    pageSize?: number,
-  }): CancelablePromise<CursorPagingResponse_GetOrdersResponse_Array_> {
-    return this.httpRequest.request({
-      method: 'GET',
-      url: '/customer/orders',
-      query: {
-        'cursor': cursor,
-        'pageSize': pageSize,
-      },
-      errors: {
-        400: `Bad request`,
-        401: `Invalid token`,
-        403: `Forbidden`,
-        404: `Not found`,
-        500: `Internal server error`,
-      },
-    });
-  }
   /**
    * Get order by ID
    * Get order details by ID
