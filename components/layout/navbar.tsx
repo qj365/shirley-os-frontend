@@ -1,8 +1,9 @@
 'use client';
-import Logout from '@/components/auth/logout';
+
 import { CartSheet } from '@/components/shared/cart-sheet';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/auth';
+import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
@@ -10,7 +11,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
-import { cn } from '@/lib/utils';
 
 // Use useLayoutEffect on client, useEffect on server (SSR-safe)
 const useIsomorphicLayoutEffect =
@@ -112,14 +112,12 @@ const AuthSection = ({
   router,
   isMobile = false,
   onActionComplete,
-  isWhiteMode = false,
 }: {
   isAuthenticated: boolean;
   buttonStyles: string;
   router: ReturnType<typeof useRouter>;
   isMobile?: boolean;
   onActionComplete?: () => void;
-  isWhiteMode?: boolean;
 }) => {
   if (!isAuthenticated) {
     return (
@@ -142,17 +140,13 @@ const AuthSection = ({
       <>
         <button
           onClick={() => {
-            router.push('/dashboard');
+            router.push('/my-page');
             onActionComplete?.();
           }}
           className="mt-2 rounded-full border-2 border-[#fabc20] bg-[#fabc20] px-8 py-2 text-xl font-semibold text-black transition-colors hover:bg-black hover:text-white active:scale-95"
         >
           Account
         </button>
-        <Logout
-          onLogoutSuccess={onActionComplete}
-          textColor="text-black hover:text-gray-700"
-        />
       </>
     );
   }
@@ -161,18 +155,11 @@ const AuthSection = ({
   return (
     <div className="flex items-center gap-4">
       <button
-        onClick={() => router.push('/dashboard')}
+        onClick={() => router.push('/my-page')}
         className={`rounded-full border-2 px-4 py-1 text-lg font-semibold lg:px-6 lg:py-2 lg:text-xl xl:text-2xl ${buttonStyles} transition-colors active:scale-95`}
       >
         Account
       </button>
-      <Logout
-        textColor={
-          isWhiteMode
-            ? 'text-white hover:text-gray-300'
-            : 'text-gray-700 hover:text-gray-900'
-        }
-      />
     </div>
   );
 };
@@ -230,7 +217,9 @@ function Navbar() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+
+  const { token, user } = useAuthStore();
+  const isAuthenticated = !!(token && user);
 
   const isFullNavbar = pathname !== '/login' && pathname !== '/signup';
 
@@ -285,7 +274,7 @@ function Navbar() {
     <>
       <div
         className={cn(
-          'fixed top-0 right-0 left-0 z-[40] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
+          'fixed top-0 right-0 left-0 z-[49] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
           isMenuScrolled && 'bg-white !py-4 shadow'
         )}
       >
@@ -331,7 +320,6 @@ function Navbar() {
               isAuthenticated={isAuthenticated}
               buttonStyles={customNavStyles.buttonStyles}
               router={router}
-              isWhiteMode={customNavStyles.isWhiteMode}
             />
           </div>
         </div>
@@ -355,7 +343,6 @@ function Navbar() {
               router={router}
               isMobile={true}
               onActionComplete={closeMenu}
-              isWhiteMode={customNavStyles.isWhiteMode}
             />
           </nav>
         </div>

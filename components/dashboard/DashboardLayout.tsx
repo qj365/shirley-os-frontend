@@ -1,9 +1,19 @@
 'use client';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Bell, FileText, LayoutDashboard, Menu } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuthStore } from '@/stores/auth-store';
+import { Bell, FileText, LayoutDashboard, LogOut, Menu } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ReactNode, useState } from 'react';
 
 // Sidebar menu items
@@ -44,14 +54,57 @@ export default function DashboardLayout({
   children,
   activePage,
 }: DashboardLayoutProps) {
+  const { appUser, logout } = useAuthStore();
+  const router = useRouter();
+
+  const userNameLabel = appUser
+    ? appUser?.firstName?.charAt(0) + appUser?.lastName?.charAt(0)
+    : 'U';
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  // User Menu Dropdown Component
+  const UserMenuDropdown = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className={`flex items-center justify-center rounded-full bg-[#F3C03F] transition-colors hover:bg-[#E6B03A] ${isMobile ? 'h-10 w-10' : 'h-12 w-12'}`}
+        >
+          <span
+            className={`font-bold text-black ${isMobile ? 'text-base' : 'text-lg'}`}
+          >
+            {userNameLabel}
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 bg-white">
+        <DropdownMenuLabel>
+          {appUser ? `${appUser.firstName} ${appUser.lastName}` : 'User'}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   // Sidebar Component
   const Sidebar = ({ isMobile = false }: { isMobile?: boolean }) => (
     <div
       className={`${isMobile ? 'w-full' : 'w-60'} flex h-full flex-col bg-gray-100`}
     >
-      <div className="px-3 py-6">
+      <div className="space-y-2 px-3 py-6">
         <div className="mb-8 flex items-center justify-center lg:hidden">
           <Link
             href="/"
@@ -77,7 +130,7 @@ export default function DashboardLayout({
             <a
               key={index}
               href={item.href}
-              className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+              className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left font-semibold transition-colors ${
                 isActive
                   ? 'bg-[#F3C03F] font-semibold text-black'
                   : 'text-gray-600 hover:bg-gray-200'
@@ -122,9 +175,7 @@ export default function DashboardLayout({
               <button className="rounded-full p-2 transition-colors hover:bg-gray-100">
                 <Bell className="h-6 w-6 text-gray-700" />
               </button>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#F3C03F]">
-                <span className="text-lg font-bold text-black">TM</span>
-              </div>
+              <UserMenuDropdown />
             </div>
           </div>
         </div>
@@ -155,9 +206,7 @@ export default function DashboardLayout({
               <button className="rounded-full p-2 transition-colors hover:bg-gray-100">
                 <Bell className="h-6 w-6 text-gray-700" />
               </button>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F3C03F]">
-                <span className="text-base font-bold text-black">TM</span>
-              </div>
+              <UserMenuDropdown isMobile={true} />
             </div>
           </div>
         </div>

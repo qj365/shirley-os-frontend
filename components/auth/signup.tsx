@@ -1,512 +1,551 @@
-"use client"
+'use client';
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { Eye, EyeOff, ArrowLeft } from "lucide-react"
-import { sdk } from "@/config"
-import { FetchError } from "@medusajs/js-sdk"
-import PasswordStrengthIndicator from "./PasswordStrengthIndicator"
-import { getPasswordStrength, handleAuthAction, requestVerificationCode, verifyCode } from "@/services/auth-service";
+import {
+  sendOtpSchema,
+  signupSchema,
+  verifyOtpSchema,
+  type SendOtpFormData,
+  type SignupFormData,
+  type VerifyOtpFormData,
+} from '@/lib/validations/schemas';
+import { getPasswordStrength } from '@/services/auth-service';
+import { api, OtpType } from '@/src/lib/api/customer';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft, Clock, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import AuthLayout from './AuthLayout';
+import PasswordStrengthIndicator from './PasswordStrengthIndicator';
+import { toastErrorMessage } from '@/utils/helpers/toastErrorMesage';
 
 interface SignupProps {
-  onSignupSuccess?: () => void // Function to call after successful signup
+  onSignupSuccess?: () => void;
 }
 
 function Signup({ onSignupSuccess }: SignupProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  
-  // State hooks for form fields, error handling, and loading state
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isEmailPrefilled, setIsEmailPrefilled] = useState(false)
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Verification code state
-  const [currentStep, setCurrentStep] = useState(1) // 1: Registration form, 2: Verification code
-  const [verificationCode, setVerificationCode] = useState("") 
-  const [countdown, setCountdown] = useState(0) // Countdown in seconds
-  const [isResendDisabled, setIsResendDisabled] = useState(false)
-  // Track if user has already been registered
-  //const [isUserRegistered, setIsUserRegistered] = useState(false)
+  // Form states
+  const [currentStep, setCurrentStep] = useState<
+    'sendOtp' | 'verifyOtp' | 'signup'
+  >('sendOtp');
+  const [loading, setLoading] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // OTP and timer states
+  const [countdown, setCountdown] = useState(0);
+  const [isResendDisabled, setIsResendDisabled] = useState(false);
+
+  // Form data storage between steps
+  const [formData, setFormData] = useState<{
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+  }>({
+    email: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+  });
+
+  // Form instances
+  const sendOtpForm = useForm<SendOtpFormData>({
+    resolver: zodResolver(sendOtpSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const verifyOtpForm = useForm<VerifyOtpFormData>({
+    resolver: zodResolver(verifyOtpSchema),
+    defaultValues: {
+      email: '',
+      otp: '',
+    },
+  });
+
+  const signupForm = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      token: '',
+      firstName: '',
+      lastName: '',
+      password: '',
+      phoneNumber: '',
+    },
+  });
 
   // Password strength validation
-  const passwordStrength = getPasswordStrength(password)
-
-  // Clear error when user starts typing in any field
-  const clearError = () => {
-    if (error) setError("")
-    if (successMessage) setSuccessMessage("")
-  }
+  const password = signupForm.watch('password');
+  const passwordStrength = getPasswordStrength(password || '');
 
   // Handle URL parameters for email prefilling
   useEffect(() => {
-    const emailParam = searchParams.get('email')
+    const emailParam = searchParams.get('email');
     if (emailParam) {
-      setEmail(emailParam)
-      setIsEmailPrefilled(true)
+      sendOtpForm.setValue('email', emailParam);
+      setFormData(prev => ({ ...prev, email: emailParam }));
     }
-  }, [searchParams])
+  }, [searchParams, sendOtpForm]);
 
   // Countdown timer effect
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    
+    let interval: NodeJS.Timeout;
     if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (countdown === 0) {
-      setIsResendDisabled(false);
+      interval = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            setIsResendDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
-    
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
+    return () => clearInterval(interval);
   }, [countdown]);
 
-  // Format countdown time as MM:SS
-  const formatCountdown = () => {
-    const minutes = Math.floor(countdown / 60);
-    const seconds = countdown % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  // Request verification code
-  const requestVerificationCodeHandler = async () => {
+  // Step 1: Send OTP
+  const handleSendOtp = async (data: SendOtpFormData) => {
     setLoading(true);
-    setError("");
-    
-    try {
-      // Basic validation
-      if (password !== confirmPassword) {
-        setError("Passwords do not match")
-        setLoading(false);
-        return
-      }
-  
-      // Call the verification code service
-      await requestVerificationCode(email, firstName);
-      
-      // Move to verification step
-      setCurrentStep(2);
-      
-      // Set success message
-      setSuccessMessage("Verification code sent to your email");
-      
-      // Start countdown for resend (2 minutes = 120 seconds)
-      setCountdown(120);
-      setIsResendDisabled(true);
-    } catch (error) {
-      console.error("Verification code request error:", error)
-      
-      if (error instanceof FetchError) {
-        setError(`Failed to send verification code: ${error.message}`)
-      } else if (error instanceof Error) {
-        setError(`Error: ${error.message}`)
-      } else {
-        setError("Failed to send verification code. Please try again.")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  // Resend verification code
-  const resendVerificationCodeHandler = async () => {
-    if (isResendDisabled) return;
-    
-    setLoading(true);
-    setError("");
-    
     try {
-      // Call the verification code service again
-      await requestVerificationCode(email, firstName);
-      
-      // Set success message
-      setSuccessMessage("Verification code resent to your email");
-      
-      // Reset countdown
-      setCountdown(120);
+      await api.auth.sendOtpResetPassword({
+        otpType: OtpType.SIGNUP,
+        requestBody: {
+          email: data.email,
+        },
+      });
+
+      // Store form data for next steps
+      setFormData(prev => ({
+        ...prev,
+        email: data.email,
+      }));
+
+      // Set up verification form with email
+      verifyOtpForm.setValue('email', data.email);
+
+      // Move to next step
+      setCurrentStep('verifyOtp');
+      setCountdown(60); // 60 seconds countdown
       setIsResendDisabled(true);
-    } catch (error) {
-      console.error("Resend code error:", error);
-      setError("Failed to resend verification code. Please try again.");
+
+      toast.success('OTP sent successfully! Please check your email.');
+    } catch (err: unknown) {
+      toastErrorMessage(err);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  // Verify code and complete registration
-  const verifyCodeAndComplete = async () => {
+  // Resend OTP
+  const handleResendOtp = async () => {
+    if (isResendDisabled) return;
+
     setLoading(true);
-    setError("");
-    
+
     try {
-      // Verify the code
-      await verifyCode(email, verificationCode);
-      
-      // Now register the user with Medusa auth system
-      await sdk.auth.register("customer", "emailpass", {
-        email,
-        password,
-      });
-      
-      // Create the customer
-      await sdk.store.customer.create({
-        email,
-        first_name: firstName,
-        last_name: lastName,
-        phone: phoneNumber,
+      await api.auth.sendOtpResetPassword({
+        otpType: OtpType.SIGNUP,
+        requestBody: {
+          email: formData.email,
+        },
       });
 
-      // Explicitly log in to establish the session
-      await sdk.auth.login("customer", "emailpass", {
-        email,
-        password,
+      setCountdown(60);
+      setIsResendDisabled(true);
+      toast.success('OTP resent successfully!');
+    } catch (err: unknown) {
+      toastErrorMessage(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: Verify OTP
+  const handleVerifyOtp = async (data: VerifyOtpFormData) => {
+    setLoading(true);
+
+    try {
+      const response = await api.auth.verifyOtp({
+        otpType: OtpType.SIGNUP,
+        requestBody: {
+          email: data.email,
+          otp: data.otp,
+        },
       });
 
-      // Retrieve the newly logged-in customer's data
-      const { customer } = await sdk.store.customer.retrieve();
-      
-      // Store user info in localStorage to match the SDK config
-      if (customer) {
-        localStorage.setItem("user_email", customer.email);
-        localStorage.setItem("customer_id", customer.id);
-      }
-      
-      // Show success message
-      setSuccessMessage("Account created successfully. Redirecting...");
-      
-      // Call the onSignupSuccess callback if provided
+      // Set up signup form with stored data
+      signupForm.setValue('token', response.token);
+
+      // Move to next step
+      setCurrentStep('signup');
+
+      toast.success('OTP verified successfully!');
+    } catch (err: unknown) {
+      toastErrorMessage(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3: Complete Signup
+  const handleSignup = async (data: SignupFormData) => {
+    setLoading(true);
+
+    try {
+      await api.auth.signup({
+        requestBody: {
+          token: data.token,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+        },
+      });
+
+      toast.success('Account created successfully!');
+
+      // Call success callback if provided
       if (onSignupSuccess) {
         onSignupSuccess();
       }
-      
-      // Handle auth action and redirection
-      handleAuthAction(router, {
-        action: 'signup',
-        onSuccess: onSignupSuccess
-      });
-    } catch (error) {
-      console.error("Verification error:", error);
-      
-      if (error instanceof FetchError) {
-        setError(`${error.message}`)
-      } else if (error instanceof Error) {
-        setError(`Error: ${error.message}`)
-      } else {
-        setError("Verification failed. Please try again.")
-      }
+
+      // Redirect to login or dashboard
+      router.push('/login');
+    } catch (err: unknown) {
+      toastErrorMessage(err);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (currentStep === 1) {
-      await requestVerificationCodeHandler();
-    } else {
-      await verifyCodeAndComplete();
+  // Go back to previous step
+  const goBack = () => {
+    if (currentStep === 'verifyOtp') {
+      setCurrentStep('sendOtp');
+      setCountdown(0);
+      setIsResendDisabled(false);
+    } else if (currentStep === 'signup') {
+      setCurrentStep('verifyOtp');
     }
-  }
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setSuccessMessage('');
+  };
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword)
-  }
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Back to home arrow */}
-      <div className="p-4 absolute z-10">
-        <Link href="/" className="flex items-center text-gray-600 hover:text-black transition-colors">
-          <ArrowLeft size={20} />
-          <span className="ml-2">Back to home</span>
-        </Link>
-      </div>
-      
-      <div className="flex flex-1 flex-col md:flex-row h-screen">
-        {/* Form section */}
-        <div className="w-full lg:w-1/2 p-8 pt-16 md:pt-8 flex items-center justify-center">
-          <div className="w-full max-w-md">
-            <h1 className="text-2xl font-bold mb-6">
-              {currentStep === 1 ? "Create Account" : "Verify Your Email"}
-            </h1>
-            
-            {error && (
-              <div className="bg-red-50 rounded-md p-4 mb-4">
-                <div className="text-red-600 text-sm font-medium">{error}</div>
-              </div>
-            )}
-            
-            {successMessage && (
-              <p className="text-green-500 text-sm mb-4">{successMessage}</p>
-            )}
-            
-            <form className="space-y-4" onSubmit={handleSignup}>
-              {currentStep === 1 ? (
-                // Step 1: Registration Form
-                <>
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="w-full">
-                      <label className="mb-1 text-sm text-slate-900 font-medium block">First Name</label>
-                      <div className="relative flex items-center">
-                        <input
-                          type="text"
-                          placeholder="First Name"
-                          value={firstName}
-                          onChange={(e) => {
-                            setFirstName(e.target.value)
-                            clearError()
-                          }}
-                          className="px-4 py-2 pr-10 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="w-full">
-                      <label className="mb-1 text-sm text-slate-900 font-medium block">Last Name</label>
-                      <div className="relative flex items-center">
-                        <input
-                          type="text"
-                          placeholder="Last Name"
-                          value={lastName}
-                          onChange={(e) => {
-                            setLastName(e.target.value)
-                            clearError()
-                          }}
-                          className="px-4 py-2 pr-10 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
+    <AuthLayout>
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">
+            {currentStep === 'sendOtp' && 'Sign Up'}
+            {currentStep === 'verifyOtp' && 'Verify Your Email'}
+            {currentStep === 'signup' && 'Complete Your Profile'}
+          </h1>
+          <p className="text-sm text-gray-600">
+            {currentStep === 'sendOtp' &&
+              'Enter your email to receive a verification code'}
+            {currentStep === 'verifyOtp' &&
+              'We sent a verification code to your email'}
+            {currentStep === 'signup' && 'Complete your account details'}
+          </p>
+        </div>
 
-                  <div>
-                    <label className="mb-1 text-sm text-slate-900 font-medium block">Email</label>
-                    <div className="relative flex items-center">
-                      <input
-                        type="email"
-                        placeholder="Enter Email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value)
-                          clearError()
-                        }}
-                        readOnly={isEmailPrefilled}
-                        className={`px-4 py-2 pr-10 w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500 ${
-                          isEmailPrefilled 
-                            ? 'bg-gray-50 cursor-not-allowed' 
-                            : 'bg-[#f0f1f2] focus:bg-transparent'
-                        }`}
-                        required
-                      />
-                      {isEmailPrefilled && (
-                        <div className="absolute right-3 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          From order
-                        </div>
-                      )}
-                    </div>
-                    {isEmailPrefilled && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Email from your recent order. Need to change it? <button type="button" onClick={() => { setIsEmailPrefilled(false); setEmail(''); }} className="text-blue-600 hover:underline">Click here</button>
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1 text-sm text-slate-900 font-medium block">Phone Number</label>
-                    <div className="relative flex items-center">
-                      <input
-                        type="tel"
-                        placeholder="Enter Phone Number"
-                        value={phoneNumber}
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value.replace(/[^0-9]/g, ""))
-                          clearError()
-                        }}
-                        className="px-4 py-2 pr-10 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 text-sm text-slate-900 font-medium block">Password</label>
-                    <div className="relative flex items-center">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter Password"
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value)
-                          clearError()
-                        }}
-                        className="px-4 py-2 pr-10 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute right-3 text-gray-500 focus:outline-none"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                    {/* Password Strength Indicator */}
-                    <PasswordStrengthIndicator 
-                      passwordStrength={passwordStrength} 
-                      password={password} 
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1 text-sm text-slate-900 font-medium block">Confirm Password</label>
-                    <div className="relative flex items-center">
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm Password"
-                        value={confirmPassword}
-                        onChange={(e) => {
-                          setConfirmPassword(e.target.value)
-                          clearError()
-                        }}
-                        className={`px-4 py-2 pr-10 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border outline-none rounded transition-all placeholder:text-gray-500 ${
-                          confirmPassword && password === confirmPassword ? 'border-green-500' :
-                          confirmPassword && password !== confirmPassword ? 'border-red-500' :
-                          'border-gray-300'
-                        }`}
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={toggleConfirmPasswordVisibility}
-                        className="absolute right-3 text-gray-500 focus:outline-none"
-                      >
-                        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">Passwords do not match</p>
-                    )}
-                    {confirmPassword && password === confirmPassword && (
-                      <p className="text-green-500 text-xs mt-1">Passwords match</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4 shrink-0" required />
-                    <label className="text-sm text-slate-900 ml-3">I agree to the Terms and Conditions</label>
-                  </div>
-                </>
-              ) : (
-                // Step 2: Verification Code
-                <>
-                  <div className="text-center mb-6">
-                    <p className="text-gray-600 mb-4">
-                      We&apos;ve sent a verification code to <span className="font-semibold">{email}</span>.
-                      Please enter the code below to verify your email address.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <label className="mb-1 text-sm text-slate-900 font-medium block">Verification Code</label>
-                    <div className="relative flex items-center">
-                      <input
-                        type="text"
-                        placeholder="Enter verification code"
-                        value={verificationCode}
-                        onClick={() => clearError()}
-                        onChange={(e) => {
-                          setVerificationCode(e.target.value.replace(/[^0-9]/g, ""))
-                          clearError()
-                        }}
-                        className="px-4 py-2 bg-[#f0f1f2] focus:bg-transparent w-full text-sm font-semibold text-black border border-gray-300 outline-none rounded transition-all placeholder:text-gray-500"
-                        required
-                        maxLength={6}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600 mb-2">
-                      Didn&apos;t receive the code?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={
-                        async () => {
-                          await resendVerificationCodeHandler()
-                          clearError()
-                        }
-                      }
-                      disabled={isResendDisabled}
-                      className={`text-sm font-medium ${isResendDisabled ? 'text-gray-400' : 'text-[#fabc20] hover:underline'}`}
-                    >
-                      {isResendDisabled 
-                        ? `Resend code in ${formatCountdown()}` 
-                        : "Resend verification code"}
-                    </button>
-                  </div>
-                </>
-              )}
-
-              <button
-                type="submit"
-                className={`px-5 py-2.5 w-full mt-6 text-sm font-medium rounded transition-all ${
-                  loading || (currentStep === 1 && (password !== confirmPassword || !confirmPassword))
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-[#fabc20] hover:bg-[#f5c508] text-black active:bg-[#f5c508] active:scale-95 hover:cursor-pointer'
-                }`}
-                disabled={loading || !!successMessage || 
-                  (currentStep === 1 && (password !== confirmPassword || !confirmPassword)) ||
-                  (currentStep === 2 && verificationCode.length < 4)}
-              >
-                {loading 
-                  ? (currentStep === 1 ? "Processing..." : "Verifying...") 
-                  : (currentStep === 1 ? "Continue" : "Verify & Create Account")}
-              </button>
-
-              <div className="text-center mt-4">
-                <p className="text-md font-bold text-gray-900">
-                  Already a member?{" "}
-                  <Link href="/login" className="text-[#fabc20] hover:cursor-pointer hover:underline">
-                    Login Now
-                  </Link>
-                </p>
-              </div>
-            </form>
+        {/* Progress Indicator */}
+        <div className="mb-8 flex items-center justify-center">
+          <div className="flex items-center space-x-4">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                currentStep === 'sendOtp'
+                  ? 'bg-[#fabc20] text-white'
+                  : currentStep === 'verifyOtp' || currentStep === 'signup'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-300 text-gray-600'
+              }`}
+            >
+              1
+            </div>
+            <div
+              className={`h-1 w-16 ${
+                currentStep === 'verifyOtp' || currentStep === 'signup'
+                  ? 'bg-green-500'
+                  : 'bg-gray-300'
+              }`}
+            ></div>
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                currentStep === 'verifyOtp'
+                  ? 'bg-orange-500 text-white'
+                  : currentStep === 'signup'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-300 text-gray-600'
+              }`}
+            >
+              2
+            </div>
+            <div
+              className={`h-1 w-16 ${
+                currentStep === 'signup' ? 'bg-green-500' : 'bg-gray-300'
+              }`}
+            ></div>
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                currentStep === 'signup'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-300 text-gray-600'
+              }`}
+            >
+              3
+            </div>
           </div>
         </div>
 
-        {/* Image section */}
-        <div className="w-full lg:w-1/2 hidden lg:block relative">
-          <Image 
-            src="/image/login.png" 
-            alt="login" 
-            layout="fill" 
-            objectFit="cover" 
-            className="h-full"
-          />
+        {/* Form Card */}
+        <div>
+          {/* Back Button */}
+          {currentStep !== 'sendOtp' && (
+            <button
+              onClick={goBack}
+              className="mb-6 flex items-center text-gray-600 transition-colors hover:text-gray-800"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </button>
+          )}
+
+          {successMessage && (
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
+              <p className="text-sm text-green-600">{successMessage}</p>
+            </div>
+          )}
+
+          {/* Step 1: Send OTP Form */}
+          {currentStep === 'sendOtp' && (
+            <form
+              onSubmit={sendOtpForm.handleSubmit(handleSendOtp)}
+              className="space-y-4"
+            >
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-900">
+                  Email Address
+                </label>
+                <input
+                  {...sendOtpForm.register('email')}
+                  placeholder="Email Address"
+                  className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 text-sm font-semibold text-black transition-all outline-none placeholder:text-gray-500 focus:bg-transparent"
+                />
+                {sendOtpForm.formState.errors.email && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {sendOtpForm.formState.errors.email.message}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-[#fabc20] px-4 py-3 font-semibold text-black transition-colors hover:bg-[#f5c508] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? 'Sending...' : 'Send Verification Code'}
+              </button>
+            </form>
+          )}
+
+          {/* Step 2: Verify OTP Form */}
+          {currentStep === 'verifyOtp' && (
+            <form
+              onSubmit={verifyOtpForm.handleSubmit(handleVerifyOtp)}
+              className="space-y-4"
+            >
+              <div className="mb-6 text-center">
+                <p className="mb-2 text-sm text-gray-600">
+                  We sent a OTP code to <strong>{formData.email}</strong>
+                </p>
+                <p className="text-xs text-gray-500">
+                  Please check your email and enter the code below
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-900">
+                  Verification Code
+                </label>
+                <input
+                  {...verifyOtpForm.register('otp')}
+                  type="text"
+                  placeholder="Enter OTP code"
+                  maxLength={6}
+                  className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 text-center text-lg font-semibold tracking-widest text-black transition-all outline-none placeholder:text-sm placeholder:text-gray-500 focus:bg-transparent"
+                />
+                {verifyOtpForm.formState.errors.otp && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {verifyOtpForm.formState.errors.otp.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Resend OTP */}
+              <div className="text-center">
+                {countdown > 0 ? (
+                  <div className="flex items-center justify-center text-sm text-gray-500">
+                    <Clock className="mr-1 h-4 w-4" />
+                    Resend code in {formatTime(countdown)}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={loading || isResendDisabled}
+                    className="text-sm font-medium text-[#fabc20] hover:text-[#f5c508] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Resend Code
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-[#fabc20] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#f5c508] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? 'Verifying...' : 'Verify Code'}
+              </button>
+            </form>
+          )}
+
+          {/* Step 3: Complete Signup Form */}
+          {currentStep === 'signup' && (
+            <form
+              onSubmit={signupForm.handleSubmit(handleSignup)}
+              className="space-y-4"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="w-full">
+                  <label className="mb-1 block text-sm font-medium text-slate-900">
+                    First Name
+                  </label>
+                  <input
+                    {...signupForm.register('firstName')}
+                    placeholder="First Name"
+                    className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 text-sm font-semibold text-black transition-all outline-none placeholder:text-gray-500 focus:bg-transparent"
+                  />
+                  {signupForm.formState.errors.firstName && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {signupForm.formState.errors.firstName.message}
+                    </p>
+                  )}
+                </div>
+                <div className="w-full">
+                  <label className="mb-1 block text-sm font-medium text-slate-900">
+                    Last Name
+                  </label>
+                  <input
+                    {...signupForm.register('lastName')}
+                    placeholder="Last Name"
+                    className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 text-sm font-semibold text-black transition-all outline-none placeholder:text-gray-500 focus:bg-transparent"
+                  />
+                  {signupForm.formState.errors.lastName && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {signupForm.formState.errors.lastName.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-900">
+                  Phone Number
+                </label>
+                <input
+                  {...signupForm.register('phoneNumber')}
+                  type="tel"
+                  placeholder="Phone Number"
+                  className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 text-sm font-semibold text-black transition-all outline-none placeholder:text-gray-500 focus:bg-transparent"
+                />
+                {signupForm.formState.errors.phoneNumber && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {signupForm.formState.errors.phoneNumber.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-900">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    {...signupForm.register('password')}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Password"
+                    className="w-full rounded border border-gray-300 bg-[#f0f1f2] px-4 py-2 pr-10 text-sm font-semibold text-black transition-all outline-none placeholder:text-gray-500 focus:bg-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {signupForm.formState.errors.password && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {signupForm.formState.errors.password.message}
+                  </p>
+                )}
+                {password && (
+                  <PasswordStrengthIndicator
+                    passwordStrength={passwordStrength}
+                    password={password}
+                  />
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !passwordStrength.is_strong}
+                className="w-full rounded-lg bg-[#fabc20] px-4 py-3 font-semibold text-black transition-colors hover:bg-[#f5c508] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </button>
+            </form>
+          )}
+
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="font-medium text-[#fabc20] hover:text-[#f5c508]"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  )
+    </AuthLayout>
+  );
 }
 
-export default Signup
+export default Signup;

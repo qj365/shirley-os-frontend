@@ -1,12 +1,11 @@
 'use client';
 
+import { Raleway } from 'next/font/google';
 import { usePathname } from 'next/navigation';
 import React from 'react';
-import Navbar from './navbar';
-import Footer from './footer';
-import { Raleway } from 'next/font/google';
 import { Toaster } from 'sonner';
-import { CartProvider } from '@/services/cart-service';
+import Footer from './footer';
+import Navbar from './navbar';
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -58,16 +57,13 @@ export default function ClientLayout({
         {/* Sonner Toaster component */}
         <Toaster position="top-right" closeButton richColors />
 
-        {/* Wrap everything in CartProvider */}
-        <CartProvider>
-          <div className={`transition-all duration-300`}>
-            {showNavbar() && <Navbar key={pathname} />}
-            {children}
-            {!isAuthPage() &&
-              !pathname?.includes('/shop/product_detail') &&
-              !pathname?.includes('/checkout') && <Footer />}
-          </div>
-        </CartProvider>
+        <div className={`transition-all duration-300`}>
+          {showNavbar() && <Navbar key={pathname} />}
+          {children}
+          {!isAuthPage() &&
+            !pathname?.includes('/shop/product_detail') &&
+            !pathname?.includes('/checkout') && <Footer />}
+        </div>
       </body>
     </html>
   );
