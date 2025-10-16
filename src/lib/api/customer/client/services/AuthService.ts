@@ -76,7 +76,7 @@ export class AuthService {
     otpType: OtpType,
     requestBody: VerifyOtpDto,
   }): CancelablePromise<{
-    token: any;
+    token: string;
   }> {
     return this.httpRequest.request({
       method: 'POST',
@@ -103,7 +103,7 @@ export class AuthService {
   }: {
     requestBody: ResetPasswordDto,
   }): CancelablePromise<{
-    email: any;
+    email: string;
   }> {
     return this.httpRequest.request({
       method: 'POST',

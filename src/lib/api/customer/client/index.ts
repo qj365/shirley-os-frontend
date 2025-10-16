@@ -56,6 +56,8 @@ export type { GetProductsByCategoryDto } from './models/GetProductsByCategoryDto
 export type { GetProductsByCategoryResponse } from './models/GetProductsByCategoryResponse';
 export type { GetProductsDto } from './models/GetProductsDto';
 export type { GetProductsResponse } from './models/GetProductsResponse';
+export type { GetRelatedProducts } from './models/GetRelatedProducts';
+export type { GetRelatedProductsResponse } from './models/GetRelatedProductsResponse';
 export { NotificationEvent } from './models/NotificationEvent';
 export type { NumberedPagingResponse_AdminGetCategoriesResponse_Array_ } from './models/NumberedPagingResponse_AdminGetCategoriesResponse_Array_';
 export type { NumberedPagingResponse_AdminGetOrdersResponse_Array_ } from './models/NumberedPagingResponse_AdminGetOrdersResponse_Array_';

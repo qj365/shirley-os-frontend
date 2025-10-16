@@ -8,6 +8,7 @@ import type { CursorPagingResponse_GetProductsByCategoryResponse_Array_ } from '
 import type { GetAllProductsResponse } from '../models/GetAllProductsResponse';
 import type { GetProductBySlugResponse } from '../models/GetProductBySlugResponse';
 import type { GetProductResponse } from '../models/GetProductResponse';
+import type { GetRelatedProductsResponse } from '../models/GetRelatedProductsResponse';
 import type { NumberedPagingResponse_GetProductsResponse_Array_ } from '../models/NumberedPagingResponse_GetProductsResponse_Array_';
 import type { ProductStatsResponse } from '../models/ProductStatsResponse';
 import type { TemplateVariantOptionsResponse } from '../models/TemplateVariantOptionsResponse';
@@ -76,6 +77,32 @@ export class ProductService {
       url: '/customer/products/{slug}',
       path: {
         'slug': slug,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetRelatedProductsResponse Ok
+   * @throws ApiError
+   */
+  public getRelatedProducts({
+    idProduct,
+    categoryId,
+  }: {
+    idProduct: number,
+    categoryId: number,
+  }): CancelablePromise<GetRelatedProductsResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/products/related',
+      query: {
+        'idProduct': idProduct,
+        'categoryId': categoryId,
       },
       errors: {
         400: `Bad request`,
