@@ -22,7 +22,9 @@ export default function ProductDetailMainInfo({
   const { name, productVariants, variantOptions, images, id } = product || {};
   const addItem = useCartStore(state => state.addItem);
 
-  const isOutOfStock = productVariants?.every(item => item.stock === 0);
+  const isOutOfStock = productVariants?.every(
+    item => item.stock < item.minOrder
+  );
 
   // --- state ---
   const [selectedOptions, setSelectedOptions] = React.useState<
@@ -34,20 +36,31 @@ export default function ProductDetailMainInfo({
     const selectedIds = Object.values(selectedOptions).filter(Boolean);
     if (selectedIds.length === 0) return productVariants;
 
-    return productVariants.filter(variant =>
-      selectedIds.every(id => variant?.variantOptionIds.includes(id as number))
+    return productVariants.filter(
+      variant =>
+        selectedIds.every(id =>
+          variant?.variantOptionIds.includes(id as number)
+        ) && variant.stock >= variant.minOrder
     );
   }, [selectedOptions, productVariants]);
 
   const displayPrice =
     matchedVariants.length === 1
       ? matchedVariants[0].price
-      : Math.min(...productVariants.map(v => v.price));
+      : Math.min(
+          ...productVariants
+            .filter(v => v.stock >= v.minOrder)
+            .map(v => v.price)
+        );
 
   const displayCompare =
     matchedVariants.length === 1
       ? matchedVariants[0].compareAtPrice
-      : Math.max(...productVariants.map(v => v.compareAtPrice));
+      : Math.max(
+          ...productVariants
+            .filter(v => v.stock >= v.minOrder)
+            .map(v => v.compareAtPrice)
+        );
 
   // --- disable logic ---
   const disabledOptions = React.useMemo(() => {
@@ -65,7 +78,7 @@ export default function ProductDetailMainInfo({
           v =>
             selectedIds.every(id =>
               v?.variantOptionIds.includes(id as number)
-            ) && v.stock > 0
+            ) && v.stock >= v.minOrder
         );
         if (!valid) result.add(opt.id);
       });
@@ -83,6 +96,16 @@ export default function ProductDetailMainInfo({
       }
     }
   }, [matchedVariants, images, onVariantImageChange]);
+
+  // --- update quantity when variant changes to respect minOrder ---
+  React.useEffect(() => {
+    if (matchedVariants.length === 1) {
+      const minOrder = matchedVariants[0].minOrder;
+      if (quantity < minOrder) {
+        setQuantity(minOrder);
+      }
+    }
+  }, [matchedVariants, quantity]);
 
   const toggleOption = (groupId: number, optionId: number) => {
     setSelectedOptions(prev => ({
@@ -103,11 +126,22 @@ export default function ProductDetailMainInfo({
         return;
       }
 
-      const matched = productVariants.find(v =>
-        selectedIds.every(id => v?.variantOptionIds.includes(id as number))
+      const matched = productVariants.find(
+        v =>
+          selectedIds.every(id => v?.variantOptionIds.includes(id as number)) &&
+          v.stock >= v.minOrder
       );
       if (!matched) {
-        toast.error('The selected combination is currently unavailable.');
+        toast.error(
+          'The selected combination is currently unavailable or does not meet minimum order requirements.'
+        );
+        return;
+      }
+
+      if (quantity < matched.minOrder) {
+        toast.error(
+          `Minimum order quantity is ${matched.minOrder} for this product.`
+        );
         return;
       }
 
@@ -139,6 +173,7 @@ export default function ProductDetailMainInfo({
         compareAtPrice: matched.compareAtPrice,
         image: matched.image,
         stock: matched.stock,
+        minOrder: matched.minOrder,
       });
 
       toast.success('Added to cart successfully!');
@@ -215,9 +250,16 @@ export default function ProductDetailMainInfo({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50"
-            onClick={() => setQuantity(q => Math.max(1, q - 1))}
-            disabled={quantity <= 1}
+            className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50 [&:disabled_span]:!cursor-not-allowed"
+            onClick={() => {
+              const minOrder =
+                matchedVariants.length === 1 ? matchedVariants[0].minOrder : 1;
+              setQuantity(q => Math.max(minOrder, q - 1));
+            }}
+            disabled={
+              quantity <=
+              (matchedVariants.length === 1 ? matchedVariants[0].minOrder : 1)
+            }
           >
             <Minus className="h-3 w-3" />
             <span className="sr-only">Decrease quantity</span>

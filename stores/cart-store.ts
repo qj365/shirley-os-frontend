@@ -13,6 +13,7 @@ export interface CartItem {
   compareAtPrice: number;
   image: string;
   stock: number;
+  minOrder: number;
 }
 
 interface CartStore {
@@ -33,6 +34,13 @@ export const useCartStore = create<CartStore>()(
 
       addItem: item => {
         const items = get().items;
+
+        // Check minimum order requirement
+        if (item.quantity < item.minOrder) {
+          throw new Error(
+            `Minimum order quantity is ${item.minOrder} for this product`
+          );
+        }
 
         // Check if item with same variant already exists
         const existingItem = items.find(
@@ -77,8 +85,18 @@ export const useCartStore = create<CartStore>()(
         }
 
         const item = get().items.find(i => i.id === id);
-        if (item && quantity > item.stock) {
-          throw new Error(`Only ${item.stock} item(s) available in stock`);
+        if (item) {
+          // Check minimum order requirement
+          if (quantity < item.minOrder) {
+            throw new Error(
+              `Minimum order quantity is ${item.minOrder} for this product`
+            );
+          }
+
+          // Check stock limit
+          if (quantity > item.stock) {
+            throw new Error(`Only ${item.stock} item(s) available in stock`);
+          }
         }
 
         set({

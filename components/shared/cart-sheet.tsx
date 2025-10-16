@@ -130,6 +130,11 @@ export function CartSheet({
                             </span>
                           )}
                         </div>
+                        {item.minOrder > 1 && (
+                          <p className="text-xs font-medium text-blue-600">
+                            Min. order: {item.minOrder} items
+                          </p>
+                        )}
                         <p className="mt-1 text-sm text-gray-600">
                           Subtotal: {formatDisplayCurrency(itemTotal)}
                         </p>
@@ -153,7 +158,7 @@ export function CartSheet({
                                 toast.error((e as Error).message);
                               }
                             }}
-                            disabled={item.quantity <= 1}
+                            disabled={item.quantity <= item.minOrder}
                           >
                             <Minus className="h-3 w-3" />
                             <span className="sr-only">Decrease quantity</span>
@@ -230,43 +235,53 @@ export function CartSheet({
               </div>
 
               {/* Minimum Order Notice */}
-              {totalQuantity <
-                Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) && (
-                <div className="rounded-lg border border-gray-200 bg-gray-200 px-3 py-5">
-                  <p className="text-center text-sm text-gray-800">
-                    Please select{' '}
-                    {Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) -
-                      totalQuantity}{' '}
-                    more item
-                    {Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3) -
-                      totalQuantity !==
-                    1
-                      ? 's'
-                      : ''}{' '}
-                    to proceed to checkout
-                  </p>
-                </div>
-              )}
+              {(() => {
+                const minOrderRequired = items.some(
+                  item => item.quantity < item.minOrder
+                );
+                const minOrderItems = items.filter(
+                  item => item.quantity < item.minOrder
+                );
+
+                if (minOrderRequired) {
+                  return (
+                    <div className="rounded-lg border border-gray-200 bg-gray-200 px-3 py-5">
+                      <p className="text-center text-sm text-gray-800">
+                        {minOrderItems
+                          .map(
+                            item =>
+                              `Please increase ${item.productName} to at least ${item.minOrder} items`
+                          )
+                          .join(', ')}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return null;
+              })()}
 
               {/* Checkout Button */}
               <Button
                 onClick={() => {
-                  const minQty = Number(
-                    process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3
+                  const minOrderRequired = items.some(
+                    item => item.quantity < item.minOrder
                   );
-                  if (totalQuantity >= minQty) {
-                    onOpenChange?.(false);
-                    router.push('/checkout');
-                  } else {
-                    toast.info(
-                      `Please select at least ${minQty} items before proceeding to checkout.`
+
+                  if (minOrderRequired) {
+                    const minOrderItems = items.filter(
+                      item => item.quantity < item.minOrder
                     );
+                    toast.info(
+                      `Please increase quantities to meet minimum order requirements: ${minOrderItems.map(item => `${item.productName} (min: ${item.minOrder})`).join(', ')}`
+                    );
+                    return;
                   }
+
+                  onOpenChange?.(false);
+                  router.push('/checkout');
                 }}
-                disabled={
-                  totalQuantity <
-                  Number(process.env.NEXT_PUBLIC_MINIMUM_QUANTITY || 3)
-                }
+                disabled={items.some(item => item.quantity < item.minOrder)}
                 className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Proceed to Checkout
