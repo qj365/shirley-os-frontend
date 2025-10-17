@@ -1,15 +1,14 @@
 'use client';
 
 import { GetProductBySlugResponse } from '@/src/lib/api/customer';
+import { useState } from 'react';
 import ProductDetailMainInfo from './ProductDetailMainInfo';
 import ProductImageSlider from './ProductImageSlider';
-import { useState } from 'react';
 
 type Props = {
   data: GetProductBySlugResponse;
 };
 export default function ProductDetail({ data }: Props) {
-  console.log(data, '______');
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
 
   const handleVariantImageChange = (imageIndex: number) => {
@@ -26,7 +25,7 @@ export default function ProductDetail({ data }: Props) {
         />
         <div className="flex flex-col gap-6 md:gap-8">
           <div className="hidden items-center justify-center lg:flex">
-            <h1 className="text-2xl font-bold md:text-[45px]">
+            <h1 className="text-2xl font-bold md:text-3xl lg:text-4xl">
               Product Details
             </h1>
           </div>

@@ -1,92 +1,85 @@
-import { mission, MissionData } from "@/constants/about/mission";
+import { mission, MissionData } from '@/constants/about/mission';
 
-import Image from "next/image";
-import React from "react";
-import About from "../landing/about";
+import Image from 'next/image';
+import React from 'react';
+import About from '../landing/about';
 
 function MissionSection() {
   return (
     <>
-    <div className="w-full relative px-6 mx-auto bg-[#f5f5f5] ">
-      <div className="absolute w-[62px] h-[86px] md:w-[170px] md:h-[205px] top-0 right-0">
-        <Image
-          src="/image/aboutImages/capsicum.png"
-          alt="capsicum"
-          width={170}
-          height={205}
-          className="object-center rounded-lg"
-          priority
-        />
-      </div>
-
-      <div className="flex flex-col lg:flex-row items-center gap-8   ">
-        {/* Image on the left */}
-
-        <div className="relative w-[278px] md:w-1/2 h-[250px] md:h-[400px] lg:h-[840px]  rounded-lg overflow-hidden">
+      <div className="relative mx-auto w-full bg-[#f5f5f5] px-6">
+        <div className="absolute top-0 right-0 h-[86px] w-[62px] md:h-[205px] md:w-[170px]">
           <Image
-            src="/image/aboutImages/montage.jpeg"
-            alt="Shirley's Jollof Paste"
-            layout="fill"
-            className="object-center rounded-lg"
+            src="/image/aboutImages/capsicum.png"
+            alt="capsicum"
+            width={170}
+            height={205}
+            className="rounded-lg object-center"
             priority
           />
         </div>
 
-        {/* mission text events */}
-        <div className="w-full lg:w-3/5 p-3 space-y-12 md:space-y-16 lg:space-y-18">
-          <h2 className="text-3xl md:text-4xl lg:text-[45px] font-bold">
-            Overview
-          </h2>
+        <div className="flex flex-col items-center gap-8 lg:flex-row">
+          {/* Image on the left */}
 
-          <div className="space-y-8 md:space-y-12">
-            {/* Mission point 1 */}
+          <div className="relative h-[250px] w-[278px] overflow-hidden rounded-lg md:h-[400px] md:w-1/2 lg:h-[840px]">
+            <Image
+              src="/image/aboutImages/montage.jpeg"
+              alt="Shirley's Jollof Paste"
+              layout="fill"
+              className="rounded-lg object-center"
+              priority
+            />
+          </div>
 
-            {mission.map((item: MissionData, index) => {
-              return (
-                <div key={index} className="flex items-start gap-5">
-                  <div className="relative w-24 h-24  rounded-full bg-black flex items-center justify-center  ">
-                    <div className="relative w-16 h-16 ">
-                      <Image
-                        src={item.image}
-                        alt="image"
-                        fill
-                        className="object-contain"
-                      />
+          {/* mission text events */}
+          <div className="w-full space-y-12 p-3 md:space-y-16 lg:w-3/5 lg:space-y-18">
+            <h2 className="text-3xl font-bold md:text-4xl lg:text-[45px]">
+              Overview
+            </h2>
+
+            <div className="space-y-8 md:space-y-12">
+              {/* Mission point 1 */}
+
+              {mission.map((item: MissionData, index) => {
+                return (
+                  <div key={index} className="flex items-start gap-5">
+                    <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-black">
+                      <div className="relative h-16 w-16">
+                        <Image
+                          src={item.image}
+                          alt="image"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
                     </div>
+                    <p className="text-xl leading-tight md:text-2xl lg:text-[30px]">
+                      {item.text}
+                    </p>
                   </div>
-                  <p className="text-xl md:text-2xl lg:text-[30px] leading-tight">
-                    {item.text}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-            </div>
-
-      <div
-        className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[653px] 
-                    overflow-hidden 
-                    mt-8 sm:mt-12 md:mt-16 lg:mt-[99px] 
-                    
-                    relative"
-      >
-        <Image
-          src="/image/aboutImages/1.jpg"
-          alt="Hero image"
-          fill
-          sizes="(max-width: 640px) 100vw, 
+        <div className="relative mt-8 h-[300px] w-full overflow-hidden sm:mt-12 sm:h-[400px] md:mt-16 md:h-[500px] lg:mt-[99px] lg:h-[653px]">
+          <Image
+            src="/image/aboutImages/1.jpg"
+            alt="Hero image"
+            fill
+            sizes="(max-width: 640px) 100vw, 
                (max-width: 768px) 100vw, 
                (max-width: 1024px) 100vw, 
                100vw"
-          priority
-          className="object-cover"
-        />
+            priority
+            className="object-cover"
+          />
+        </div>
       </div>
-    </div>
-      <About img="/image/aboutImages/girl.png" />
-      </>
+      <About img="/image/aboutImages/aboutUs.png" />
+    </>
   );
 }
 

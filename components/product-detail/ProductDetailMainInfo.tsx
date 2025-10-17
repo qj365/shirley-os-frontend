@@ -161,6 +161,7 @@ export default function ProductDetailMainInfo({
         .filter(Boolean)
         .join(', ');
 
+      console.log(matched, '{{{{}}}}}}');
       // Add to cart
       addItem({
         productId: id,
@@ -193,13 +194,15 @@ export default function ProductDetailMainInfo({
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <div className="flex flex-col gap-3 md:gap-4">
-        <h2 className="text-xl font-bold capitalize md:text-[40px]">{name}</h2>
+        <h2 className="text-xl font-bold capitalize md:text-xl lg:text-2xl">
+          {name}
+        </h2>
         <div className="flex items-center gap-2">
-          <span className="text-xl font-semibold md:text-[40px]">
+          <span className="text-xl font-semibold md:text-xl lg:text-2xl">
             {' '}
             {formatDisplayCurrency(displayPrice)}
           </span>
-          <span className="text-lg text-gray-500 line-through md:text-[35px]">
+          <span className="text-lg text-gray-500 line-through md:text-xl">
             {formatDisplayCurrency(displayCompare)}
           </span>
         </div>
@@ -213,7 +216,7 @@ export default function ProductDetailMainInfo({
       {/* VARIANT OPTIONS */}
       {variantOptions.map(group => (
         <div key={group.id} className="space-y-4">
-          <div className="text-base font-semibold md:text-xl">{group.name}</div>
+          <div className="text-base font-semibold md:text-lg">{group.name}</div>
           <div className="flex flex-wrap gap-2">
             {group.options.map(opt => {
               const selected = selectedOptions[group.id] === opt.id;
@@ -231,7 +234,7 @@ export default function ProductDetailMainInfo({
                       : !disabled
                         ? 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-[#F3C03F] hover:text-black'
                         : '',
-                    'block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-100 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg',
+                    'block rounded-full border-[2px] border-transparent px-6 py-2 text-sm font-semibold whitespace-nowrap !shadow-none transition-all duration-100 hover:cursor-pointer sm:px-5 sm:py-2 lg:px-6 lg:py-2 lg:text-base',
                     disabled && '!cursor-not-allowed opacity-30'
                   )}
                 >
@@ -280,7 +283,7 @@ export default function ProductDetailMainInfo({
           </Button>
         </div>
         <Button
-          className="btn-gradient--yellow flex-1 !text-lg !font-semibold hover:opacity-80"
+          className="btn-gradient--yellow size-10 flex-1 !text-lg !font-semibold hover:opacity-80"
           onClick={handleAddToCart}
           disabled={isOutOfStock}
         >

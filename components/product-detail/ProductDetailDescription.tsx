@@ -1,46 +1,7 @@
+'use client';
+import { cn } from '@/lib/utils';
 import React from 'react';
 import Modal from '../shared/modal';
-import { cn } from '@/lib/utils';
-
-// Utility function to strip media elements from HTML
-const stripMediaElements = (html: string): string => {
-  if (!html) return '';
-
-  // Create a temporary div to parse HTML
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-
-  // Remove all media elements
-  const mediaSelectors = [
-    'img',
-    'video',
-    'audio',
-    'iframe',
-    'embed',
-    'object',
-    'picture',
-    'source',
-    'track',
-    '[src*=".jpg"]',
-    '[src*=".jpeg"]',
-    '[src*=".png"]',
-    '[src*=".gif"]',
-    '[src*=".webp"]',
-    '[src*=".svg"]',
-    '[src*=".mp4"]',
-    '[src*=".webm"]',
-    '[src*=".ogg"]',
-    '[src*=".mp3"]',
-    '[src*=".wav"]',
-  ];
-
-  mediaSelectors.forEach(selector => {
-    const elements = tempDiv.querySelectorAll(selector);
-    elements.forEach(element => element.remove());
-  });
-
-  return tempDiv.innerHTML;
-};
 
 export default function ProductDetailDescription({
   description,
@@ -52,17 +13,20 @@ export default function ProductDetailDescription({
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] =
     React.useState(false);
 
-  // Strip media elements for the main display
-  const strippedDescription = React.useMemo(() => {
-    return stripMediaElements(description);
-  }, [description]);
-
   React.useEffect(() => {
-    if (descriptionRef.current) {
-      const element = descriptionRef.current;
-      setShowReadMore(element.scrollHeight > element.clientHeight);
-    }
-  }, [strippedDescription]);
+    const checkHeight = () => {
+      if (descriptionRef.current) {
+        const element = descriptionRef.current;
+        const height = element.scrollHeight;
+
+        setShowReadMore(height > 100);
+      }
+    };
+
+    const rafId = requestAnimationFrame(checkHeight);
+
+    return () => cancelAnimationFrame(rafId);
+  }, [description]);
 
   return (
     <>
@@ -70,11 +34,21 @@ export default function ProductDetailDescription({
         <p
           ref={descriptionRef}
           className={cn(
-            showReadMore ? 'line-clamp-4' : '',
+            showReadMore ? 'line-clamp-3' : '',
             'text-sm leading-relaxed md:text-base'
           )}
           dangerouslySetInnerHTML={{
-            __html: strippedDescription || '',
+            __html:
+              description
+                ?.replace(/<img[^>]*>/gi, '')
+                .replace(/<video[^>]*>.*?<\/video>/gi, '')
+                .replace(/<audio[^>]*>.*?<\/audio>/gi, '')
+                .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+                .replace(/<embed[^>]*>/gi, '')
+                .replace(/<object[^>]*>.*?<\/object>/gi, '')
+                .replace(/<picture[^>]*>.*?<\/picture>/gi, '')
+                .replace(/<source[^>]*>/gi, '')
+                .replace(/<track[^>]*>/gi, '') || '',
           }}
         />
         {showReadMore && (

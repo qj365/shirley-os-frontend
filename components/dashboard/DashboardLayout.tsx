@@ -10,11 +10,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/stores/auth-store';
-import { Bell, FileText, LayoutDashboard, LogOut, Menu } from 'lucide-react';
+import {
+  Bell,
+  FileText,
+  KeyRound,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useState } from 'react';
+import ChangePasswordModal from './ChangePasswordModal';
 
 // Sidebar menu items
 export const dashboardMenuItems = [
@@ -62,6 +70,8 @@ export default function DashboardLayout({
     : 'U';
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
 
   const handleLogout = async () => {
     try {
@@ -86,11 +96,18 @@ export default function DashboardLayout({
           </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-white">
+      <DropdownMenuContent align="end" className="w-56 border-none bg-white">
         <DropdownMenuLabel>
           {appUser ? `${appUser.firstName} ${appUser.lastName}` : 'User'}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => setIsChangePasswordModalOpen(true)}
+          className="cursor-pointer"
+        >
+          <KeyRound className="mr-2 h-4 w-4" />
+          Change Password
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           Logout
@@ -224,6 +241,12 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
     </div>
   );
 }

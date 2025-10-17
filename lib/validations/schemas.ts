@@ -49,7 +49,47 @@ export const signupSchema = z.object({
     .max(20, 'Phone number must be less than 20 characters'),
 });
 
+// Password reset validation schema
+export const passwordResetSchema = z
+  .object({
+    password: z
+      .string()
+      .nonempty('This field is required')
+      .min(8, 'Password must be at least 8 characters')
+      .max(20, 'Password must be less than 20 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]/,
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      ),
+    confirmPassword: z.string().nonempty('This field is required'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+// Change password validation schema
+export const changePasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .nonempty('This field is required')
+      .min(8, 'Password must be at least 8 characters')
+      .max(20, 'Password must be less than 20 characters')
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]/,
+        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      ),
+    confirmPassword: z.string().nonempty('This field is required'),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
 // Type exports
 export type SendOtpFormData = z.infer<typeof sendOtpSchema>;
 export type VerifyOtpFormData = z.infer<typeof verifyOtpSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
+export type PasswordResetFormData = z.infer<typeof passwordResetSchema>;
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;

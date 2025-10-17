@@ -7,9 +7,9 @@ interface PasswordStrengthIndicatorProps {
   password: string;
 }
 
-const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ 
-  passwordStrength, 
-  password 
+const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({
+  passwordStrength,
+  password,
 }) => {
   if (!password) return null;
 
@@ -50,40 +50,48 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({
   const criteria = [
     {
       text: 'At least 8 characters',
-      met: password.length >= 8
+      met: password.length >= 8,
+    },
+    {
+      text: 'At most 20 characters',
+      met: password.length <= 20,
     },
     {
       text: 'Include lowercase letters',
-      met: /[a-z]/.test(password)
+      met: /[a-z]/.test(password),
     },
     {
       text: 'Include uppercase letters',
-      met: /[A-Z]/.test(password)
+      met: /[A-Z]/.test(password),
     },
     {
       text: 'Include numbers',
-      met: /\d/.test(password)
+      met: /\d/.test(password),
     },
     {
       text: 'Include special characters',
-      met: /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    }
+      met: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    },
   ];
 
   return (
     <div className="mt-2 space-y-2">
       {/* Strength indicator */}
       <div className="space-y-1">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <span className="text-xs text-gray-600">Password strength:</span>
-          <span className={`text-xs font-medium ${getStrengthColor(passwordStrength.strength)}`}>
+          <span
+            className={`text-xs font-medium ${getStrengthColor(passwordStrength.strength)}`}
+          >
             {passwordStrength.strength}
           </span>
         </div>
-        
+
         {/* Progress bar */}
-        <div className={`w-full h-2 rounded-full ${getProgressBarBgColor(passwordStrength.score)}`}>
-          <div 
+        <div
+          className={`h-2 w-full rounded-full ${getProgressBarBgColor(passwordStrength.score)}`}
+        >
+          <div
             className={`h-full rounded-full transition-all duration-300 ${getProgressBarColor(passwordStrength.score)}`}
             style={{ width: `${passwordStrength.score}%` }}
           />
@@ -97,11 +105,13 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({
           {criteria.map((criterion, index) => (
             <div key={index} className="flex items-center space-x-2">
               {criterion.met ? (
-                <Check className="w-3 h-3 text-green-500" />
+                <Check className="h-3 w-3 text-green-500" />
               ) : (
-                <X className="w-3 h-3 text-gray-400" />
+                <X className="h-3 w-3 text-gray-400" />
               )}
-              <span className={`text-xs ${criterion.met ? 'text-green-600' : 'text-gray-500'}`}>
+              <span
+                className={`text-xs ${criterion.met ? 'text-green-600' : 'text-gray-500'}`}
+              >
                 {criterion.text}
               </span>
             </div>
