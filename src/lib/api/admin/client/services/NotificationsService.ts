@@ -88,6 +88,30 @@ export class NotificationsService {
    * @returns void
    * @throws ApiError
    */
+  public adminNotificationMarkAsRead({
+    id,
+  }: {
+    id: number,
+  }): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'PUT',
+      url: '/admin/notifications/mark-as-read/{id}',
+      path: {
+        'id': id,
+      },
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns void
+   * @throws ApiError
+   */
   public markAllAsRead(): CancelablePromise<void> {
     return this.httpRequest.request({
       method: 'PUT',
