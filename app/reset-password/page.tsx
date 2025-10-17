@@ -2,6 +2,7 @@
 
 import PasswordReset from '@/components/auth/reset';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
@@ -12,5 +13,15 @@ function ResetPasswordContent() {
 }
 
 export default function ResetPasswordPage() {
-  return <ResetPasswordContent />;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
+  );
 }
