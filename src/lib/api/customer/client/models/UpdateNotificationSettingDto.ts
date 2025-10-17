@@ -5,5 +5,6 @@
 export type UpdateNotificationSettingDto = {
   lowStockNotification: boolean;
   lowStockValue: number;
+  newOrderNotification: boolean;
 };
 

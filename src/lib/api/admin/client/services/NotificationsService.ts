@@ -84,4 +84,21 @@ export class NotificationsService {
       },
     });
   }
+  /**
+   * @returns void
+   * @throws ApiError
+   */
+  public markAllAsRead(): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'PUT',
+      url: '/admin/notifications/mark-all-as-read',
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
 }
