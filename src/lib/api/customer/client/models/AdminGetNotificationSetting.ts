@@ -6,5 +6,6 @@ export type AdminGetNotificationSetting = {
   id: number;
   lowStockNotification: boolean;
   lowStockValue: number;
+  newOrderNotification: boolean;
 };
 

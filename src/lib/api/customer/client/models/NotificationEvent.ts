@@ -2,6 +2,5 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export enum NotificationEvent {
-  ADMIN_LOW_STOCK = 'ADMIN_LOW_STOCK',
-}
+import type { _36_Enums_NotificationEvent } from './_36_Enums_NotificationEvent';
+export type NotificationEvent = _36_Enums_NotificationEvent;

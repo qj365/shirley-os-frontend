@@ -62,6 +62,7 @@ export class NotificationsService {
   }: {
     requestBody: UpdateNotificationSettingDto,
   }): CancelablePromise<{
+    newOrderNotification: boolean;
     lowStockValue: number;
     lowStockNotification: boolean;
     userId: number;

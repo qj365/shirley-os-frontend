@@ -11,6 +11,7 @@ export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { _36_Enums_FulfillmentStatus } from './models/_36_Enums_FulfillmentStatus';
+export { _36_Enums_NotificationEvent } from './models/_36_Enums_NotificationEvent';
 export { _36_Enums_ProductStatus } from './models/_36_Enums_ProductStatus';
 export { _36_Enums_UserRole } from './models/_36_Enums_UserRole';
 export type { AdminCancelOrderDto } from './models/AdminCancelOrderDto';
@@ -58,7 +59,7 @@ export type { GetProductsDto } from './models/GetProductsDto';
 export type { GetProductsResponse } from './models/GetProductsResponse';
 export type { GetRelatedProducts } from './models/GetRelatedProducts';
 export type { GetRelatedProductsResponse } from './models/GetRelatedProductsResponse';
-export { NotificationEvent } from './models/NotificationEvent';
+export type { NotificationEvent } from './models/NotificationEvent';
 export type { NumberedPagingResponse_AdminGetCategoriesResponse_Array_ } from './models/NumberedPagingResponse_AdminGetCategoriesResponse_Array_';
 export type { NumberedPagingResponse_AdminGetOrdersResponse_Array_ } from './models/NumberedPagingResponse_AdminGetOrdersResponse_Array_';
 export type { NumberedPagingResponse_GetProductsResponse_Array_ } from './models/NumberedPagingResponse_GetProductsResponse_Array_';
