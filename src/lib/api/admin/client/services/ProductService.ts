@@ -64,29 +64,6 @@ export class ProductService {
     });
   }
   /**
-   * @returns GetProductBySlugResponse Ok
-   * @throws ApiError
-   */
-  public getProductBySlug({
-    slug,
-  }: {
-    slug: string,
-  }): CancelablePromise<GetProductBySlugResponse> {
-    return this.httpRequest.request({
-      method: 'GET',
-      url: '/customer/products/{slug}',
-      path: {
-        'slug': slug,
-      },
-      errors: {
-        400: `Bad request`,
-        403: `Forbidden`,
-        404: `Not found`,
-        500: `Internal server error`,
-      },
-    });
-  }
-  /**
    * @returns GetRelatedProductsResponse Ok
    * @throws ApiError
    */
@@ -103,6 +80,29 @@ export class ProductService {
       query: {
         'idProduct': idProduct,
         'categoryId': categoryId,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetProductBySlugResponse Ok
+   * @throws ApiError
+   */
+  public getProductBySlug({
+    slug,
+  }: {
+    slug: string,
+  }): CancelablePromise<GetProductBySlugResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/products/{slug}',
+      path: {
+        'slug': slug,
       },
       errors: {
         400: `Bad request`,
