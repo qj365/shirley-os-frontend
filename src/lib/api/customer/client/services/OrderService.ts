@@ -11,8 +11,6 @@ import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class OrderService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
   /**
-   * Create checkout session
-   * Create a Stripe checkout session for purchasing products
    * @returns CreateCheckoutSessionResponse Ok
    * @throws ApiError
    */
@@ -36,8 +34,6 @@ export class OrderService {
     });
   }
   /**
-   * Get user orders
-   * Get all orders for authenticated user
    * @returns CursorPagingResponse_GetOrdersResponse_Array_ Ok
    * @throws ApiError
    */
@@ -65,21 +61,19 @@ export class OrderService {
     });
   }
   /**
-   * Get order by ID
-   * Get order details by ID
    * @returns GetOrderResponse Ok
    * @throws ApiError
    */
   public getOrderById({
-    orderId,
+    id,
   }: {
-    orderId: number,
+    id: number,
   }): CancelablePromise<GetOrderResponse> {
     return this.httpRequest.request({
       method: 'GET',
-      url: '/customer/orders/{orderId}',
+      url: '/customer/orders/{id}',
       path: {
-        'orderId': orderId,
+        'id': id,
       },
       errors: {
         400: `Bad request`,
