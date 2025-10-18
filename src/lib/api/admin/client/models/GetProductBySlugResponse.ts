@@ -15,6 +15,7 @@ export type GetProductBySlugResponse = {
     stock: number;
     compareAtPrice: number;
     price: number;
+    id: number;
   }>;
   variantOptions: PrismaJson_VariantOptions;
   category: {
