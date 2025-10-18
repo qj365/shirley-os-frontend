@@ -16,6 +16,29 @@ export class OrderService {
    * @returns GetOrderByIdResponse Ok
    * @throws ApiError
    */
+  public getOrderBySessionId({
+    sessionId,
+  }: {
+    sessionId: string,
+  }): CancelablePromise<GetOrderByIdResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/orders/session/{sessionId}',
+      path: {
+        'sessionId': sessionId,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetOrderByIdResponse Ok
+   * @throws ApiError
+   */
   public getOrderById({
     id,
   }: {
