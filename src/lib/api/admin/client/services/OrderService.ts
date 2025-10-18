@@ -6,21 +6,21 @@ import type { _36_Enums_FulfillmentStatus } from '../models/_36_Enums_Fulfillmen
 import type { AdminCancelOrderDto } from '../models/AdminCancelOrderDto';
 import type { AdminFulfillOrderDto } from '../models/AdminFulfillOrderDto';
 import type { AdminGetOrderByIdResponse } from '../models/AdminGetOrderByIdResponse';
-import type { GetOrderResponse } from '../models/GetOrderResponse';
+import type { GetOrderByIdResponse } from '../models/GetOrderByIdResponse';
 import type { NumberedPagingResponse_AdminGetOrdersResponse_Array_ } from '../models/NumberedPagingResponse_AdminGetOrdersResponse_Array_';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class OrderService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
   /**
-   * @returns GetOrderResponse Ok
+   * @returns GetOrderByIdResponse Ok
    * @throws ApiError
    */
   public getOrderById({
     id,
   }: {
     id: number,
-  }): CancelablePromise<GetOrderResponse> {
+  }): CancelablePromise<GetOrderByIdResponse> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/customer/orders/{id}',

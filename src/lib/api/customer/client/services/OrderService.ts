@@ -2,10 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { _36_Enums_FulfillmentStatus } from '../models/_36_Enums_FulfillmentStatus';
 import type { CreateCheckoutSessionDto } from '../models/CreateCheckoutSessionDto';
 import type { CreateCheckoutSessionResponse } from '../models/CreateCheckoutSessionResponse';
-import type { CursorPagingResponse_GetOrdersResponse_Array_ } from '../models/CursorPagingResponse_GetOrdersResponse_Array_';
-import type { GetOrderResponse } from '../models/GetOrderResponse';
+import type { GetOrderByIdResponse } from '../models/GetOrderByIdResponse';
+import type { NumberedPagingResponse_GetOrdersResponse_Array_ } from '../models/NumberedPagingResponse_GetOrdersResponse_Array_';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class OrderService {
@@ -34,22 +35,34 @@ export class OrderService {
     });
   }
   /**
-   * @returns CursorPagingResponse_GetOrdersResponse_Array_ Ok
+   * @returns NumberedPagingResponse_GetOrdersResponse_Array_ Ok
    * @throws ApiError
    */
   public getOrders({
-    cursor,
+    page = 1,
     pageSize = 10,
+    orderCode,
+    startDate,
+    endDate,
+    fulfillmentStatus,
   }: {
-    cursor?: string,
+    page?: number,
     pageSize?: number,
-  }): CancelablePromise<CursorPagingResponse_GetOrdersResponse_Array_> {
+    orderCode?: string,
+    startDate?: string,
+    endDate?: string,
+    fulfillmentStatus?: _36_Enums_FulfillmentStatus,
+  }): CancelablePromise<NumberedPagingResponse_GetOrdersResponse_Array_> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/customer/orders',
       query: {
-        'cursor': cursor,
+        'page': page,
         'pageSize': pageSize,
+        'orderCode': orderCode,
+        'startDate': startDate,
+        'endDate': endDate,
+        'fulfillmentStatus': fulfillmentStatus,
       },
       errors: {
         400: `Bad request`,
@@ -61,14 +74,14 @@ export class OrderService {
     });
   }
   /**
-   * @returns GetOrderResponse Ok
+   * @returns GetOrderByIdResponse Ok
    * @throws ApiError
    */
   public getOrderById({
     id,
   }: {
     id: number,
-  }): CancelablePromise<GetOrderResponse> {
+  }): CancelablePromise<GetOrderByIdResponse> {
     return this.httpRequest.request({
       method: 'GET',
       url: '/customer/orders/{id}',

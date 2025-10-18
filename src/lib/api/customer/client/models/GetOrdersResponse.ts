@@ -3,12 +3,10 @@
 /* tslint:disable */
 /* eslint-disable */
 export type GetOrdersResponse = {
-  id: number;
-  total: number;
+  orderAt: string | null;
   fulfillmentStatus: string | null;
-  paymentStatus: string | null;
-  orderAt?: string;
-  createdAt: string;
-  itemCount: number;
+  total: number;
+  orderCode: string | null;
+  id: number;
 };
 
