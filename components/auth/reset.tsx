@@ -51,14 +51,14 @@ export default function PasswordReset({
 
   // Form instances
   const sendOtpForm = useForm<SendOtpFormData>({
-    resolver: zodResolver(sendOtpSchema),
+    resolver: zodResolver(sendOtpSchema) as any,
     defaultValues: {
       email: initialEmail,
     },
   });
 
   const verifyOtpForm = useForm<VerifyOtpFormData>({
-    resolver: zodResolver(verifyOtpSchema),
+    resolver: zodResolver(verifyOtpSchema) as any,
     defaultValues: {
       email: initialEmail,
       otp: '',
@@ -66,7 +66,7 @@ export default function PasswordReset({
   });
 
   const passwordResetForm = useForm<PasswordResetFormData>({
-    resolver: zodResolver(passwordResetSchema),
+    resolver: zodResolver(passwordResetSchema) as any,
     defaultValues: {
       password: '',
       confirmPassword: '',

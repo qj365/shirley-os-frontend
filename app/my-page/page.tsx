@@ -1,24 +1,7 @@
 'use client';
 
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import OrderListItem from '@/components/dashboard/OrderListItem';
 import Image from 'next/image';
-
-// Mock data cho orders
-const mockOrders = [
-  {
-    id: '5951750',
-    store: 'Maniam Super Store',
-    amount: 485.55,
-    status: 'Process',
-  },
-  {
-    id: '5951750',
-    store: 'Maniam Super Store',
-    amount: 485.55,
-    status: 'Process',
-  },
-];
 
 export default function MyPage() {
   // Hero Banner Component
@@ -63,16 +46,16 @@ export default function MyPage() {
   );
 
   // Orders Section
-  const OrdersSection = () => (
-    <div className="space-y-4">
-      <h2 className="mb-4 text-xl font-bold text-black md:text-2xl">
-        In progress Orders
-      </h2>
-      {mockOrders.map((order, index) => (
-        <OrderListItem key={index} item={order} />
-      ))}
-    </div>
-  );
+  // const OrdersSection = () => (
+  //   <div className="space-y-4">
+  //     <h2 className="mb-4 text-xl font-bold text-black md:text-2xl">
+  //       In progress Orders
+  //     </h2>
+  //     {mockOrders.map((order, index) => (
+  //       <OrderListItem key={index} item={order} />
+  //     ))}
+  //   </div>
+  // );
 
   // Subscription Section
   const SubscriptionSection = () => (
@@ -94,7 +77,7 @@ export default function MyPage() {
         <HeroBanner showRenewalDate={true} />
 
         {/* In Progress Orders Section */}
-        <OrdersSection />
+        {/* <OrdersSection /> */}
 
         {/* Subscription Section */}
         <SubscriptionSection />

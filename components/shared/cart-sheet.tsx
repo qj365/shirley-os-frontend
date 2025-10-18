@@ -2,8 +2,7 @@
 
 import type React from 'react';
 
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
-
+import CartItem from '@/components/shared/cart-item';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -14,11 +13,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 import { useCartStore } from '@/stores/cart-store';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
+import { ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function CartSheet({
   children,
@@ -86,123 +85,16 @@ export function CartSheet({
             </div>
           ) : (
             <div className="space-y-3">
-              {items.map(item => {
-                const itemTotal = item.price * item.quantity;
-
-                return (
-                  <div
-                    key={item.id}
-                    className="rounded-lg border border-gray-200 p-4"
-                  >
-                    {/* Product Row: Image + Details + Price */}
-                    <div className="mb-4 flex items-start gap-4">
-                      {/* Product Image */}
-                      <div className="relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#ffedc3]">
-                        <div className="relative h-14 w-14">
-                          <Image
-                            src={item.image || ''}
-                            alt={item.productName || 'Product'}
-                            fill
-                            className="object-contain"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="min-w-0 flex-1">
-                        <h3 className="mb-1 text-base leading-tight font-semibold text-gray-900">
-                          {item.productName}
-                        </h3>
-                        {item.variantTitle && (
-                          <p className="mb-2 text-sm text-gray-600">
-                            {item.variantTitle}
-                          </p>
-                        )}
-
-                        {/* Price Information */}
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-base font-semibold text-gray-900">
-                            {formatDisplayCurrency(item.price)}
-                          </span>
-                          {item.compareAtPrice > item.price && (
-                            <span className="text-sm text-gray-500 line-through">
-                              {formatDisplayCurrency(item.compareAtPrice)}
-                            </span>
-                          )}
-                        </div>
-                        {item.minOrder > 1 && (
-                          <p className="text-xs font-medium text-blue-600">
-                            Min. order: {item.minOrder} items
-                          </p>
-                        )}
-                        <p className="mt-1 text-sm text-gray-600">
-                          Subtotal: {formatDisplayCurrency(itemTotal)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Actions Row: Quantity Controls + Remove */}
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-2">
-                        <span className="mr-2 text-sm text-gray-600">Qty:</span>
-                        <div className="flex items-center rounded-md border border-gray-200">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50"
-                            onClick={() => {
-                              try {
-                                updateQuantity(item.id, item.quantity - 1);
-                              } catch (e) {
-                                toast.error((e as Error).message);
-                              }
-                            }}
-                            disabled={item.quantity <= item.minOrder}
-                          >
-                            <Minus className="h-3 w-3" />
-                            <span className="sr-only">Decrease quantity</span>
-                          </Button>
-
-                          <span className="min-w-[2rem] px-3 py-1 text-center text-sm font-medium text-gray-900">
-                            {item.quantity}
-                          </span>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 rounded-none border-l border-gray-200 p-0 hover:bg-gray-50"
-                            onClick={() => {
-                              try {
-                                updateQuantity(item.id, item.quantity + 1);
-                              } catch (e) {
-                                toast.error((e as Error).message);
-                              }
-                            }}
-                          >
-                            <Plus className="h-3 w-3" />
-                            <span className="sr-only">Increase quantity</span>
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Remove Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                        onClick={() => {
-                          removeItem(item.id);
-                          toast.success('Item removed from cart');
-                        }}
-                      >
-                        <Trash2 className="mr-1 h-4 w-4" />
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+              {items.map(item => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  onUpdateQuantity={updateQuantity}
+                  onRemoveItem={removeItem}
+                  showQuantityControls={true}
+                  showRemoveButton={true}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -279,12 +171,12 @@ export function CartSheet({
                   }
 
                   onOpenChange?.(false);
-                  router.push('/checkout');
+                  router.push('/order');
                 }}
                 disabled={items.some(item => item.quantity < item.minOrder)}
                 className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Proceed to Checkout
+                Proceed to Order
               </Button>
             </div>
           </SheetFooter>

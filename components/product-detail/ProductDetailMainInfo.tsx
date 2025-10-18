@@ -166,7 +166,7 @@ export default function ProductDetailMainInfo({
       addItem({
         productId: id,
         productName: name,
-        variantId: matched.variantOptionIds[0] || 0, // Use first option ID as variant ID
+        variantId: matched.id, // Use the variant ID from API response
         variantOptionIds: matched.variantOptionIds,
         variantTitle,
         quantity,

@@ -22,6 +22,7 @@ export default function ClientLayout({
     const showPaths = [
       '/',
       '/checkout',
+      '/order',
       '/shop',
       '/wholesale',
       '/about',
@@ -62,7 +63,8 @@ export default function ClientLayout({
           {children}
           {!isAuthPage() &&
             !pathname?.includes('/shop/product_detail') &&
-            !pathname?.includes('/checkout') && <Footer />}
+            !pathname?.includes('/checkout') &&
+            !pathname?.includes('/order') && <Footer />}
         </div>
       </body>
     </html>

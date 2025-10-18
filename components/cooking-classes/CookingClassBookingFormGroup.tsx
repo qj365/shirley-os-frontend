@@ -12,6 +12,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { Resolver } from 'react-hook-form';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,17 +20,17 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 
 const registerClassSchema = z.object({
-  numberOfPeople: z.string().nonempty('This field is required'),
-  fullName: z.string().trim().nonempty('This field is required'),
-  email: z.email('Email invalid').nonempty('This field is required'),
-  phone: z.string().trim().nonempty('This field is required'),
-  bookingFor: z.string().nonempty('This field is required'),
-  specialRequest: z.string().nonempty('This field is required'),
-  holderName: z.string().trim().nonempty('This field is required'),
+  numberOfPeople: z.string().min(1, 'This field is required'),
+  fullName: z.string().trim().min(1, 'This field is required'),
+  email: z.string().min(1, 'This field is required').email('Email invalid'),
+  phone: z.string().trim().min(1, 'This field is required'),
+  bookingFor: z.string().min(1, 'This field is required'),
+  specialRequest: z.string().min(1, 'This field is required'),
+  holderName: z.string().trim().min(1, 'This field is required'),
   cardNumber: z.string().regex(/^\d{16}$/, 'Card Number invalid'),
   expire: z.string().regex(/^\d{2}\/\d{2}$/, 'Expire date invalid'),
   cvv: z.string().regex(/^\d{3,4}$/, 'CVV invalid'),
-  region: z.string().nonempty('This field is required'),
+  region: z.string().min(1, 'This field is required'),
   voucherCode: z.string(),
 });
 
@@ -39,7 +40,9 @@ export default function CookingClassBookingFormGroup() {
   const [step, setStep] = useState(1);
 
   const form = useForm<RegisterClassFormValues>({
-    resolver: zodResolver(registerClassSchema),
+    resolver: zodResolver(
+      registerClassSchema
+    ) as unknown as Resolver<RegisterClassFormValues>,
   });
 
   const renderSection = useMemo(() => {

@@ -3,7 +3,7 @@ import ProductDetailEmptyData from '@/components/product-detail/ProductDetailEmp
 import ProductsCarousel from '@/components/shop/ProductsCarousel';
 import { api } from '@/src/lib/api/customer';
 
-async function fetchProductsByCategory(slug: string) {
+async function fetchProductsBySlug(slug: string) {
   try {
     return await api.product.getProductBySlug({
       slug,
@@ -30,7 +30,7 @@ export default async function ProductDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const productDetail = await fetchProductsByCategory(slug);
+  const productDetail = await fetchProductsBySlug(slug);
 
   if (!productDetail) {
     return <ProductDetailEmptyData />;
@@ -41,7 +41,6 @@ export default async function ProductDetail({
     productDetail.id,
     productDetail.category.id
   );
-  console.log(relatedProducts);
 
   return (
     <div className="min-h-screen pt-35 md:pt-40">

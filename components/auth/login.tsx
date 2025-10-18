@@ -30,7 +30,18 @@ function Login() {
         const response = await api.customer.customerGetMe();
 
         if (response?.role === _36_Enums_UserRole.CUSTOMER) {
-          router.push('/');
+          // Check if there's a redirect URL from checkout
+          const redirectPath =
+            typeof window !== 'undefined'
+              ? sessionStorage.getItem('redirectAfterLogin')
+              : null;
+
+          if (redirectPath) {
+            sessionStorage.removeItem('redirectAfterLogin');
+            router.push(redirectPath);
+          } else {
+            router.push('/');
+          }
 
           void toast.success('Login successfully');
         } else {

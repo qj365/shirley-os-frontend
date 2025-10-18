@@ -17,7 +17,7 @@ export default function ProductDetail({ data }: Props) {
 
   return (
     <div className="container pb-7">
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-20">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-20">
         <ProductImageSlider
           images={data?.images}
           externalSelectedIndex={selectedImageIndex}

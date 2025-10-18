@@ -55,14 +55,14 @@ function Signup() {
 
   // Form instances
   const sendOtpForm = useForm<SendOtpFormData>({
-    resolver: zodResolver(sendOtpSchema),
+    resolver: zodResolver(sendOtpSchema) as any,
     defaultValues: {
       email: '',
     },
   });
 
   const verifyOtpForm = useForm<VerifyOtpFormData>({
-    resolver: zodResolver(verifyOtpSchema),
+    resolver: zodResolver(verifyOtpSchema) as any,
     defaultValues: {
       email: '',
       otp: '',
@@ -70,7 +70,7 @@ function Signup() {
   });
 
   const signupForm = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
+    resolver: zodResolver(signupSchema) as any,
     defaultValues: {
       token: '',
       firstName: '',

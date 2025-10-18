@@ -13,6 +13,7 @@ import {
 import { getPasswordStrength } from '@/services/auth-service';
 import { api } from '@/src/lib/api/customer';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { Resolver } from 'react-hook-form';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -37,7 +38,9 @@ export default function ChangePasswordModal({
 
   // Form instance
   const changePasswordForm = useForm<ChangePasswordFormData>({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(
+      changePasswordSchema
+    ) as unknown as Resolver<ChangePasswordFormData>,
     mode: 'onChange', // Enable real-time validation
     defaultValues: {
       newPassword: '',
