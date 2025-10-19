@@ -11,16 +11,17 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ClearCartOnSuccess from '@/components/order/ClearCartOnSuccess';
 
 export default async function OrderSuccessPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { sessionId } = await searchParams;
+  const { session_id } = await searchParams;
 
   // If no session ID provided
-  if (!sessionId) {
+  if (!session_id) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="pt-24 md:pt-28 lg:pt-32">
@@ -51,7 +52,7 @@ export default async function OrderSuccessPage({
 
   try {
     order = await api.order.getOrderBySessionId({
-      sessionId: sessionId as string,
+      sessionId: session_id as string,
     });
   } catch (err: unknown) {
     console.error('Error fetching order:', err);
@@ -89,6 +90,7 @@ export default async function OrderSuccessPage({
   // Success - render order details
   return (
     <div className="min-h-screen bg-gray-50">
+      <ClearCartOnSuccess />
       <div className="container pt-24 pb-16 md:pt-28 lg:pt-32">
         <div>
           {/* Success Header */}

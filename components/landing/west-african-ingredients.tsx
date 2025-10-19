@@ -16,7 +16,7 @@ export default function WestAfricanIngredients() {
 
   const handleDownloadPDF = () => {
     const pdfUrl =
-      'https://cdn.cereform.vn/test/dev/Jollof%20Paste%20Cooking%20Instructions.pdf';
+      'https://pub-1e0e5da8ae504195b9ff374220e9ef05.r2.dev/Jollof%20Paste%20Cooking%20Instructions.pdf';
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = 'Jollof Paste Cooking Instructions.pdf';

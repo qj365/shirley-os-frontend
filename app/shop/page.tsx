@@ -30,7 +30,8 @@ async function fetchProductsByCategory(
         ...(queryParams && queryParams),
       });
     }
-  } catch {
+  } catch (e) {
+    console.error('Error fetching products ', e);
     return [];
   }
 }
@@ -58,8 +59,14 @@ export default async function ShopPage({
   // Render all products grouped by category
   const renderAllProductsCarousel = () => {
     if (!Array.isArray(getProductsResponse)) return null;
-    if (getProductsResponse.length === 0) return null;
 
+    if (!getProductsResponse?.length) {
+      return (
+        <section className="mx-auto flex w-full flex-col gap-10">
+          <EmptyShop />
+        </section>
+      );
+    }
     // Filter categories that have products
     const categoriesWithProducts = getProductsResponse.filter(
       item => item?.products && item.products.length > 0
