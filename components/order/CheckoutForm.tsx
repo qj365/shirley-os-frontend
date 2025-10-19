@@ -296,7 +296,7 @@ export const CheckoutForm: React.FC<Props> = ({
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div>
       {/* Progress indicator */}
       {currentStep < 4 && (
         <div className="mb-8">

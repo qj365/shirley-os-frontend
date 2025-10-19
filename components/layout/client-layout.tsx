@@ -30,7 +30,6 @@ export default function ClientLayout({
       '/recipe',
       '/recipes',
       '/dashboard',
-      '/order-confirmation',
       '/faq',
     ];
 

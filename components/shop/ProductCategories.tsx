@@ -36,7 +36,7 @@ export default function ProductCategories({
               ? 'btn-gradient--yellow'
               : 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-gradient-to-r hover:from-[#F3C03F] hover:to-[#FFBA0A] hover:text-black'
           } block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-300 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg`}
-          scroll={index === 0 ? true : false}
+          scroll={false}
         >
           {category.name}
         </Link>

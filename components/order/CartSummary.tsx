@@ -72,12 +72,6 @@ export default function CartSummary({ showSummary = false }: Props) {
               </span>
             </div>
 
-            {/* Always show discount as £0.00 */}
-            <div className="flex justify-between text-lg text-gray-600">
-              <span>Discount:</span>
-              <span className="font-semibold">£0.00</span>
-            </div>
-
             <div className="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold text-gray-900 md:text-xl">
               <span>Total:</span>
               <span>{formatDisplayCurrency(subtotal)}</span>
@@ -116,18 +110,6 @@ export default function CartSummary({ showSummary = false }: Props) {
         {/* Order Summary */}
         <div className="mt-6 border-t border-gray-300 pt-6">
           <div className="space-y-3">
-            <div className="flex justify-between text-lg">
-              <span className="text-gray-700">Subtotal:</span>
-              <span className="font-semibold text-gray-900">
-                {formatDisplayCurrency(subtotal)}
-              </span>
-            </div>
-
-            <div className="flex justify-between text-lg text-gray-600">
-              <span>Discount:</span>
-              <span className="font-semibold">£0.00</span>
-            </div>
-
             <div className="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold text-gray-900 md:text-xl">
               <span>Total:</span>
               <span>{formatDisplayCurrency(subtotal)}</span>
