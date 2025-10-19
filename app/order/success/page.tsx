@@ -30,7 +30,7 @@ export default async function OrderSuccessPage({
               <Package className="mx-auto mb-4 h-16 w-16 text-gray-400" />
               <h2 className="mb-2 text-2xl font-semibold text-gray-900">
                 Order Not Found
-              </h2>
+              </h2>{' '}
               <p className="mb-6 text-gray-600">No session ID provided.</p>
               <Link
                 href="/shop"
@@ -54,9 +54,11 @@ export default async function OrderSuccessPage({
     order = await api.order.getOrderBySessionId({
       sessionId: session_id as string,
     });
-  } catch (err: unknown) {
-    console.error('Error fetching order:', err);
-    error = err instanceof Error ? err.message : 'Failed to load order details';
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    console.error('Error fetching order:', err?.details || err?.message);
+    error = err?.details || err?.message || 'Failed to load order details';
   }
 
   // If error or no order found
@@ -70,6 +72,7 @@ export default async function OrderSuccessPage({
               <h2 className="mb-2 text-2xl font-semibold text-gray-900">
                 Order Not Found
               </h2>
+
               <p className="mb-6 text-gray-600">
                 {error || "We couldn't find your order details."}
               </p>

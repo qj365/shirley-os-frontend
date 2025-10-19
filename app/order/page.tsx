@@ -30,7 +30,7 @@ export default function CheckoutPage() {
             <p className="mt-2 text-gray-600">Complete your purchase</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 xl:gap-14">
             {/* Left column - Checkout form */}
             <div className="lg:col-span-7">
               <CheckoutForm
