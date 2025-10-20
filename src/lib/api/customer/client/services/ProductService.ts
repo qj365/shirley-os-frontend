@@ -6,6 +6,7 @@ import type { CursorPagingResponse_GetProductsByCategoryResponse_Array_ } from '
 import type { GetAllProductsResponse } from '../models/GetAllProductsResponse';
 import type { GetProductBySlugResponse } from '../models/GetProductBySlugResponse';
 import type { GetRelatedProductsResponse } from '../models/GetRelatedProductsResponse';
+import type { SubscribeOutOfStockVariantsDto } from '../models/SubscribeOutOfStockVariantsDto';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class ProductService {
@@ -96,6 +97,28 @@ export class ProductService {
       path: {
         'slug': slug,
       },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns void
+   * @throws ApiError
+   */
+  public subscribeOutOfStockVariants({
+    requestBody,
+  }: {
+    requestBody: SubscribeOutOfStockVariantsDto,
+  }): CancelablePromise<void> {
+    return this.httpRequest.request({
+      method: 'POST',
+      url: '/customer/products/subscribe-out-of-stock-variants',
+      body: requestBody,
+      mediaType: 'application/json',
       errors: {
         400: `Bad request`,
         403: `Forbidden`,

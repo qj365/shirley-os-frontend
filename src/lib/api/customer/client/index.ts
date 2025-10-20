@@ -76,6 +76,7 @@ export type { ProductStatus } from './models/ProductStatus';
 export type { ResetPasswordDto } from './models/ResetPasswordDto';
 export type { SendOtp } from './models/SendOtp';
 export type { SignupDto } from './models/SignupDto';
+export type { SubscribeOutOfStockVariantsDto } from './models/SubscribeOutOfStockVariantsDto';
 export type { TemplateVariantOptionsResponse } from './models/TemplateVariantOptionsResponse';
 export type { UpdateNotificationSettingDto } from './models/UpdateNotificationSettingDto';
 export type { UpdateProductDto } from './models/UpdateProductDto';
