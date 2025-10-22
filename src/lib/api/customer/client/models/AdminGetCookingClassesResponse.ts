@@ -7,6 +7,7 @@ export type AdminGetCookingClassesResponse = {
     availableSlots: number;
     maxSlots: number;
     dateTime: string;
+    id: number;
   }>;
   address: string;
   price: number;
