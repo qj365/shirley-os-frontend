@@ -9,6 +9,7 @@ export type AdminGetCookingClassesResponse = {
     dateTime: string;
     id: number;
   }>;
+  duration: number;
   address: string;
   price: number;
   image: string;
