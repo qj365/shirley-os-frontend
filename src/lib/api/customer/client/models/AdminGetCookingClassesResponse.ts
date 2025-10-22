@@ -8,6 +8,8 @@ export type AdminGetCookingClassesResponse = {
     maxSlots: number;
     dateTime: string;
   }>;
+  address: string;
+  price: number;
   image: string;
   name: string;
   id: number;
