@@ -151,15 +151,17 @@ export class CookingClassService {
    * @returns any Ok
    * @throws ApiError
    */
-  public createCookingClassSchedule({
+  public deleteCookingClassSchedules({
     requestBody,
   }: {
-    requestBody: AdminCreateCookingClassScheduleDto,
+    requestBody: {
+      ids: Array<number>;
+    },
   }): CancelablePromise<{
-    id: number;
+    message: string;
   }> {
     return this.httpRequest.request({
-      method: 'POST',
+      method: 'DELETE',
       url: '/admin/cooking-classes/schedule',
       body: requestBody,
       mediaType: 'application/json',
@@ -176,17 +178,15 @@ export class CookingClassService {
    * @returns any Ok
    * @throws ApiError
    */
-  public deleteCookingClassSchedules({
+  public createCookingClassSchedule({
     requestBody,
   }: {
-    requestBody: {
-      ids: Array<number>;
-    },
+    requestBody: AdminCreateCookingClassScheduleDto,
   }): CancelablePromise<{
-    message: string;
+    id: number;
   }> {
     return this.httpRequest.request({
-      method: 'DELETE',
+      method: 'POST',
       url: '/admin/cooking-classes/schedule',
       body: requestBody,
       mediaType: 'application/json',
