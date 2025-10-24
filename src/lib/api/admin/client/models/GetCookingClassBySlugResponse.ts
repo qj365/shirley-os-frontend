@@ -9,7 +9,6 @@ export type GetCookingClassBySlugResponse = {
   price: number;
   slug: string;
   description: string;
-  banner: string;
   whatToExpect: string;
   duration: number;
   address: string;

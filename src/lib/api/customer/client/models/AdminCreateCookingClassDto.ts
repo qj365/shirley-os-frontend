@@ -5,7 +5,6 @@
 export type AdminCreateCookingClassDto = {
   name: string;
   image: string;
-  banner: string;
   price: number;
   description: string;
   whatToExpect: string;
