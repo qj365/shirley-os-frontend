@@ -8,15 +8,66 @@ import type { AdminGetCookingClassByIdResponse } from '../models/AdminGetCooking
 import type { AdminGetCookingClassesResponse } from '../models/AdminGetCookingClassesResponse';
 import type { AdminUpdateCookingClassDto } from '../models/AdminUpdateCookingClassDto';
 import type { AdminUpdateCookingClassScheduleDto } from '../models/AdminUpdateCookingClassScheduleDto';
+import type { CursorPagingResponse_GetCookingClassesResponse_Array_ } from '../models/CursorPagingResponse_GetCookingClassesResponse_Array_';
+import type { GetCookingClassBySlugResponse } from '../models/GetCookingClassBySlugResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class CookingClassService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
   /**
-   * @returns AdminGetCookingClassesResponse Ok
+   * @returns CursorPagingResponse_GetCookingClassesResponse_Array_ Ok
    * @throws ApiError
    */
   public getCookingClasses({
+    cursor,
+    pageSize = 10,
+  }: {
+    cursor?: string,
+    pageSize?: number,
+  }): CancelablePromise<CursorPagingResponse_GetCookingClassesResponse_Array_> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes',
+      query: {
+        'cursor': cursor,
+        'pageSize': pageSize,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetCookingClassBySlugResponse Ok
+   * @throws ApiError
+   */
+  public getCookingClassBySlug({
+    slug,
+  }: {
+    slug: string,
+  }): CancelablePromise<GetCookingClassBySlugResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes/{slug}',
+      path: {
+        'slug': slug,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns AdminGetCookingClassesResponse Ok
+   * @throws ApiError
+   */
+  public getCookingClasses1({
     name,
     startDate,
     endDate,

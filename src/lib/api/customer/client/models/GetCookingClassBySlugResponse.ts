@@ -2,18 +2,22 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AdminCreateCookingClassDto = {
+export type GetCookingClassBySlugResponse = {
+  id: number;
   name: string;
   image: string;
-  banner: string;
   price: number;
+  slug: string;
   description: string;
+  banner: string;
   whatToExpect: string;
   duration: number;
   address: string;
   cookingClassSchedules: Array<{
+    availableSlots: number;
     maxSlots: number;
     dateTime: string;
+    id: number;
   }>;
 };
 
