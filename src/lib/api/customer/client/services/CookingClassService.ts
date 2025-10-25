@@ -12,7 +12,7 @@ export class CookingClassService {
    * @returns CursorPagingResponse_GetCookingClassesResponse_Array_ Ok
    * @throws ApiError
    */
-  public getCookingClasses({
+  public customerGetCookingClasses({
     cursor,
     pageSize = 10,
   }: {
@@ -38,7 +38,7 @@ export class CookingClassService {
    * @returns GetCookingClassBySlugResponse Ok
    * @throws ApiError
    */
-  public getCookingClassBySlug({
+  public customerGetCookingClassBySlug({
     slug,
   }: {
     slug: string,
