@@ -10,7 +10,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { GetCookingClassBySlugResponse } from '@/src/lib/api/customer';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Resolver } from 'react-hook-form';
 import Image from 'next/image';
@@ -36,14 +44,21 @@ const registerClassSchema = z.object({
 
 type RegisterClassFormValues = z.infer<typeof registerClassSchema>;
 
-export default function CookingClassBookingFormGroup() {
-  const [step, setStep] = useState(1);
+interface CookingClassBookingFormGroupProps {
+  cookingClass: GetCookingClassBySlugResponse;
+}
 
+export default function CookingClassBookingFormGroup({
+  cookingClass,
+}: CookingClassBookingFormGroupProps) {
+  const [step, setStep] = useState(1);
   const form = useForm<RegisterClassFormValues>({
     resolver: zodResolver(
       registerClassSchema
     ) as unknown as Resolver<RegisterClassFormValues>,
   });
+
+  console.log(cookingClass, 'cookingClass');
 
   const renderSection = useMemo(() => {
     const steps = [
@@ -155,13 +170,29 @@ export default function CookingClassBookingFormGroup() {
                     <FormLabel className="text-base">
                       I would like to book for
                     </FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter number of Person"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="sh-text-input min-h-11 outline-none focus:ring-0">
+                          <SelectValue placeholder="Select number of people" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="border-none bg-white">
+                        {Array.from({ length: 10 }, (_, i) => i + 1).map(
+                          num => (
+                            <SelectItem
+                              key={num}
+                              value={num.toString()}
+                              className="cursor-pointer hover:bg-gray-100"
+                            >
+                              {num} {num === 1 ? 'person' : 'people'}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

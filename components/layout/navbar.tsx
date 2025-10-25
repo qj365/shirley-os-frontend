@@ -78,7 +78,10 @@ const NavigationLinks = ({
 }) => {
   const linkClass = (path: string) =>
     `font-semibold text-lg lg:text-xl transition-colors hover:text-red-600 ${
-      pathname === path ? 'text-red-600' : textColor
+      (path !== '/' && pathname.includes(path)) ||
+      (path === '/' && pathname === path)
+        ? 'text-red-600'
+        : textColor
     }`;
 
   return (

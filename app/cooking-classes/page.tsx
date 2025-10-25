@@ -1,10 +1,27 @@
 import CookingClassesHeroSection from '@/components/cooking-classes/CookingClassesHeroSection';
-import CookingClassListItem from '@/components/cooking-classes/CookingClassListItem';
+import CookingClassList from '@/components/cooking-classes/CookingClassList';
 import OurRecipes from '@/components/landing/our-recipes';
+import { api } from '@/src/lib/api/customer';
 import { cn } from '@/lib/utils';
-import { fillArrayWithNumber } from '@/utils/helpers/fillArrayWithNumber';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
-export default function CookingClassesPage() {
+async function fetchCookingClasses() {
+  try {
+    return await api.cookingClass.customerGetCookingClasses({
+      pageSize: DEFAULT_PAGE_SIZE,
+    });
+  } catch (error) {
+    console.error('Error fetching cooking classes:', error);
+    return {
+      data: [],
+      nextCursor: undefined,
+    };
+  }
+}
+
+export default async function CookingClassesPage() {
+  const cookingClassesData = await fetchCookingClasses();
+  console.log(cookingClassesData);
   return (
     <>
       <CookingClassesHeroSection />
@@ -23,22 +40,7 @@ export default function CookingClassesPage() {
           behind our beloved dishes.
         </p>
 
-        <div className="container grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:gap-7">
-          {fillArrayWithNumber(8).map(item => (
-            <CookingClassListItem
-              key={item}
-              description={
-                item % 2 === 0
-                  ? "Discover the secrets behind West Africa's most celebrated rice dish and learn how to create authentic Jollof perfection."
-                  : 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.'
-              }
-              imageSrc={'/image/whRecipe6.jpg'}
-              price={item % 2 === 0 ? '85' : ''}
-              slug={`class-${item + 1}`}
-              title={`Jollof Master Class ${item + 1}`}
-            />
-          ))}
-        </div>
+        <CookingClassList initData={cookingClassesData} />
       </section>
       <OurRecipes bgClassName="bg-white" />
     </>
