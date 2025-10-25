@@ -11,7 +11,13 @@ type Props = {
   price: string;
 };
 
-export default function CookingClassListItem({ imageSrc, slug, description, price, title }: Props) {
+export default function CookingClassListItem({
+  imageSrc,
+  slug,
+  description,
+  price,
+  title,
+}: Props) {
   return (
     <Link
       className="shadow-card flex flex-col hover:cursor-pointer"
@@ -26,9 +32,9 @@ export default function CookingClassListItem({ imageSrc, slug, description, pric
         />
       </figure>
       <div className="flex flex-1 flex-col gap-2 p-4 2xl:gap-4 2xl:p-7">
-        <h3 className="text-xl font-bold md:text-2xl">{title}</h3>
+        <h3 className="text-base font-bold md:text-xl">{title}</h3>
         <p
-          className="mb-auto line-clamp-3 text-base text-ellipsis text-gray-700 md:text-lg"
+          className="mb-auto line-clamp-3 text-sm text-ellipsis text-gray-700 md:text-base"
           title={description}
         >
           {description}
@@ -37,7 +43,8 @@ export default function CookingClassListItem({ imageSrc, slug, description, pric
           <p className="text-sm md:text-base">
             {price ? (
               <>
-                <strong className="text-xl md:text-2xl">£{price}</strong> <i>each person </i>
+                <strong className="text-xl md:text-2xl">£{price}</strong>{' '}
+                <i>per person </i>
               </>
             ) : (
               <i>Prize on enquiry </i>

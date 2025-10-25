@@ -1,28 +1,28 @@
-import { premiumData, PremiumType } from "@/constants/landing/premium";
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import { premiumData, PremiumType } from '@/constants/landing/premium';
+import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
 
 function Premium() {
   // Function to generate the appropriate URL for each premium product
   const getPremiumUrl = (item: PremiumType) => {
     // Map the premium product titles to appropriate category parameters
     if (item.title === "Shirley's Jollof Paste") {
-      return "/shop?category=Jollof%20Paste";
+      return '/shop?category=Jollof%20Paste';
     } else if (item.title === "Shirley's Red Sauce") {
-      return "/shop?category=Red%20Sauce";
+      return '/shop?category=Red%20Sauce';
     }
     // Default fallback
     return `/shop?category=${encodeURIComponent(item.title)}`;
   };
 
   return (
-    <section className="w-full lg:w-[60%] mx-auto px-6 py-12 mb-28 md:py-24">
-      <div className="text-center mb-16 md:mb-24">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+    <section className="mx-auto mb-28 w-full px-6 py-12 md:py-24 lg:w-[60%]">
+      <div className="mb-16 text-center md:mb-24">
+        <h2 className="mb-6 text-3xl font-bold md:text-4xl">
           Premium Products, Authentic <br /> Flavours
         </h2>
-        <p className="text-lg md:text-xl text-gray-800 max-w-4xl mx-auto">
+        <p className="mx-auto max-w-4xl text-lg text-gray-800 md:text-xl">
           Our carefully crafted range maintains the depth and complexity of
           traditional West African cuisine while offering unparalleled
           convenience.
@@ -30,28 +30,32 @@ function Premium() {
       </div>
 
       <div className="flex justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
           {premiumData.map((item: PremiumType, index: number) => {
             return (
               <Link href={getPremiumUrl(item)} key={index}>
-                <div className="relative flex flex-col justify-center items-center cursor-pointer">
+                <div className="relative flex h-full cursor-pointer flex-col items-center justify-center">
                   {/* Circular image container with responsive sizing */}
-                  <div className="absolute top-0 w-full flex justify-center">
-                    <div className="w-3/4 md:w-2/3 lg:w-3/4 aspect-square rounded-full border-[10px] border-[#FFC020] overflow-hidden flex items-center justify-center">
+                  <div className="absolute top-0 flex w-full justify-center">
+                    <div className="flex aspect-square w-3/4 items-center justify-center overflow-hidden rounded-full border-[10px] border-[#FFC020] md:w-2/3 lg:w-3/4">
                       <Image
                         src={item.image}
                         alt={item.title}
                         width={500}
                         height={500}
-                        className="w-full h-full object-cover object-center"
+                        className="h-full w-full object-cover object-center"
                       />
                     </div>
                   </div>
-                  
+
                   {/* Card with responsive padding and sizing */}
-                  <div className="w-full pt-[calc(37.5%+2rem)] pb-6 px-4 md:px-6 rounded-xl flex flex-col justify-end text-center items-center border-2 bg-white border-gray-100 mt-[37.5%]">
-                    <h3 className="text-xl md:text-2xl font-bold">{item.title}</h3>
-                    <p className="text-base md:text-lg text-gray-700 mt-4">{item.para}</p>
+                  <div className="mt-[37.5%] flex w-full flex-1 flex-col items-center justify-between rounded-xl border-2 border-gray-100 bg-white px-4 pt-[calc(37.5%+2rem)] pb-6 text-center md:px-6">
+                    <h3 className="text-xl font-bold md:text-2xl">
+                      {item.title}
+                    </h3>
+                    <p className="mt-4 text-base text-gray-700 md:text-lg">
+                      {item.para}
+                    </p>
                   </div>
                 </div>
               </Link>

@@ -27,13 +27,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
 }) => {
   return (
     <div className={`w-full ${className}`}>
-      {fullWidth ? (
-        children
-      ) : (
-        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 xl:px-12">
-          {children}
-        </div>
-      )}
+      {fullWidth ? children : <div className="container">{children}</div>}
     </div>
   );
 };
@@ -46,7 +40,6 @@ function HomePage() {
         <HeroSection />
       </SectionWrapper>
 
-      {/* Contained sections with consistent padding */}
       <SectionWrapper>
         <HotSeller />
       </SectionWrapper>
@@ -73,7 +66,7 @@ function HomePage() {
         <YellowBar />
       </SectionWrapper>
 
-      <SectionWrapper fullWidth>
+      <SectionWrapper>
         <WestAfricanIngredients />
       </SectionWrapper>
 
@@ -82,7 +75,7 @@ function HomePage() {
         <OurRecipes />
       </SectionWrapper>
 
-      <SectionWrapper fullWidth>
+      <SectionWrapper>
         <WestAfricanBrand />
       </SectionWrapper>
 

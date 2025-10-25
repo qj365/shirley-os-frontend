@@ -11,7 +11,7 @@ function About({ img }: { img: string }) {
 
   return (
     <>
-      <section className="container flex w-full flex-col items-center justify-center gap-12 py-[76px] md:py-[100px] lg:flex-row">
+      <section className="flex w-full flex-col items-center justify-center gap-12 py-[76px] md:py-[100px] lg:flex-row">
         <figure className="m-0 h-[400px] w-fit md:h-[500px]">
           <Image
             src={img}

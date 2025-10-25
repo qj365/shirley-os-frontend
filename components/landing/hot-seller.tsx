@@ -1,66 +1,73 @@
-"use client"
+'use client';
 
-import Image from "next/image"
-import { type Hotseller, hotSeller } from "@/constants/landing/hot-seller"
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
-import { useMediaQuery } from "./hook"
-import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import Image from 'next/image';
+import { type Hotseller, hotSeller } from '@/constants/landing/hot-seller';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel';
+import { useMediaQuery } from './hook';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 function HotSeller() {
-  const isMobile = useMediaQuery("(max-width: 639px)")
-  const isTablet = useMediaQuery("(min-width: 640px) and (max-width: 1023px)")
-  const isXLarge = useMediaQuery("(min-width: 1536px)")
-  const router = useRouter()
+  const isMobile = useMediaQuery('(max-width: 639px)');
+  const isTablet = useMediaQuery('(min-width: 640px) and (max-width: 1023px)');
+  const isXLarge = useMediaQuery('(min-width: 1536px)');
+  const router = useRouter();
 
   // State for carousel API
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
-  const [count, setCount] = useState(0)
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
 
   // Update current index when the carousel changes
   useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
-    setCount(api.scrollSnapList().length)
-    setCurrent(api.selectedScrollSnap())
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap());
 
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap())
-    })
-  }, [api])
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
 
   const carouselOptions = {
-    align: "start" as const,
+    align: 'start' as const,
     slidesPerView: isMobile ? 1 : isTablet ? 2 : isXLarge ? 4 : 3,
     spaceBetween: isMobile ? 10 : isXLarge ? 15 : 20,
-  }
+  };
 
   // Function to handle card click and navigate to the shop page
   const handleCardClick = (item: Hotseller) => {
     // Create URL with category parameter
-    let url = `/shop?category=${encodeURIComponent(item.category)}`
-    
+    let url = `/shop?category=${encodeURIComponent(item.category)}`;
+
     // Add flavor parameter if available
     if (item.flavour) {
-      url += `&flavour=${encodeURIComponent(item.flavour)}`
+      url += `&flavour=${encodeURIComponent(item.flavour)}`;
     }
-    
+
     // Navigate to the shop page
-    router.push(url)
-  }
+    router.push(url);
+  };
 
   return (
-    <section className="px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col gap-6 py-10 max-w-screen-2xl mx-auto">
+    <section className="flex flex-col gap-6 py-10">
       {/* Hot Sellers Section with Navigation */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div className="relative">
-          <h2 className="text-xl xsm:text-2xl sm:text-3xl font-bold">OUR HOT SELLERS</h2>
-          <div className="absolute -bottom-2 left-0 w-1/2 h-1 bg-[#fabc20] rounded-full"></div>
+          <h2 className="xsm:text-2xl text-xl font-bold sm:text-3xl">
+            OUR HOT SELLERS
+          </h2>
+          <div className="absolute -bottom-2 left-0 h-1 w-1/2 rounded-full bg-[#fabc20]"></div>
         </div>
 
         {/* Custom navigation arrows in top-right */}
@@ -68,7 +75,7 @@ function HotSeller() {
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-full border-2 border-[#fabc20] text-[#fabc20] hover:bg-[#fabc20] hover:text-white transition-colors"
+            className="h-9 w-9 rounded-full border-2 border-[#fabc20] text-[#fabc20] transition-colors hover:bg-[#fabc20] hover:text-white"
             onClick={() => api?.scrollPrev()}
             disabled={current === 0}
           >
@@ -78,7 +85,7 @@ function HotSeller() {
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 rounded-full border-2 border-[#fabc20] text-[#fabc20] hover:bg-[#fabc20] hover:text-white transition-colors"
+            className="h-9 w-9 rounded-full border-2 border-[#fabc20] text-[#fabc20] transition-colors hover:bg-[#fabc20] hover:text-white"
             onClick={() => api?.scrollNext()}
             disabled={current === count - 1}
           >
@@ -95,35 +102,47 @@ function HotSeller() {
             {hotSeller.map((item: Hotseller, index: number) => (
               <CarouselItem
                 key={index}
-                className={isMobile ? "pl-2 basis-full" : isTablet ? "pl-4 basis-1/2" : isXLarge ? "pl-4 basis-1/4" : "pl-4 basis-1/3"}
+                className={
+                  isMobile
+                    ? 'basis-full pl-2'
+                    : isTablet
+                      ? 'basis-1/2 pl-4'
+                      : isXLarge
+                        ? 'basis-1/4 pl-4'
+                        : 'basis-1/3 pl-4'
+                }
               >
-                <div 
+                <div
                   className="group cursor-pointer"
                   onClick={() => handleCardClick(item)}
                 >
                   <div className="relative overflow-hidden rounded-2xl shadow-md transition-all duration-300 group-hover:shadow-xl">
                     {/* Card content */}
-                    <div className="bg-white p-6 flex flex-col items-center">
+                    <div className="flex flex-col items-center bg-white p-6">
                       {/* Image with circular background */}
                       <div className="relative mb-4">
-                        <div className="absolute inset-0 bg-[#fabc20]/10 rounded-full transform scale-110"></div>
-                        <div className="relative z-10 w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] flex items-center justify-center transition-transform duration-500 group-hover:scale-110">
+                        <div className="absolute inset-0 scale-110 transform rounded-full bg-[#fabc20]/10"></div>
+                        <div className="relative z-10 flex h-[120px] w-[120px] items-center justify-center transition-transform duration-500 group-hover:scale-110 sm:h-[140px] sm:w-[140px]">
                           <Image
-                            src={item.image || "/placeholder.svg"}
+                            src={item.image || '/placeholder.svg'}
                             alt={item.title}
                             width={140}
                             height={140}
-                            className="w-full h-full object-contain"
+                            className="h-full w-full object-contain"
                             priority
                           />
                         </div>
                       </div>
-                      
+
                       {/* Product info */}
                       <div className="text-center">
-                        <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-1">{item.title}</h3>
-                        <p className="text-[#fabc20] font-medium">{item.subtitle}</p>
-                        
+                        <h3 className="mb-1 text-lg font-bold text-gray-800 sm:text-xl">
+                          {item.title}
+                        </h3>
+                        <p className="font-medium text-[#fabc20]">
+                          {item.subtitle}
+                        </p>
+
                         {/* Price */}
                         {/* <div className="mt-3 flex items-center justify-center gap-2">
                           <span className="text-lg font-bold">{item.price}</span>
@@ -133,9 +152,9 @@ function HotSeller() {
                         </div> */}
                       </div>
                     </div>
-                    
+
                     {/* Bottom accent bar */}
-                    <div className="h-2 bg-[#fabc20] w-full transform origin-left transition-all duration-300 group-hover:scale-x-110"></div>
+                    <div className="h-2 w-full origin-left transform bg-[#fabc20] transition-all duration-300 group-hover:scale-x-110"></div>
                   </div>
                 </div>
               </CarouselItem>
@@ -144,7 +163,7 @@ function HotSeller() {
         </Carousel>
       </div>
     </section>
-  )
+  );
 }
 
-export default HotSeller
+export default HotSeller;

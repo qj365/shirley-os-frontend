@@ -15,7 +15,7 @@ export default async function CookingClassDetail() {
 
   return (
     <>
-      <section className="px-6 pt-20 md:pt-[155px]">
+      <section className="px-6 pt-20 md:pt-[100px]">
         <div
           className="mx-auto h-[235px] max-w-[1530px] rounded-[10px] bg-cover bg-center sm:h-[400px] md:h-[500px] md:rounded-[20px] lg:h-[600px] xl:h-[703px]"
           style={{
@@ -58,16 +58,6 @@ export default async function CookingClassDetail() {
       <div className="pt-[40px]">
         <RecipeTestimonial />
       </div>
-      <section className="container flex flex-col gap-[20px] py-[50px] md:gap-[35px] md:py-[150px]">
-        <h2 className="text-center text-lg font-bold md:text-3xl">
-          Private Bookings
-        </h2>
-        <p className="text-center text-sm leading-5 md:text-xl md:leading-14">
-          Looking for a bespoke experience? We offer private classes for special
-          occasions and corporate events.
-        </p>
-        <button className={btnClass}>enquiry now</button>
-      </section>
     </>
   );
 }
