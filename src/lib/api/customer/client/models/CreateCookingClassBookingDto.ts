@@ -10,5 +10,6 @@ export type CreateCookingClassBookingDto = {
   note?: string;
   bookingFor: string;
   specialRequest?: string;
+  numberOfPeople: number;
 };
 

@@ -8,9 +8,9 @@ export type GetBookingByIdResponse = {
   fullname: string;
   email: string;
   phone: string;
-  note: string;
+  numberOfPeople: number;
   bookingFor: string;
-  specialRequest: string;
+  specialRequest: string | null;
   paymentStatus: _36_Enums_PaymentStatus;
   cookingClass: {
     address: string;

@@ -5,9 +5,9 @@
 export type AdminGetCookingClassBookingByScheduleIdResponse = {
   createdAt: string;
   paymentStatus: string;
-  specialRequest: string;
+  specialRequest: string | null;
   bookingFor: string;
-  note: string;
+  numberOfPeople: number;
   phone: string;
   email: string;
   fullname: string;
