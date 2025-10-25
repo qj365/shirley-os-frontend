@@ -12,6 +12,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export { _36_Enums_FulfillmentStatus } from './models/_36_Enums_FulfillmentStatus';
 export { _36_Enums_NotificationEvent } from './models/_36_Enums_NotificationEvent';
+export { _36_Enums_PaymentStatus } from './models/_36_Enums_PaymentStatus';
 export { _36_Enums_ProductStatus } from './models/_36_Enums_ProductStatus';
 export { _36_Enums_UserRole } from './models/_36_Enums_UserRole';
 export type { AdminCancelOrderDto } from './models/AdminCancelOrderDto';
@@ -22,6 +23,7 @@ export type { AdminGetAllNotificationDto } from './models/AdminGetAllNotificatio
 export type { AdminGetAllNotificationResponse } from './models/AdminGetAllNotificationResponse';
 export type { AdminGetCategoriesDto } from './models/AdminGetCategoriesDto';
 export type { AdminGetCategoriesResponse } from './models/AdminGetCategoriesResponse';
+export type { AdminGetCookingClassBookingByScheduleIdResponse } from './models/AdminGetCookingClassBookingByScheduleIdResponse';
 export type { AdminGetCookingClassByIdResponse } from './models/AdminGetCookingClassByIdResponse';
 export type { AdminGetCookingClassesDto } from './models/AdminGetCookingClassesDto';
 export type { AdminGetCookingClassesResponse } from './models/AdminGetCookingClassesResponse';
@@ -36,6 +38,8 @@ export type { AdminUpdateCookingClassScheduleDto } from './models/AdminUpdateCoo
 export type { ChangePasswordDto } from './models/ChangePasswordDto';
 export type { CreateCheckoutSessionDto } from './models/CreateCheckoutSessionDto';
 export type { CreateCheckoutSessionResponse } from './models/CreateCheckoutSessionResponse';
+export type { CreateCookingClassBookingDto } from './models/CreateCookingClassBookingDto';
+export type { CreateCookingClassBookingResponse } from './models/CreateCookingClassBookingResponse';
 export type { CreateProductDto } from './models/CreateProductDto';
 export type { CreateProductVariantDto } from './models/CreateProductVariantDto';
 export type { CreateUploadDto } from './models/CreateUploadDto';
@@ -47,6 +51,7 @@ export type { CustomerGetMeResponse } from './models/CustomerGetMeResponse';
 export type { Dimension } from './models/Dimension';
 export type { FulfillmentStatus } from './models/FulfillmentStatus';
 export type { GetAllProductsResponse } from './models/GetAllProductsResponse';
+export type { GetBookingByIdResponse } from './models/GetBookingByIdResponse';
 export type { GetCategoriesResponse } from './models/GetCategoriesResponse';
 export type { GetCookingClassBySlugResponse } from './models/GetCookingClassBySlugResponse';
 export type { GetCookingClassDto } from './models/GetCookingClassDto';
@@ -69,6 +74,7 @@ export type { NumberedPagingResponse_GetOrdersResponse_Array_ } from './models/N
 export type { NumberedPagingResponse_GetProductsResponse_Array_ } from './models/NumberedPagingResponse_GetProductsResponse_Array_';
 export type { Omit_User_createdAt_or_updatedAt_ } from './models/Omit_User_createdAt_or_updatedAt_';
 export { OtpType } from './models/OtpType';
+export type { PaymentStatus } from './models/PaymentStatus';
 export type { Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__ } from './models/Pick_User_Exclude_keyofUser_createdAt_or_updatedAt__';
 export type { PrismaJson_NotificationData } from './models/PrismaJson_NotificationData';
 export type { PrismaJson_ProductImages } from './models/PrismaJson_ProductImages';
