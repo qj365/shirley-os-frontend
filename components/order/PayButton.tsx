@@ -5,7 +5,11 @@ import { useCartStore } from '@/stores/cart-store';
 import { useCheckout } from '@stripe/react-stripe-js/checkout';
 import { useState } from 'react';
 
-const PayButton = () => {
+type Props = {
+  isDisabled?: boolean;
+};
+
+const PayButton = ({ isDisabled }: Props) => {
   const checkoutState = useCheckout();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -32,7 +36,7 @@ const PayButton = () => {
       <button
         type="button"
         onClick={handleClick}
-        disabled={loading}
+        disabled={loading || isDisabled}
         className="flex min-w-50 items-center gap-2 rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] px-8 py-2 !text-center text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (

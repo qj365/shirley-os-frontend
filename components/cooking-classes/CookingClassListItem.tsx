@@ -22,7 +22,7 @@ export default function CookingClassListItem({
   return (
     <Link
       className="shadow-card flex flex-col hover:cursor-pointer"
-      href={`/cooking-classes/${slug}`}
+      href={`/cooking-class/${slug}`}
     >
       <figure className="relative m-0 h-[227px] w-full shrink-0 overflow-hidden lg:h-[350px]">
         <Image
@@ -49,7 +49,7 @@ export default function CookingClassListItem({
           <BookingButton
             className="btn-gradient--yellow block px-6 py-2 font-semibold hover:opacity-80 active:scale-95 xl:px-8"
             label="Book now"
-            navigateLink={`/cooking-classes/${slug}/booking`}
+            navigateLink={`/cooking-class/${slug}/booking`}
           />
         </div>
       </div>

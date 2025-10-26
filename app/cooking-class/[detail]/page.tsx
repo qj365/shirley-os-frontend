@@ -71,7 +71,7 @@ export default async function CookingClassDetail({
           <BookingButton
             className={cn(btnClass, 'my-4 md:my-10')}
             label="Book now"
-            navigateLink={`/cooking-classes/${slug}/booking`}
+            navigateLink={`/cooking-class/${slug}/booking`}
           />
         </div>
       </section>

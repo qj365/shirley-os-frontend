@@ -19,10 +19,10 @@ const useIsomorphicLayoutEffect =
 // Helper functions for cleaner code
 const getRouteStyles = (pathname: string) => {
   const isCookingClassBookingPage =
-    pathname.startsWith('/cooking-classes/') && pathname.endsWith('/booking');
+    pathname.startsWith('/cooking-class/') && pathname.endsWith('/booking');
 
   const isWhiteMode =
-    ['/shop', '/wholesale', '/about', '/faq', '/cooking-classes'].includes(
+    ['/shop', '/wholesale', '/about', '/faq', '/cooking-class'].includes(
       pathname
     ) || isCookingClassBookingPage;
 
@@ -93,8 +93,8 @@ const NavigationLinks = ({
         Shop
       </Link>
       <Link
-        href="/cooking-classes"
-        className={linkClass('/cooking-classes')}
+        href="/cooking-class"
+        className={linkClass('/cooking-class')}
         onClick={onLinkClick}
       >
         Class

@@ -40,7 +40,7 @@ export default function ClientLayout({
 
     if (pathname?.startsWith('/recipe/')) return true; // Show navbar for dynamic recipe routes
 
-    if (pathname?.startsWith('/cooking-classes')) return true;
+    if (pathname?.startsWith('/cooking-class')) return true;
 
     return pathname ? showPaths.includes(pathname) : false;
   };
