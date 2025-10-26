@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import {
   Empty,
@@ -7,7 +8,7 @@ import {
 } from '@/components/ui/empty';
 import { ShoppingBag } from 'lucide-react';
 
-export default async function EmptyShop() {
+export default function EmptyShop() {
   return (
     <Empty>
       <EmptyHeader>

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { GetCookingClassBySlugResponse } from '@/src/lib/api/customer';
+import { api } from '@/src/lib/api/customer';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Resolver } from 'react-hook-form';
 import Image from 'next/image';
@@ -26,20 +27,27 @@ import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { toastErrorMessage } from '@/utils/helpers/toastErrorMessage';
+import { STRIPE_PUBLISHABLE_KEY } from '@/config';
+import {
+  CheckoutProvider,
+  PaymentElement,
+} from '@stripe/react-stripe-js/checkout';
+import { loadStripe } from '@stripe/stripe-js';
+import { useCheckout } from '@stripe/react-stripe-js/checkout';
+
+const stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 const registerClassSchema = z.object({
+  scheduleId: z.number().min(1, 'Please select a schedule'),
   numberOfPeople: z.string().min(1, 'This field is required'),
   fullName: z.string().trim().min(1, 'This field is required'),
   email: z.string().min(1, 'This field is required').email('Email invalid'),
   phone: z.string().trim().min(1, 'This field is required'),
   bookingFor: z.string().min(1, 'This field is required'),
-  specialRequest: z.string().min(1, 'This field is required'),
-  holderName: z.string().trim().min(1, 'This field is required'),
-  cardNumber: z.string().regex(/^\d{16}$/, 'Card Number invalid'),
-  expire: z.string().regex(/^\d{2}\/\d{2}$/, 'Expire date invalid'),
-  cvv: z.string().regex(/^\d{3,4}$/, 'CVV invalid'),
-  region: z.string().min(1, 'This field is required'),
-  voucherCode: z.string(),
+  specialRequest: z.string().optional(),
+  note: z.string().optional(),
 });
 
 type RegisterClassFormValues = z.infer<typeof registerClassSchema>;
@@ -48,17 +56,94 @@ interface CookingClassBookingFormGroupProps {
   cookingClass: GetCookingClassBySlugResponse;
 }
 
+// Payment Button Component
+const PaymentButton = ({ onSuccess }: { onSuccess: () => void }) => {
+  const checkoutState = useCheckout();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleClick = () => {
+    setLoading(true);
+    if (checkoutState.type === 'success') {
+      const { confirm } = checkoutState.checkout;
+
+      confirm().then(result => {
+        if (result.type === 'success') {
+          onSuccess();
+        }
+        if (result.type === 'error') {
+          setError(result.error?.message || 'Payment failed');
+          toast.error(result.error?.message || 'Payment failed');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 pt-10">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={loading}
+        className="btn-gradient--yellow mx-auto mt-7.5 flex w-[220px] text-lg font-semibold hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 md:w-[565px]"
+      >
+        {loading ? (
+          <>
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
+            Processing...
+          </>
+        ) : (
+          'Pay Now'
+        )}
+      </button>
+      {error && <div className="text-red-500">{error}</div>}
+    </div>
+  );
+};
+
 export default function CookingClassBookingFormGroup({
   cookingClass,
 }: CookingClassBookingFormGroupProps) {
   const [step, setStep] = useState(1);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
   const form = useForm<RegisterClassFormValues>({
     resolver: zodResolver(
       registerClassSchema
     ) as unknown as Resolver<RegisterClassFormValues>,
+    defaultValues: {
+      specialRequest: '',
+      note: '',
+    },
   });
 
-  console.log(cookingClass, 'cookingClass');
+  const handleStep1Submit = async (values: RegisterClassFormValues) => {
+    setIsProcessing(true);
+    try {
+      const response = await api.cookingClass.createCookingClassBooking({
+        requestBody: {
+          scheduleId: values.scheduleId,
+          fullname: values.fullName,
+          email: values.email,
+          phone: values.phone,
+          bookingFor: values.bookingFor,
+          specialRequest: values.specialRequest || '',
+          note: values.note || '',
+          numberOfPeople: parseInt(values.numberOfPeople),
+        },
+      });
+
+      setClientSecret(response.clientSecret);
+      setStep(2);
+      toast.success('Booking created successfully');
+    } catch (error) {
+      toastErrorMessage(error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const renderSection = useMemo(() => {
     const steps = [
@@ -155,13 +240,43 @@ export default function CookingClassBookingFormGroup({
       {renderSection}
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(() => {
-            console.log('asdasd');
-          })}
-        >
+        <form onSubmit={form.handleSubmit(handleStep1Submit)}>
           {step === 1 && (
             <div className="grid grid-cols-1 gap-4">
+              <FormField
+                control={form.control}
+                name="scheduleId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Select Schedule</FormLabel>
+                    <Select
+                      onValueChange={value => field.onChange(parseInt(value))}
+                      defaultValue={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="sh-text-input min-h-11 outline-none focus:ring-0">
+                          <SelectValue placeholder="Select a schedule" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="border-none bg-white">
+                        {cookingClass.cookingClassSchedules.map(schedule => (
+                          <SelectItem
+                            key={schedule.id}
+                            value={schedule.id.toString()}
+                            className="cursor-pointer hover:bg-gray-100"
+                            disabled={schedule.availableSlots === 0}
+                          >
+                            {new Date(schedule.dateTime).toLocaleString()} -{' '}
+                            {schedule.availableSlots} slots available
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="numberOfPeople"
@@ -281,121 +396,7 @@ export default function CookingClassBookingFormGroup({
                     <FormControl>
                       <input
                         className="sh-text-input"
-                        placeholder="Enter special request"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="grid grid-cols-1 gap-4">
-              <FormField
-                control={form.control}
-                name="holderName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">
-                      Card holder name
-                    </FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter card holder name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cardNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Card number</FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter Card number"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="expire"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Expire date</FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="MM/YY"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cvv"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">CVV</FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter cvv"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Region</FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter region"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="voucherCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Voucher Code</FormLabel>
-                    <FormControl>
-                      <input
-                        className="sh-text-input"
-                        placeholder="Enter Voucher Code"
+                        placeholder="Enter special request (optional)"
                         {...field}
                       />
                     </FormControl>
@@ -410,12 +411,24 @@ export default function CookingClassBookingFormGroup({
                   Registration opens 15 minutes before the class starts. Dietary
                   requirements can be catered for but only if known in advance.
                   If you have a Virgin experience days voucher, please contact
-                  us and we can place your booking. In our cooking class, we use
+                  us and we can place your booking. In our cooking class, we use
                   induction hobs. If you have a pacemaker fitted, please get in
-                  touch with us. Please familiarize yourself with our
-                  cancellation policy prior to booking. 
+                  touch with us. Please familiarize yourself with our
+                  cancellation policy prior to booking.
                 </p>
               </div>
+            </div>
+          )}
+
+          {step === 2 && clientSecret && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold">Payment Information</h2>
+              <CheckoutProvider stripe={stripe} options={{ clientSecret }}>
+                <form>
+                  <PaymentElement options={{ layout: 'accordion' }} />
+                  <PaymentButton onSuccess={() => setStep(3)} />
+                </form>
+              </CheckoutProvider>
             </div>
           )}
 
@@ -426,29 +439,29 @@ export default function CookingClassBookingFormGroup({
               </h3>
 
               <p className="text-center text-sm md:text-xl">
-                Dear Ibrahim Shorey,
+                Dear {form.getValues('fullName')},
                 <br />
-                Thank you for booking your cooking class with us! 🎊 <br />{' '}
-                We’re excited to have you join us for a fun and delicious
+                Thank you for booking your cooking class with us! 🎊 <br />
+                We&apos;re excited to have you join us for a fun and delicious
                 experience.
               </p>
               <div className="mx-auto flex items-start gap-3">
                 <Checkbox id="cookingClassBookingGetNews" />
                 <Label htmlFor="cookingClassBookingGetNews">
-                  I am happy for Shirley’s to send me exclusive information and
-                  deals, from time to time.
+                  I am happy for Shirley&apos;s to send me exclusive information
+                  and deals, from time to time.
                 </Label>
               </div>
             </div>
           )}
 
-          {step < 3 && (
+          {step === 1 && (
             <Button
               className="btn-gradient--yellow mx-auto mt-7.5 flex w-[220px] text-lg font-semibold hover:opacity-80 md:w-[565px]"
-              type="button"
-              onClick={() => setStep(prev => (prev === 3 ? 1 : prev + 1))}
+              type="submit"
+              disabled={isProcessing}
             >
-              {step === 1 ? 'Next' : 'Submit'}
+              {isProcessing ? 'Processing...' : 'Next'}
             </Button>
           )}
         </form>

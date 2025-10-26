@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import * as React from 'react';
@@ -7,6 +6,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  type CarouselApi,
 } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -25,40 +25,51 @@ export default function ProductImageSlider({
   externalSelectedIndex,
   onIndexChange,
 }: Props) {
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [canScrollPrev, setCanScrollPrev] = React.useState(false);
   const [canScrollNext, setCanScrollNext] = React.useState(false);
 
+  // State for carousel APIs
+  const [mainApi, setMainApi] = React.useState<CarouselApi>();
+  const [thumbApi, setThumbApi] = React.useState<CarouselApi>();
+
+  // Use externalSelectedIndex as the source of truth, fallback to 0
+  const selectedIndex = externalSelectedIndex ?? 0;
+
+  // Update carousel when external index changes
   React.useEffect(() => {
-    if (
-      externalSelectedIndex !== undefined &&
-      externalSelectedIndex !== selectedIndex
-    ) {
-      setSelectedIndex(externalSelectedIndex);
-      mainCarouselRef.current?.scrollTo(externalSelectedIndex);
+    if (mainApi && externalSelectedIndex !== undefined) {
+      const currentIndex = mainApi.selectedScrollSnap();
+      if (externalSelectedIndex !== currentIndex) {
+        mainApi.scrollTo(externalSelectedIndex);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [externalSelectedIndex]);
+  }, [externalSelectedIndex, mainApi]);
 
-  const mainCarouselRef = React.useRef<any>(null);
-  const thumbCarouselRef = React.useRef<any>(null);
+  // Handle main carousel selection
+  React.useEffect(() => {
+    if (!mainApi) return;
 
-  const handleMainSelect = React.useCallback(
-    (emblaApi: any) => {
-      if (!emblaApi) return;
-      const index = emblaApi.selectedScrollSnap();
-      setSelectedIndex(index);
-      thumbCarouselRef.current?.scrollTo(index);
-      setCanScrollPrev(emblaApi.canScrollPrev());
-      setCanScrollNext(emblaApi.canScrollNext());
+    const handleSelect = () => {
+      const index = mainApi.selectedScrollSnap();
+      thumbApi?.scrollTo(index);
+      setCanScrollPrev(mainApi.canScrollPrev());
+      setCanScrollNext(mainApi.canScrollNext());
       onIndexChange?.(index);
-    },
-    [onIndexChange]
-  );
+    };
+
+    // Initialize scroll state
+    setCanScrollPrev(mainApi.canScrollPrev());
+    setCanScrollNext(mainApi.canScrollNext());
+
+    mainApi.on('select', handleSelect);
+
+    return () => {
+      mainApi.off('select', handleSelect);
+    };
+  }, [mainApi, thumbApi, onIndexChange]);
 
   const scrollTo = (index: number) => {
-    setSelectedIndex(index);
-    mainCarouselRef.current?.scrollTo(index);
+    mainApi?.scrollTo(index);
     onIndexChange?.(index);
   };
 
@@ -66,16 +77,8 @@ export default function ProductImageSlider({
     <div className="w-full select-none">
       {/* MAIN CAROUSEL */}
       <Carousel
-        opts={{ loop: true, align: 'center' }}
-        setApi={api => {
-          mainCarouselRef.current = api;
-          if (api) {
-            api.on('select', () => handleMainSelect(api));
-            // Initialize scroll state
-            setCanScrollPrev(api.canScrollPrev());
-            setCanScrollNext(api.canScrollNext());
-          }
-        }}
+        opts={{ loop: false, align: 'center' }}
+        setApi={setMainApi}
         className="relative w-full"
       >
         <CarouselContent>
@@ -101,7 +104,7 @@ export default function ProductImageSlider({
           variant="outline"
           size="icon"
           className="absolute top-1/2 left-[4px] z-10 size-10 -translate-y-1/2 rounded-full border-none bg-transparent shadow-md hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50"
-          onClick={() => mainCarouselRef.current?.scrollPrev()}
+          onClick={() => mainApi?.scrollPrev()}
           disabled={!canScrollPrev}
         >
           <ChevronLeft className="size-8 text-gray-800" />
@@ -110,7 +113,7 @@ export default function ProductImageSlider({
         <Button
           variant="outline"
           className="absolute top-1/2 right-[4px] z-10 size-10 -translate-y-1/2 rounded-full border-none bg-transparent shadow-md hover:bg-amber-50 disabled:pointer-events-none disabled:opacity-50"
-          onClick={() => mainCarouselRef.current?.scrollNext()}
+          onClick={() => mainApi?.scrollNext()}
           disabled={!canScrollNext}
         >
           <ChevronRight className="size-8 text-gray-800" />
@@ -125,8 +128,9 @@ export default function ProductImageSlider({
             align: 'start',
             containScroll: 'trimSnaps',
             dragFree: true,
+            loop: false,
           }}
-          setApi={api => (thumbCarouselRef.current = api)}
+          setApi={setThumbApi}
           className="max-w-full"
         >
           <CarouselContent className="flex items-center justify-center gap-2">

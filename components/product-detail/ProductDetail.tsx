@@ -10,18 +10,35 @@ type Props = {
 };
 export default function ProductDetail({ data }: Props) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+  const [isFromCarousel, setIsFromCarousel] = useState(false);
 
   const handleVariantImageChange = (imageIndex: number) => {
+    console.log('Variant image change:', imageIndex);
     setSelectedImageIndex(imageIndex);
   };
 
+  const handleCarouselIndexChange = (imageIndex: number) => {
+    console.log(
+      'Carousel interaction detected, setting isFromCarousel to true'
+    );
+    setIsFromCarousel(true);
+    setSelectedImageIndex(imageIndex);
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      console.log('Resetting isFromCarousel to false');
+      setIsFromCarousel(false);
+    }, 100);
+  };
+
+  console.log(selectedImageIndex, 'selectedImageIndex');
+  console.log(isFromCarousel, 'isFromCarousel');
   return (
     <div className="container pb-7">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-20">
         <ProductImageSlider
           images={data?.images}
           externalSelectedIndex={selectedImageIndex}
-          onIndexChange={setSelectedImageIndex}
+          onIndexChange={handleCarouselIndexChange}
         />
         <div className="flex flex-col gap-6 md:gap-8">
           <div className="hidden items-center justify-center lg:flex">
@@ -33,6 +50,8 @@ export default function ProductDetail({ data }: Props) {
           <ProductDetailMainInfo
             product={data}
             onVariantImageChange={handleVariantImageChange}
+            isFromCarousel={isFromCarousel}
+            currentSelectedImageIndex={selectedImageIndex}
           />
         </div>
       </div>
