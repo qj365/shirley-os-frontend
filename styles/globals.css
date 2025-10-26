@@ -110,7 +110,7 @@ textarea::placeholder {
 }
 
 .shadow-card {
-  @apply overflow-hidden rounded-[10px] bg-white shadow-[0_4px_13px_0_rgba(148,_147,_239,_0.2)] md:rounded-[20px];
+  @apply overflow-hidden rounded-[10px] bg-white shadow-md hover:shadow-lg md:rounded-[20px];
 }
 
 .btn-gradient--yellow {
@@ -136,4 +136,68 @@ textarea::placeholder {
 
 .sh-text-input {
   @apply w-full rounded-[5px] border-2 border-[#797979] bg-transparent p-2 text-base font-semibold text-black outline-none placeholder:text-[#797979];
+}
+
+/* Restore default list styles for dangerouslySetInnerHTML content */
+.rich-content {
+  /* Restore list styles */
+  ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+  }
+
+  ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+  }
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  /* Restore other default styles */
+  p {
+    margin: 0.5rem 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: bold;
+    margin: 1rem 0 0.5rem 0;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+  h2 {
+    font-size: 1.25rem;
+  }
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  strong,
+  b {
+    font-weight: bold;
+  }
+
+  em,
+  i {
+    font-style: italic;
+  }
+
+  a {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    color: #004499;
+  }
 }

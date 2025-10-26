@@ -13,11 +13,15 @@ import { useCartStore } from '@/stores/cart-store';
 type Props = {
   product: GetProductBySlugResponse;
   onVariantImageChange?: (imageIndex: number) => void;
+  isFromCarousel?: boolean;
+  currentSelectedImageIndex?: number;
 };
 
 export default function ProductDetailMainInfo({
   product,
   onVariantImageChange,
+  isFromCarousel = false,
+  currentSelectedImageIndex = 0,
 }: Props) {
   const { name, productVariants, variantOptions, images, id } = product || {};
   const addItem = useCartStore(state => state.addItem);
@@ -87,15 +91,76 @@ export default function ProductDetailMainInfo({
   }, [selectedOptions, productVariants, variantOptions]);
 
   // --- update image when variant changes ---
+  const [hasUserSelectedOptions, setHasUserSelectedOptions] =
+    React.useState(false);
+  const [lastMatchedVariantId, setLastMatchedVariantId] = React.useState<
+    number | null
+  >(null);
+
+  // Track when user has made at least one selection
   React.useEffect(() => {
-    if (matchedVariants.length === 1 && images && onVariantImageChange) {
+    const selectedCount = Object.values(selectedOptions).filter(Boolean).length;
+    setHasUserSelectedOptions(selectedCount > 0);
+
+    // Reset variant tracking when user deselects all options
+    if (selectedCount === 0) {
+      setLastMatchedVariantId(null);
+    }
+  }, [selectedOptions]);
+
+  // Don't reset variant tracking when user interacts with carousel
+  // This prevents unnecessary calls to onVariantImageChange
+
+  // Only update image when user has selected options and there's exactly one matching variant
+  // and it's not from carousel interaction and the variant actually changed
+  React.useEffect(() => {
+    console.log('Variant effect triggered:', {
+      hasUserSelectedOptions,
+      matchedVariantsLength: matchedVariants.length,
+      hasImages: !!images,
+      hasOnVariantImageChange: !!onVariantImageChange,
+      isFromCarousel,
+      currentVariantId: matchedVariants[0]?.id,
+      lastMatchedVariantId,
+      currentSelectedImageIndex,
+    });
+
+    if (
+      hasUserSelectedOptions &&
+      matchedVariants.length === 1 &&
+      images &&
+      onVariantImageChange &&
+      !isFromCarousel
+    ) {
+      const currentVariantId = matchedVariants[0].id;
       const variantImage = matchedVariants[0].image;
       const imageIndex = images.findIndex(img => img === variantImage);
-      if (imageIndex !== -1) {
-        onVariantImageChange(imageIndex);
+
+      // Only update if the variant actually changed (not due to carousel interaction)
+      if (currentVariantId !== lastMatchedVariantId) {
+        console.log(
+          'Calling onVariantImageChange with index:',
+          imageIndex,
+          'current:',
+          currentSelectedImageIndex
+        );
+        if (imageIndex !== -1) {
+          onVariantImageChange(imageIndex);
+          setLastMatchedVariantId(currentVariantId);
+        }
+      } else {
+        console.log('Variant ID same, skipping update');
       }
     }
-  }, [matchedVariants, images, onVariantImageChange]);
+  }, [
+    matchedVariants,
+    images,
+    onVariantImageChange,
+    hasUserSelectedOptions,
+    isFromCarousel,
+    lastMatchedVariantId,
+    currentSelectedImageIndex,
+  ]);
 
   // --- update quantity when variant changes to respect minOrder ---
   React.useEffect(() => {

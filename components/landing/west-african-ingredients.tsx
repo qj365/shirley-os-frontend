@@ -27,11 +27,11 @@ export default function WestAfricanIngredients() {
   };
 
   return (
-    <section className="w-full px-5 py-10 md:px-16 md:py-12">
+    <section className="w-full py-10 md:py-12">
       <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
         {/* Left side - Heading and description */}
         <div className="flex w-full flex-col gap-8 self-start lg:sticky lg:top-24 lg:w-2/5 lg:gap-12">
-          <h2 className="font-raleway text-2xl leading-tight font-semibold italic md:text-4xl lg:text-5xl">
+          <h2 className="font-raleway text-2xl leading-tight font-semibold italic md:text-4xl">
             Crafted with the finest ingredients sourced from the heart of West
             Africa
           </h2>
@@ -105,7 +105,7 @@ export default function WestAfricanIngredients() {
           })}
         </div>
       </div>
-      <div className="relative mt-8 h-[300px] w-full overflow-hidden rounded-lg sm:mt-12 sm:h-[400px] sm:rounded-xl md:mt-16 md:h-[500px] md:rounded-2xl lg:mt-[99px] lg:h-[653px]">
+      <div className="relative mt-8 h-[300px] w-full overflow-hidden rounded-lg sm:mt-12 sm:h-[350px] sm:rounded-xl md:mt-16 md:rounded-2xl lg:mt-[99px] lg:h-[450px]">
         <Image
           src="/image/landingPageImages/image.png"
           alt="Hero image"

@@ -4,14 +4,90 @@
 /* eslint-disable */
 import type { AdminCreateCookingClassDto } from '../models/AdminCreateCookingClassDto';
 import type { AdminCreateCookingClassScheduleDto } from '../models/AdminCreateCookingClassScheduleDto';
+import type { AdminGetCookingClassBookingByScheduleIdResponse } from '../models/AdminGetCookingClassBookingByScheduleIdResponse';
 import type { AdminGetCookingClassByIdResponse } from '../models/AdminGetCookingClassByIdResponse';
 import type { AdminGetCookingClassesResponse } from '../models/AdminGetCookingClassesResponse';
 import type { AdminUpdateCookingClassDto } from '../models/AdminUpdateCookingClassDto';
 import type { AdminUpdateCookingClassScheduleDto } from '../models/AdminUpdateCookingClassScheduleDto';
+import type { CursorPagingResponse_GetCookingClassesResponse_Array_ } from '../models/CursorPagingResponse_GetCookingClassesResponse_Array_';
+import type { GetBookingByIdResponse } from '../models/GetBookingByIdResponse';
+import type { GetCookingClassBySlugResponse } from '../models/GetCookingClassBySlugResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class CookingClassService {
   constructor(public readonly httpRequest: BaseHttpRequest) {}
+  /**
+   * @returns CursorPagingResponse_GetCookingClassesResponse_Array_ Ok
+   * @throws ApiError
+   */
+  public customerGetCookingClasses({
+    cursor,
+    pageSize = 10,
+  }: {
+    cursor?: string,
+    pageSize?: number,
+  }): CancelablePromise<CursorPagingResponse_GetCookingClassesResponse_Array_> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes',
+      query: {
+        'cursor': cursor,
+        'pageSize': pageSize,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetBookingByIdResponse Ok
+   * @throws ApiError
+   */
+  public getBookingBySessionId({
+    sessionId,
+  }: {
+    sessionId: string,
+  }): CancelablePromise<GetBookingByIdResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes/booking/session/{sessionId}',
+      path: {
+        'sessionId': sessionId,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetCookingClassBySlugResponse Ok
+   * @throws ApiError
+   */
+  public customerGetCookingClassBySlug({
+    slug,
+  }: {
+    slug: string,
+  }): CancelablePromise<GetCookingClassBySlugResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes/{slug}',
+      path: {
+        'slug': slug,
+      },
+      errors: {
+        400: `Bad request`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
   /**
    * @returns AdminGetCookingClassesResponse Ok
    * @throws ApiError
@@ -58,6 +134,30 @@ export class CookingClassService {
       url: '/admin/cooking-classes',
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        400: `Bad request`,
+        401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns AdminGetCookingClassBookingByScheduleIdResponse Ok
+   * @throws ApiError
+   */
+  public getCookingClassBookingByScheduleId({
+    scheduleId,
+  }: {
+    scheduleId: number,
+  }): CancelablePromise<Array<AdminGetCookingClassBookingByScheduleIdResponse>> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/admin/cooking-classes/booking/schedule/{scheduleId}',
+      path: {
+        'scheduleId': scheduleId,
+      },
       errors: {
         400: `Bad request`,
         401: `Invalid token`,
@@ -151,15 +251,17 @@ export class CookingClassService {
    * @returns any Ok
    * @throws ApiError
    */
-  public createCookingClassSchedule({
+  public deleteCookingClassSchedules({
     requestBody,
   }: {
-    requestBody: AdminCreateCookingClassScheduleDto,
+    requestBody: {
+      id: number;
+    },
   }): CancelablePromise<{
-    id: number;
+    message: string;
   }> {
     return this.httpRequest.request({
-      method: 'POST',
+      method: 'DELETE',
       url: '/admin/cooking-classes/schedule',
       body: requestBody,
       mediaType: 'application/json',
@@ -176,17 +278,15 @@ export class CookingClassService {
    * @returns any Ok
    * @throws ApiError
    */
-  public deleteCookingClassSchedules({
+  public createCookingClassSchedule({
     requestBody,
   }: {
-    requestBody: {
-      ids: Array<number>;
-    },
+    requestBody: AdminCreateCookingClassScheduleDto,
   }): CancelablePromise<{
-    message: string;
+    id: number;
   }> {
     return this.httpRequest.request({
-      method: 'DELETE',
+      method: 'POST',
       url: '/admin/cooking-classes/schedule',
       body: requestBody,
       mediaType: 'application/json',

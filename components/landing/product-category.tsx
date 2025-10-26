@@ -1,17 +1,17 @@
-import { ArrowRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import React, { useState, useEffect } from "react";
-import { getProductCategories } from "@/services/product-service";
-import { MedusaProductCategory } from "@/services/product-service";
+import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { getProductCategories } from '@/services/product-service';
+import { MedusaProductCategory } from '@/services/product-service';
 
 // Define a mapping for category images
 const categoryImages: Record<string, string> = {
-  "Shirley's Jollof Paste": "/image/landingPageImages/4paste.png",
-  "Shirley's Red Sauce": "/image/landingPageImages/sauce.png",
-  "Shirley's Bundles": "/image/landingPageImages/sauceandpaste.png",
+  "Shirley's Jollof Paste": '/image/landingPageImages/4paste.png',
+  "Shirley's Red Sauce": '/image/landingPageImages/sauce.png',
+  "Shirley's Bundles": '/image/landingPageImages/sauceandpaste.png',
   // Add fallback image for any new categories
-  "default": "/image/default-product.png"
+  default: '/image/default-product.png',
 };
 
 function ProductCategory() {
@@ -26,7 +26,7 @@ function ProductCategory() {
         setCategories(productCategories);
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching product categories:", error);
+        console.error('Error fetching product categories:', error);
         setIsLoading(false);
       }
     };
@@ -53,8 +53,8 @@ function ProductCategory() {
   if (isLoading) {
     return (
       <section className="bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] py-12 md:py-24">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+        <div className="container">
+          <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
             Our Product Category
           </h2>
           <div className="flex justify-center">
@@ -67,20 +67,23 @@ function ProductCategory() {
 
   return (
     <section className="bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] py-12 md:py-24">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+      <div className="container">
+        <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
           Our Product Category
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {categories.map((category) => (
-            <div key={category.id} className="bg-[#FFF3D6] rounded-xl p-6 relative">
-              <span className="text-2xl font-semibold mb-1 text-wrap">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {categories.map(category => (
+            <div
+              key={category.id}
+              className="relative rounded-xl bg-[#FFF3D6] p-6"
+            >
+              <span className="mb-1 text-2xl font-semibold text-wrap">
                 {category.name}
               </span>
 
               <Link href={getCategoryUrl(category)}>
-                <div className="absolute left-6 bottom-6 bg-white p-3 rounded-full">
+                <div className="absolute bottom-6 left-6 rounded-full bg-white p-3">
                   <ArrowRight className="h-6 w-6 hover:cursor-pointer" />
                 </div>
               </Link>

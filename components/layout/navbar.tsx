@@ -19,10 +19,10 @@ const useIsomorphicLayoutEffect =
 // Helper functions for cleaner code
 const getRouteStyles = (pathname: string) => {
   const isCookingClassBookingPage =
-    pathname.startsWith('/cooking-classes/') && pathname.endsWith('/booking');
+    pathname.startsWith('/cooking-class/') && pathname.endsWith('/booking');
 
   const isWhiteMode =
-    ['/shop', '/wholesale', '/about', '/faq', '/cooking-classes'].includes(
+    ['/shop', '/wholesale', '/about', '/faq', '/cooking-class'].includes(
       pathname
     ) || isCookingClassBookingPage;
 
@@ -77,8 +77,11 @@ const NavigationLinks = ({
   onLinkClick?: () => void;
 }) => {
   const linkClass = (path: string) =>
-    `font-semibold text-lg lg:text-xl xl:text-2xl transition-colors hover:text-red-600 ${
-      pathname === path ? 'text-red-600' : textColor
+    `font-semibold text-lg lg:text-xl transition-colors hover:text-red-600 ${
+      (path !== '/' && pathname.includes(path)) ||
+      (path === '/' && pathname === path)
+        ? 'text-red-600'
+        : textColor
     }`;
 
   return (
@@ -90,8 +93,8 @@ const NavigationLinks = ({
         Shop
       </Link>
       <Link
-        href="/cooking-classes"
-        className={linkClass('/cooking-classes')}
+        href="/cooking-class"
+        className={linkClass('/cooking-class')}
         onClick={onLinkClick}
       >
         Class
@@ -123,7 +126,7 @@ const AuthSection = ({
     return (
       <Link href="/login">
         <button
-          className={`font-semibold ${isMobile ? 'px-8 py-2 text-xl' : 'px-4 py-1 text-lg lg:px-6 lg:py-2 lg:text-xl xl:text-2xl'} rounded-full border-2 ${
+          className={`font-semibold ${isMobile ? 'px-8 py-2 text-xl' : 'px-4 py-1 text-lg lg:px-6 lg:text-xl'} rounded-full border-2 ${
             isMobile
               ? 'border-[#fabc20] bg-[#fabc20] text-black hover:bg-black hover:text-white'
               : buttonStyles
@@ -274,77 +277,79 @@ function Navbar() {
     <>
       <div
         className={cn(
-          'fixed top-0 right-0 left-0 z-[49] bg-transparent px-6 py-6 transition-all duration-100 md:py-12',
-          isMenuScrolled && 'bg-white !py-4 shadow'
+          'fixed top-0 right-0 left-0 z-[49] bg-transparent !py-4 transition-all duration-75',
+          isMenuScrolled && 'bg-white shadow'
         )}
       >
-        <div className="mx-auto flex w-full items-center justify-between transition-all duration-500">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex h-[34px] w-[150px] items-center justify-center sm:h-[38px] sm:w-[170px] md:h-[43px] md:w-[190px] lg:h-[47px] lg:w-[210px]"
-          >
-            <Image
-              src={customNavStyles.logoSrc}
-              alt="Shirley's Logo"
-              width={210}
-              height={47}
-              className="h-full w-full object-contain"
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden items-center gap-4 md:flex lg:gap-6 xl:gap-8">
-            <NavigationLinks
-              pathname={pathname}
-              textColor={customNavStyles.textColor}
-            />
-            <CartButton totalQuantity={totalQuantity} size={50} />
-          </nav>
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-4 md:hidden">
-            <CartButton totalQuantity={totalQuantity} />
-            <button
-              onClick={toggleMenu}
-              className={`text-2xl focus:outline-none ${customNavStyles.isWhiteMode ? 'text-white' : 'text-black'}`}
-              aria-label="Toggle menu"
+        <div className="container mx-auto">
+          <div className="mx-auto flex w-full items-center justify-between transition-all duration-500">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex h-[34px] w-[150px] items-center justify-center"
             >
-              {isMenuOpen ? '✕' : '☰'}
-            </button>
+              <Image
+                src={customNavStyles.logoSrc}
+                alt="Shirley's Logo"
+                width={210}
+                height={47}
+                className="h-full w-full object-contain"
+              />
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden items-center gap-4 md:flex lg:gap-6 xl:gap-8">
+              <NavigationLinks
+                pathname={pathname}
+                textColor={customNavStyles.textColor}
+              />
+              <CartButton totalQuantity={totalQuantity} size={50} />
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="flex items-center gap-4 md:hidden">
+              <CartButton totalQuantity={totalQuantity} />
+              <button
+                onClick={toggleMenu}
+                className={`text-2xl focus:outline-none ${customNavStyles.isWhiteMode ? 'text-white' : 'text-black'}`}
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? '✕' : '☰'}
+              </button>
+            </div>
+
+            {/* Desktop Auth Section */}
+            <div className="hidden md:block">
+              <AuthSection
+                isAuthenticated={isAuthenticated}
+                buttonStyles={customNavStyles.buttonStyles}
+                router={router}
+              />
+            </div>
           </div>
 
-          {/* Desktop Auth Section */}
-          <div className="hidden md:block">
-            <AuthSection
-              isAuthenticated={isAuthenticated}
-              buttonStyles={customNavStyles.buttonStyles}
-              router={router}
-            />
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`absolute left-0 z-50 mt-2 w-full overflow-hidden border border-gray-200 bg-[#fffbf0] transition-all duration-300 ease-in-out md:hidden ${isMenuOpen ? 'max-h-[400px] px-6 pb-4 opacity-100' : 'max-h-0 px-6 py-0 opacity-0'}`}
-        >
-          <nav
-            className={`flex flex-col items-center gap-6 transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-10'}`}
+          {/* Mobile Menu */}
+          <div
+            className={`absolute left-0 z-50 mt-2 w-full overflow-hidden border border-gray-200 bg-[#fffbf0] transition-all duration-300 ease-in-out md:hidden ${isMenuOpen ? 'max-h-[400px] px-6 pb-4 opacity-100' : 'max-h-0 px-6 py-0 opacity-0'}`}
           >
-            <div className="mb-2 w-full pb-2"></div>
-            <NavigationLinks
-              pathname={pathname}
-              textColor="text-black"
-              onLinkClick={closeMenu}
-            />
-            <AuthSection
-              isAuthenticated={isAuthenticated}
-              buttonStyles={customNavStyles.buttonStyles}
-              router={router}
-              isMobile={true}
-              onActionComplete={closeMenu}
-            />
-          </nav>
+            <nav
+              className={`flex flex-col items-center gap-6 transition-transform duration-300 ${isMenuOpen ? 'translate-y-0' : '-translate-y-10'}`}
+            >
+              <div className="mb-2 w-full pb-2"></div>
+              <NavigationLinks
+                pathname={pathname}
+                textColor="text-black"
+                onLinkClick={closeMenu}
+              />
+              <AuthSection
+                isAuthenticated={isAuthenticated}
+                buttonStyles={customNavStyles.buttonStyles}
+                router={router}
+                isMobile={true}
+                onActionComplete={closeMenu}
+              />
+            </nav>
+          </div>
         </div>
       </div>
     </>
