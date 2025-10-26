@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type AdminUpdateCookingClassScheduleDto = {
-  dateTime: string;
-  maxSlots: number;
+  dateTime?: string;
+  maxSlots?: number;
 };
 
