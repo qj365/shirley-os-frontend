@@ -7,7 +7,6 @@ export type CreateCookingClassBookingDto = {
   fullname: string;
   email: string;
   phone: string;
-  note?: string;
   bookingFor: string;
   specialRequest?: string;
   numberOfPeople: number;
