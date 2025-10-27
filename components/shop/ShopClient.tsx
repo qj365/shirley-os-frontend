@@ -68,6 +68,9 @@ export default function ShopClient({
     } catch (err) {
       console.error('Error fetching products by category:', err);
       setError('Failed to load products');
+      // On error, set products to empty array to show empty shop
+      setCategoryProducts([]);
+      setCategoryPagination({ hasMore: false });
     } finally {
       setLoading(false);
     }
@@ -78,6 +81,9 @@ export default function ShopClient({
     setSelectedCategoryId(categoryId);
 
     if (categoryId) {
+      // Reset products list to empty before fetching new data
+      setCategoryProducts([]);
+      setCategoryPagination({ hasMore: false });
       // Fetch products for specific category
       fetchProductsByCategory(categoryId);
     } else {
@@ -120,7 +126,13 @@ export default function ShopClient({
       item => item?.products && item.products.length > 0
     );
 
-    if (categoriesWithProducts.length === 0) return null;
+    if (categoriesWithProducts.length === 0) {
+      return (
+        <section className="mx-auto flex w-full flex-col gap-10">
+          <EmptyShop />
+        </section>
+      );
+    }
 
     return (
       <div className="space-y-15">
@@ -139,6 +151,19 @@ export default function ShopClient({
   const renderCategoryProducts = (categoryId: string) => {
     const categoryName = getCategoryName(categoryId);
 
+    // Show loading state only when actually loading
+    if (loading) {
+      return (
+        <section className="mx-auto flex w-full flex-col gap-10">
+          <h2 className="text-lg font-bold md:text-[25px]">{categoryName}</h2>
+          <div className="flex justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-yellow-500"></div>
+          </div>
+        </section>
+      );
+    }
+
+    // Show products when we have data
     if (categoryProducts.length > 0) {
       return (
         <ProductList
@@ -151,17 +176,7 @@ export default function ShopClient({
       );
     }
 
-    if (loading) {
-      return (
-        <section className="mx-auto flex w-full flex-col gap-10">
-          <h2 className="text-lg font-bold md:text-[25px]">{categoryName}</h2>
-          <div className="flex justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-yellow-500"></div>
-          </div>
-        </section>
-      );
-    }
-
+    // Show empty state when no products found (after API call completed)
     return (
       <section className="mx-auto flex w-full flex-col gap-10">
         <h2 className="text-lg font-bold md:text-[25px]">{categoryName}</h2>
