@@ -11,6 +11,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ImagePreviewModal from './ImagePreviewModal';
 
 type Props = {
   images: string[];
@@ -31,6 +32,10 @@ export default function ProductImageSlider({
   // State for carousel APIs
   const [mainApi, setMainApi] = React.useState<CarouselApi>();
   const [thumbApi, setThumbApi] = React.useState<CarouselApi>();
+
+  // State for image preview modal
+  const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+  const [previewIndex, setPreviewIndex] = React.useState(0);
 
   // Use externalSelectedIndex as the source of truth, fallback to 0
   const selectedIndex = externalSelectedIndex ?? 0;
@@ -73,6 +78,25 @@ export default function ProductImageSlider({
     onIndexChange?.(index);
   };
 
+  // Handle image click to open preview modal
+  const handleImageClick = (index: number) => {
+    setPreviewIndex(index);
+    setIsPreviewOpen(true);
+  };
+
+  // Handle preview modal index change
+  const handlePreviewIndexChange = (index: number) => {
+    setPreviewIndex(index);
+    // Also update the main carousel if needed
+    mainApi?.scrollTo(index);
+    onIndexChange?.(index);
+  };
+
+  // Handle preview modal close
+  const handlePreviewClose = () => {
+    setIsPreviewOpen(false);
+  };
+
   return (
     <div className="w-full select-none">
       {/* MAIN CAROUSEL */}
@@ -84,7 +108,10 @@ export default function ProductImageSlider({
         <CarouselContent>
           {images.map((img, index) => (
             <CarouselItem key={`${img}+${index}`} className="aspect-square">
-              <div className="relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-[#ffedc3]">
+              <div
+                className="relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-[#ffedc3] transition-colors hover:bg-[#ffd700]"
+                onClick={() => handleImageClick(index)}
+              >
                 <Image
                   key={`${img}+${index}`}
                   src={img}
@@ -163,6 +190,16 @@ export default function ProductImageSlider({
           </CarouselContent>
         </Carousel>
       </div>
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal
+        images={images}
+        currentIndex={previewIndex}
+        isOpen={isPreviewOpen}
+        onClose={handlePreviewClose}
+        onIndexChange={handlePreviewIndexChange}
+        alt={alt}
+      />
     </div>
   );
 }

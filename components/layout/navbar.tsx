@@ -159,7 +159,7 @@ const AuthSection = ({
     <div className="flex items-center gap-4">
       <button
         onClick={() => router.push('/my-page')}
-        className={`rounded-full border-2 px-4 py-1 text-lg font-semibold lg:px-6 lg:py-2 lg:text-xl xl:text-2xl ${buttonStyles} transition-colors active:scale-95`}
+        className={`rounded-full border-2 px-4 py-1 text-lg font-semibold lg:px-6 lg:text-xl xl:text-2xl ${buttonStyles} transition-colors active:scale-95`}
       >
         Account
       </button>

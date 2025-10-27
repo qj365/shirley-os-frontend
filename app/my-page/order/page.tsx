@@ -41,7 +41,7 @@ export default function OrdersHistory() {
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 1,
+    pageSize: 10,
     totalPages: 0,
     total: 0,
   });
@@ -149,11 +149,11 @@ export default function OrdersHistory() {
   const getStatusDisplay = (status: string | null) => {
     switch (status) {
       case 'FULFILLED':
-        return 'Delivered';
+        return 'FULFILLED';
       case 'UNFULFILLED':
-        return 'Process';
+        return 'UNFULFILLED';
       case 'CANCELLED':
-        return 'Cancelled';
+        return 'CANCELLED';
       default:
         return 'Unknown';
     }
@@ -328,9 +328,11 @@ export default function OrdersHistory() {
                 {/* Right Section - Status and Price */}
                 <div className="flex flex-col items-center gap-2 md:max-w-[250px] md:flex-1 md:flex-row md:justify-between">
                   <Button
-                    className={`size-8 min-w-[100px] rounded-full font-semibold ${getStatusStyle(order.fulfillmentStatus)}`}
+                    className={`size-8 min-w-[120px] rounded-full font-semibold ${getStatusStyle(order.fulfillmentStatus)}`}
                   >
-                    {getStatusDisplay(order.fulfillmentStatus)}
+                    <span className="text-sm">
+                      {getStatusDisplay(order.fulfillmentStatus)}
+                    </span>
                   </Button>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-black md:text-xl">
