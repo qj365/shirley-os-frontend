@@ -5,6 +5,7 @@
 import type { CreateCookingClassBookingDto } from '../models/CreateCookingClassBookingDto';
 import type { CreateCookingClassBookingResponse } from '../models/CreateCookingClassBookingResponse';
 import type { CursorPagingResponse_GetCookingClassesResponse_Array_ } from '../models/CursorPagingResponse_GetCookingClassesResponse_Array_';
+import type { GetBookedCookingClassResponse } from '../models/GetBookedCookingClassResponse';
 import type { GetBookingByIdResponse } from '../models/GetBookingByIdResponse';
 import type { GetCookingClassBySlugResponse } from '../models/GetCookingClassBySlugResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -61,22 +62,26 @@ export class CookingClassService {
     });
   }
   /**
-   * @returns GetCookingClassBySlugResponse Ok
+   * @returns GetBookedCookingClassResponse Ok
    * @throws ApiError
    */
-  public customerGetCookingClassBySlug({
-    slug,
+  public customerGetBookedCookingClass({
+    startDate,
+    endDate,
   }: {
-    slug: string,
-  }): CancelablePromise<GetCookingClassBySlugResponse> {
+    startDate?: string,
+    endDate?: string,
+  }): CancelablePromise<Array<GetBookedCookingClassResponse>> {
     return this.httpRequest.request({
       method: 'GET',
-      url: '/customer/cooking-classes/{slug}',
-      path: {
-        'slug': slug,
+      url: '/customer/cooking-classes/booking',
+      query: {
+        'startDate': startDate,
+        'endDate': endDate,
       },
       errors: {
         400: `Bad request`,
+        401: `Invalid token`,
         403: `Forbidden`,
         404: `Not found`,
         500: `Internal server error`,
@@ -100,6 +105,29 @@ export class CookingClassService {
       errors: {
         400: `Bad request`,
         401: `Invalid token`,
+        403: `Forbidden`,
+        404: `Not found`,
+        500: `Internal server error`,
+      },
+    });
+  }
+  /**
+   * @returns GetCookingClassBySlugResponse Ok
+   * @throws ApiError
+   */
+  public customerGetCookingClassBySlug({
+    slug,
+  }: {
+    slug: string,
+  }): CancelablePromise<GetCookingClassBySlugResponse> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/customer/cooking-classes/{slug}',
+      path: {
+        'slug': slug,
+      },
+      errors: {
+        400: `Bad request`,
         403: `Forbidden`,
         404: `Not found`,
         500: `Internal server error`,
