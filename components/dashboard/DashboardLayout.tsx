@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  UtensilsCrossed,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,6 +41,11 @@ export const dashboardMenuItems = [
     icon: FileText,
     label: 'Orders history',
     href: '/my-page/order',
+  },
+  {
+    icon: UtensilsCrossed,
+    label: 'My Cooking Classes',
+    href: '/my-page/cooking-classes',
   },
   // {
   //   icon: RefreshCw,
@@ -125,7 +131,7 @@ export default function DashboardLayout({
         <div className="mb-8 flex items-center justify-center lg:hidden">
           <Link
             href="/"
-            className="flex h-[28px] w-[150px] items-center justify-center"
+            className="flex h-[34px] w-[150px] items-center justify-center"
           >
             <Image
               src="/image/Logo_Charcoal_Black.png"
@@ -169,13 +175,13 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gray-50">
       {/* Desktop Header */}
       <header className="sticky top-0 z-30 hidden border-b border-gray-200 bg-white lg:block">
-        <div className="mx-auto max-w-[1600px] px-6 py-4">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-12">
               <Link
                 href="/"
-                className="flex h-[34px] w-[150px] items-center justify-center sm:h-[38px] sm:w-[170px]"
+                className="flex h-[34px] w-[150px] items-center justify-center"
               >
                 <Image
                   src="/image/Logo_Charcoal_Black.png"

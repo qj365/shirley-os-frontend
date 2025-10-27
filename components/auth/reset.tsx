@@ -88,6 +88,13 @@ export default function PasswordReset({
     }
   }, [initialToken, initialEmail]);
 
+  // Update verifyOtpForm when email changes
+  useEffect(() => {
+    if (email) {
+      verifyOtpForm.setValue('email', email);
+    }
+  }, [email, verifyOtpForm]);
+
   // Step 1: Handle request password reset
   const handleRequestReset = async (data: SendOtpFormData) => {
     setLoading(true);
@@ -102,6 +109,7 @@ export default function PasswordReset({
         },
       });
       setEmail(data.email);
+      verifyOtpForm.setValue('email', data.email);
       setSuccessMessage(
         'OTP code has been sent to your email. Please check your inbox.'
       );

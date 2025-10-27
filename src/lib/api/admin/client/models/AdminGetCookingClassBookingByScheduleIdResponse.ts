@@ -2,9 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { _36_Enums_PaymentStatus } from './_36_Enums_PaymentStatus';
 export type AdminGetCookingClassBookingByScheduleIdResponse = {
   createdAt: string;
-  paymentStatus: string;
+  paymentStatus: _36_Enums_PaymentStatus;
   specialRequest: string | null;
   bookingFor: string;
   numberOfPeople: number;

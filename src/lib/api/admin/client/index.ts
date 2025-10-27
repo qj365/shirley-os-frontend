@@ -51,6 +51,8 @@ export type { CustomerGetMeResponse } from './models/CustomerGetMeResponse';
 export type { Dimension } from './models/Dimension';
 export type { FulfillmentStatus } from './models/FulfillmentStatus';
 export type { GetAllProductsResponse } from './models/GetAllProductsResponse';
+export type { GetBookedCookingClassDto } from './models/GetBookedCookingClassDto';
+export type { GetBookedCookingClassResponse } from './models/GetBookedCookingClassResponse';
 export type { GetBookingByIdResponse } from './models/GetBookingByIdResponse';
 export type { GetCategoriesResponse } from './models/GetCategoriesResponse';
 export type { GetCookingClassBySlugResponse } from './models/GetCookingClassBySlugResponse';

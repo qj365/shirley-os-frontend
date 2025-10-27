@@ -56,11 +56,11 @@ export function OrderDetailModal({
   const getStatusDisplay = (status: string | null) => {
     switch (status) {
       case 'FULFILLED':
-        return 'Delivered';
+        return 'FULFILLED';
       case 'UNFULFILLED':
-        return 'Processing';
+        return 'UNFULFILLED';
       case 'CANCELLED':
-        return 'Cancelled';
+        return 'CANCELLED';
       default:
         return 'Unknown';
     }
