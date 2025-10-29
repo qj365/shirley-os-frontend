@@ -101,7 +101,7 @@ export default function ProductImageSlider({
     <div className="w-full select-none">
       {/* MAIN CAROUSEL */}
       <Carousel
-        opts={{ loop: false, align: 'center' }}
+        opts={{ loop: true, align: 'center' }}
         setApi={setMainApi}
         className="relative w-full"
       >
