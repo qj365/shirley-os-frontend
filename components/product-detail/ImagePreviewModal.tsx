@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 import 'yet-another-react-lightbox/styles.css';
 
 interface ImagePreviewModalProps {
@@ -34,7 +33,7 @@ export default function ImagePreviewModal({
       close={onClose}
       index={currentIndex}
       slides={slides}
-      plugins={[Zoom, Thumbnails]}
+      plugins={[Zoom]}
       on={{
         view: ({ index }) => {
           if (typeof index === 'number' && index !== currentIndex) {
@@ -46,16 +45,9 @@ export default function ImagePreviewModal({
       controller={{
         closeOnBackdropClick: true,
       }}
-      carousel={{
-        finite: images.length <= 1,
-      }}
       zoom={{
         maxZoomPixelRatio: 3,
         scrollToZoom: true,
-      }}
-      thumbnails={{
-        position: 'bottom',
-        vignette: true,
       }}
     />
   );
