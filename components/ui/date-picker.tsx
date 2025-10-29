@@ -30,18 +30,6 @@ export function DatePicker({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {/* <Button
-          variant="outline"
-          className={cn(
-            'w-full justify-start pl-10 text-left font-normal',
-            !value && 'text-muted-foreground',
-            className
-          )}
-          disabled={disabled}
-        >
-          <CalendarIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          {value ? format(value, 'PPP') : <span>{placeholder}</span>}
-        </Button> */}
         <Button
           variant="outline"
           id="date"

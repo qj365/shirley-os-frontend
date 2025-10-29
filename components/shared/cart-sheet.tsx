@@ -37,6 +37,7 @@ export function CartSheet({
 
   const totalQuantity = getTotalItems();
   const subtotal = getSubtotal();
+  const distinctProductCount = items.length;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -126,13 +127,23 @@ export function CartSheet({
                 </div>
               </div>
 
-              {/* Minimum Order Notice */}
+              {/* Distinct Products Minimum Notice (requires >= 3 distinct items) */}
+              {items.length > 0 && distinctProductCount < 3 && (
+                <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-5">
+                  <p className="text-center text-sm text-yellow-900">
+                    {`Add ${3 - distinctProductCount} more product to your cart. Minimum order is 3 item`}
+                  </p>
+                </div>
+              )}
+
+              {/* Per-Item Minimum Order Notice */}
               {(() => {
+                const minOrder = 1;
                 const minOrderRequired = items.some(
-                  item => item.quantity < item.minOrder
+                  item => item.quantity < minOrder
                 );
                 const minOrderItems = items.filter(
-                  item => item.quantity < item.minOrder
+                  item => item.quantity < minOrder
                 );
 
                 if (minOrderRequired) {
@@ -142,7 +153,7 @@ export function CartSheet({
                         {minOrderItems
                           .map(
                             item =>
-                              `Please increase ${item.productName} to at least ${item.minOrder} items`
+                              `Please increase ${item.productName} to at least ${minOrder} item${minOrder > 1 ? 's' : ''}`
                           )
                           .join(', ')}
                       </p>
@@ -156,16 +167,24 @@ export function CartSheet({
               {/* Checkout Button */}
               <Button
                 onClick={() => {
+                  if (distinctProductCount < 3) {
+                    toast.info(
+                      `Add ${3 - distinctProductCount} more product to your cart. Minimum order is 3 item`
+                    );
+                    return;
+                  }
+
+                  const minOrder = 1;
                   const minOrderRequired = items.some(
-                    item => item.quantity < item.minOrder
+                    item => item.quantity < minOrder
                   );
 
                   if (minOrderRequired) {
                     const minOrderItems = items.filter(
-                      item => item.quantity < item.minOrder
+                      item => item.quantity < minOrder
                     );
                     toast.info(
-                      `Please increase quantities to meet minimum order requirements: ${minOrderItems.map(item => `${item.productName} (min: ${item.minOrder})`).join(', ')}`
+                      `Please increase quantities to meet minimum order requirements: ${minOrderItems.map(item => `${item.productName} (min: ${minOrder})`).join(', ')}`
                     );
                     return;
                   }
@@ -173,7 +192,10 @@ export function CartSheet({
                   onOpenChange?.(false);
                   router.push('/order');
                 }}
-                disabled={items.some(item => item.quantity < item.minOrder)}
+                disabled={
+                  distinctProductCount < 3 ||
+                  items.some(item => item.quantity < 1)
+                }
                 className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Proceed to Order

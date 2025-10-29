@@ -35,10 +35,11 @@ export const useCartStore = create<CartStore>()(
       addItem: item => {
         const items = get().items;
 
-        // Check minimum order requirement
-        if (item.quantity < item.minOrder) {
+        // Check minimum order requirement (default is 1)
+        const minOrder = 1;
+        if (item.quantity < minOrder) {
           throw new Error(
-            `Minimum order quantity is ${item.minOrder} for this product`
+            `Minimum order quantity is ${minOrder} for this product`
           );
         }
 
@@ -86,10 +87,11 @@ export const useCartStore = create<CartStore>()(
 
         const item = get().items.find(i => i.id === id);
         if (item) {
-          // Check minimum order requirement
-          if (quantity < item.minOrder) {
+          // Check minimum order requirement (default is 1)
+          const minOrder = 1;
+          if (quantity < minOrder) {
             throw new Error(
-              `Minimum order quantity is ${item.minOrder} for this product`
+              `Minimum order quantity is ${minOrder} for this product`
             );
           }
 

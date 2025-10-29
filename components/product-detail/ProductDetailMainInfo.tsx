@@ -26,9 +26,7 @@ export default function ProductDetailMainInfo({
   const { name, productVariants, variantOptions, images, id } = product || {};
   const addItem = useCartStore(state => state.addItem);
 
-  const isOutOfStock = productVariants?.every(
-    item => item.stock < item.minOrder
-  );
+  const isOutOfStock = productVariants?.every(item => item.stock < 1);
 
   // --- state ---
   const [selectedOptions, setSelectedOptions] = React.useState<
@@ -44,7 +42,7 @@ export default function ProductDetailMainInfo({
       variant =>
         selectedIds.every(id =>
           variant?.variantOptionIds.includes(id as number)
-        ) && variant.stock >= variant.minOrder
+        ) && variant.stock >= 1
     );
   }, [selectedOptions, productVariants]);
 
@@ -52,9 +50,7 @@ export default function ProductDetailMainInfo({
     matchedVariants.length === 1
       ? matchedVariants[0].price
       : Math.min(
-          ...productVariants
-            .filter(v => v.stock >= v.minOrder)
-            .map(v => v.price)
+          ...productVariants.filter(v => v.stock >= 1).map(v => v.price)
         );
 
   const displayCompare =
@@ -62,7 +58,7 @@ export default function ProductDetailMainInfo({
       ? matchedVariants[0].compareAtPrice
       : Math.max(
           ...productVariants
-            .filter(v => v.stock >= v.minOrder)
+            .filter(v => v.stock >= 1)
             .map(v => v.compareAtPrice)
         );
 
@@ -82,13 +78,46 @@ export default function ProductDetailMainInfo({
           v =>
             selectedIds.every(id =>
               v?.variantOptionIds.includes(id as number)
-            ) && v.stock >= v.minOrder
+            ) && v.stock >= 1
         );
         if (!valid) result.add(opt.id);
       });
     });
     return result;
   }, [selectedOptions, productVariants, variantOptions]);
+
+  // --- auto-select options when there is exactly one variant (run once per product) ---
+  const lastAutoSelectProductIdRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (!productVariants || !variantOptions) return;
+    if (id == null) return;
+
+    // ensure this logic runs at most once per product change
+    if (lastAutoSelectProductIdRef.current === id) return;
+    lastAutoSelectProductIdRef.current = id;
+
+    if (productVariants.length !== 1) return;
+
+    const singleVariant = productVariants[0];
+
+    // Only run when variant has enough stock (minimum 1)
+    if (singleVariant.stock < 1) return;
+
+    const hasAnySelection = Object.values(selectedOptions).some(Boolean);
+    if (hasAnySelection) return; // don't override user selection
+
+    const nextSelection = Object.fromEntries(
+      variantOptions.map(group => {
+        const matchedOpt = group.options.find(opt =>
+          singleVariant.variantOptionIds.includes(opt.id)
+        );
+        return [group.id, matchedOpt ? matchedOpt.id : null];
+      })
+    );
+
+    setSelectedOptions(nextSelection);
+  }, [id, productVariants, variantOptions, selectedOptions]);
 
   // --- update image when variant changes ---
   const [hasUserSelectedOptions, setHasUserSelectedOptions] =
@@ -162,10 +191,10 @@ export default function ProductDetailMainInfo({
     currentSelectedImageIndex,
   ]);
 
-  // --- update quantity when variant changes to respect minOrder ---
+  // --- update quantity when variant changes (default minOrder is 1) ---
   React.useEffect(() => {
     if (matchedVariants.length === 1) {
-      const minOrder = matchedVariants[0].minOrder;
+      const minOrder = 1;
       if (quantity < minOrder) {
         setQuantity(minOrder);
       }
@@ -194,19 +223,16 @@ export default function ProductDetailMainInfo({
       const matched = productVariants.find(
         v =>
           selectedIds.every(id => v?.variantOptionIds.includes(id as number)) &&
-          v.stock >= v.minOrder
+          v.stock >= 1
       );
       if (!matched) {
-        toast.error(
-          'The selected combination is currently unavailable or does not meet minimum order requirements.'
-        );
+        toast.error('The selected combination is currently unavailable.');
         return;
       }
 
-      if (quantity < matched.minOrder) {
-        toast.error(
-          `Minimum order quantity is ${matched.minOrder} for this product.`
-        );
+      const minOrder = 1;
+      if (quantity < minOrder) {
+        toast.error(`Minimum order quantity is ${minOrder} for this product.`);
         return;
       }
 
@@ -226,7 +252,6 @@ export default function ProductDetailMainInfo({
         .filter(Boolean)
         .join(', ');
 
-      console.log(matched, '{{{{}}}}}}');
       // Add to cart
       addItem({
         productId: id,
@@ -239,7 +264,7 @@ export default function ProductDetailMainInfo({
         compareAtPrice: matched.compareAtPrice,
         image: matched.image,
         stock: matched.stock,
-        minOrder: matched.minOrder,
+        minOrder: 1,
       });
 
       toast.success('Added to cart successfully!');
@@ -313,21 +338,17 @@ export default function ProductDetailMainInfo({
 
       {/* QUANTITY SELECTOR */}
 
-      <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-center md:gap-3">
+      <div className="mt-4 flex flex-col gap-8 sm:flex-row md:items-center md:gap-3">
         <div className="flex min-w-[160px] items-center rounded-md border border-gray-200">
           <Button
             variant="ghost"
             size="sm"
             className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50 [&:disabled_span]:!cursor-not-allowed"
             onClick={() => {
-              const minOrder =
-                matchedVariants.length === 1 ? matchedVariants[0].minOrder : 1;
+              const minOrder = 1;
               setQuantity(q => Math.max(minOrder, q - 1));
             }}
-            disabled={
-              quantity <=
-              (matchedVariants.length === 1 ? matchedVariants[0].minOrder : 1)
-            }
+            disabled={quantity <= 1}
           >
             <Minus className="h-3 w-3" />
             <span className="sr-only">Decrease quantity</span>
@@ -348,7 +369,7 @@ export default function ProductDetailMainInfo({
           </Button>
         </div>
         <Button
-          className="btn-gradient--yellow size-10 flex-1 !text-lg !font-semibold hover:opacity-80"
+          className="btn-gradient--yellow flex-1 !text-lg !font-semibold hover:opacity-80"
           onClick={handleAddToCart}
           disabled={isOutOfStock}
         >

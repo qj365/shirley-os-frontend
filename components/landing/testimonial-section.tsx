@@ -14,7 +14,7 @@ export default function TestimonialsSection() {
       <div className="relative z-10 container flex w-full flex-col items-center gap-9 pt-0 md:pt-[170px] md:pb-[80px]">
         {/* Heading */}
         <h2 className="max-w-xl text-center text-3xl leading-tight font-bold sm:text-3xl md:text-4xl lg:text-5xl">
-          Love by individuals across the globe
+          Loved by individuals across the globe
         </h2>
 
         {/* Testimonials */}
