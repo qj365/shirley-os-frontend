@@ -109,7 +109,7 @@ export default function CartItem({
                   size="sm"
                   className="h-8 w-8 rounded-none border-r border-gray-200 p-0 hover:bg-gray-50"
                   onClick={() => handleQuantityChange(item.quantity - 1)}
-                  disabled={item.quantity <= item.minOrder}
+                  disabled={item.quantity <= 1}
                 >
                   <Minus className="h-3 w-3" />
                   <span className="sr-only">Decrease quantity</span>

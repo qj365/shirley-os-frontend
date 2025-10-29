@@ -30,19 +30,13 @@ export default function ProductListItem({ product }: Props) {
       </Link>
 
       <div className="flex flex-grow flex-col p-3 sm:p-4">
-        <h3 className="mb-2 line-clamp-2 text-base font-semibold md:text-lg">
+        <h3 className="mb-2 line-clamp-2 text-base font-semibold sm:text-base">
           {product?.name}
         </h3>
 
         <div className="mb-3 flex flex-wrap items-center gap-2 text-[#7C7C7C] sm:mb-4">
-          <span className="text-base font-bold md:text-lg">
-            From{' '}
-            <span className="text-lg text-black md:text-xl">
-              {formatDisplayCurrency(product?.price)}
-            </span>
-          </span>
-          <span className="text-xs line-through md:text-sm">
-            {formatDisplayCurrency(product?.compareAtPrice)}{' '}
+          <span className="text-base font-bold text-black sm:text-lg">
+            From <span>{formatDisplayCurrency(product?.price)}</span>
           </span>
         </div>
 
