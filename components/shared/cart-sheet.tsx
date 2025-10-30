@@ -37,7 +37,6 @@ export function CartSheet({
 
   const totalQuantity = getTotalItems();
   const subtotal = getSubtotal();
-  const distinctProductCount = items.length;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -127,11 +126,11 @@ export function CartSheet({
                 </div>
               </div>
 
-              {/* Distinct Products Minimum Notice (requires >= 3 distinct items) */}
-              {items.length > 0 && distinctProductCount < 3 && (
+              {/* Minimum Quantity notice  (requires >= 3  total quantity of all items in cart) */}
+              {items.length > 0 && totalQuantity < 3 && (
                 <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-5">
                   <p className="text-center text-sm text-yellow-900">
-                    {`Add ${3 - distinctProductCount} more product to your cart. Minimum order is 3 item`}
+                    {`Add ${3 - totalQuantity} more product to your cart. Minimum order is 3 items`}
                   </p>
                 </div>
               )}
@@ -167,9 +166,9 @@ export function CartSheet({
               {/* Checkout Button */}
               <Button
                 onClick={() => {
-                  if (distinctProductCount < 3) {
+                  if (totalQuantity < 3) {
                     toast.info(
-                      `Add ${3 - distinctProductCount} more product to your cart. Minimum order is 3 item`
+                      `Add ${3 - totalQuantity} more product to your cart. Minimum order is 3 items`
                     );
                     return;
                   }
@@ -193,8 +192,7 @@ export function CartSheet({
                   router.push('/order');
                 }}
                 disabled={
-                  distinctProductCount < 3 ||
-                  items.some(item => item.quantity < 1)
+                  totalQuantity < 3 || items.some(item => item.quantity < 1)
                 }
                 className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
