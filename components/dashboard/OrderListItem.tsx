@@ -1,5 +1,6 @@
 import { ChevronRight, Store } from 'lucide-react';
 import { Button } from '../ui/button';
+import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 
 type Props = {
   item: {
@@ -51,7 +52,7 @@ export default function OrderListItem({ item }: Props) {
         </Button>
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold text-black md:text-xl">
-            £{item.amount.toFixed(2)}
+            {formatDisplayCurrency(item.amount)}
           </span>
           <ChevronRight className="h-5 w-5 !font-bold text-gray-400" />
         </div>

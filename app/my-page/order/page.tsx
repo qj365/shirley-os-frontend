@@ -27,6 +27,7 @@ import {
   NumberedPagingResponse_GetOrdersResponse_Array_,
 } from '@/src/lib/api/customer/client';
 import useDebounceSearch from '@/hooks/useDebounceSearch';
+import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 
 interface OrderFilters {
   orderCode: string;
@@ -336,7 +337,7 @@ export default function OrdersHistory() {
                   </Button>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-black md:text-xl">
-                      £{order.total.toFixed(2)}
+                      {formatDisplayCurrency(order.total)}
                     </span>
                     <ChevronRight className="h-5 w-5 !font-bold text-gray-400" />
                   </div>

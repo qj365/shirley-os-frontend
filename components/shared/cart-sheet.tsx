@@ -18,6 +18,7 @@ import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 import { ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { SHIPPING_FEE } from '@/utils/constants';
 
 export function CartSheet({
   children,
@@ -114,13 +115,19 @@ export function CartSheet({
                     {formatDisplayCurrency(subtotal)}
                   </span>
                 </div>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Shipping Fee</span>
+                  <span className="font-medium text-gray-900">
+                    {formatDisplayCurrency(SHIPPING_FEE)}
+                  </span>
+                </div>
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex items-center justify-between">
                     <span className="text-base font-semibold text-gray-900">
                       Total
                     </span>
                     <span className="text-lg font-bold text-gray-900">
-                      {formatDisplayCurrency(subtotal)}
+                      {formatDisplayCurrency(subtotal + SHIPPING_FEE)}
                     </span>
                   </div>
                 </div>

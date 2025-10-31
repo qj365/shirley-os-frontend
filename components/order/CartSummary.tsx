@@ -7,6 +7,7 @@ import Loading from '@/components/shared/loading';
 import CartItem from '@/components/shared/cart-item';
 import { useCartStore } from '@/stores/cart-store';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
+import { SHIPPING_FEE } from '@/utils/constants';
 
 interface Props {
   showSummary?: boolean;
@@ -72,9 +73,16 @@ export default function CartSummary({ showSummary = false }: Props) {
               </span>
             </div>
 
+            <div className="flex justify-between text-lg">
+              <span className="text-gray-700">Shipping Fee:</span>
+              <span className="font-semibold text-gray-900">
+                {formatDisplayCurrency(SHIPPING_FEE)}
+              </span>
+            </div>
+
             <div className="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold text-gray-900 md:text-xl">
               <span>Total:</span>
-              <span>{formatDisplayCurrency(subtotal)}</span>
+              <span>{formatDisplayCurrency(subtotal + SHIPPING_FEE)}</span>
             </div>
           </div>
         </div>
@@ -110,9 +118,23 @@ export default function CartSummary({ showSummary = false }: Props) {
         {/* Order Summary */}
         <div className="mt-6 border-t border-gray-300 pt-6">
           <div className="space-y-3">
+            <div className="flex justify-between text-lg">
+              <span className="text-gray-700">Subtotal:</span>
+              <span className="font-semibold text-gray-900">
+                {formatDisplayCurrency(subtotal)}
+              </span>
+            </div>
+
+            <div className="flex justify-between text-lg">
+              <span className="text-gray-700">Shipping Fee:</span>
+              <span className="font-semibold text-gray-900">
+                {formatDisplayCurrency(SHIPPING_FEE)}
+              </span>
+            </div>
+
             <div className="flex justify-between border-t border-gray-200 pt-2 text-lg font-bold text-gray-900 md:text-xl">
               <span>Total:</span>
-              <span>{formatDisplayCurrency(subtotal)}</span>
+              <span>{formatDisplayCurrency(subtotal + SHIPPING_FEE)}</span>
             </div>
           </div>
         </div>
