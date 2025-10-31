@@ -351,7 +351,9 @@ export default function MyCookingClasses() {
                           Price per person
                         </h4>
                         <p className="text-gray-600">
-                          £{selectedBooking.cookingClass.price.toFixed(2)}
+                          {formatDisplayCurrency(
+                            selectedBooking.cookingClass.price
+                          )}
                         </p>
                       </div>
                     </div>
@@ -492,16 +494,17 @@ export default function MyCookingClasses() {
                           Total Cost
                         </p>
                         <p className="text-sm text-gray-600">
-                          £{selectedBooking.cookingClass.price.toFixed(2)} ×{' '}
-                          {selectedBooking.numberOfPeople} people
+                          {formatDisplayCurrency(
+                            selectedBooking.cookingClass.price
+                          )}{' '}
+                          × {selectedBooking.numberOfPeople} people
                         </p>
                       </div>
                       <p className="text-2xl font-bold text-black">
-                        £
-                        {(
+                        {formatDisplayCurrency(
                           selectedBooking.cookingClass.price *
-                          selectedBooking.numberOfPeople
-                        ).toFixed(2)}
+                            selectedBooking.numberOfPeople
+                        )}
                       </p>
                     </div>
                   </div>

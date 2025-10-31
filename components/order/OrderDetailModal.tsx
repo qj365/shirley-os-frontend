@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { api } from '@/src/lib/api/customer';
 import { GetOrderByIdResponse } from '@/src/lib/api/customer/client';
+import { SHIPPING_FEE } from '@/utils/constants';
+import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 import { Calendar, Mail, MapPin, Package, Phone, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -195,21 +197,31 @@ export function OrderDetailModal({
                         <p className="text-sm">{item.productName}</p>
                         <div className="mt-1 flex items-center gap-4 text-sm">
                           <span>Qty: {item.quantity}</span>
-                          <span>Price: £{item.price.toFixed(2)}</span>
+                          <span>
+                            Price: {formatDisplayCurrency(item.price)}
+                          </span>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">
-                          £{item.total.toFixed(2)}
+                          {formatDisplayCurrency(item.total)}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="border-t px-4 py-3">
+                  <div className="flex justify-between text-base">
+                    <span className="text-gray-700">Shipping Fee:</span>
+                    <span className="font-semibold text-gray-900">
+                      {formatDisplayCurrency(
+                        orderDetails.shippingFee || SHIPPING_FEE
+                      )}
+                    </span>
+                  </div>
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
-                    <span>£{orderDetails.total.toFixed(2)}</span>
+                    <span>{formatDisplayCurrency(orderDetails.total)}</span>
                   </div>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import ClearCartOnSuccess from '@/components/order/ClearCartOnSuccess';
+import { SHIPPING_FEE } from '@/utils/constants';
 
 export default async function OrderSuccessPage({
   searchParams,
@@ -179,6 +180,21 @@ export default async function OrderSuccessPage({
               </div>
               {order.total !== undefined && (
                 <div className="border-t border-gray-200 px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-700">Subtotal</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      {formatDisplayCurrency(order.subTotal)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-700">Shipping Fee</span>
+                    <span className="text-lg font-semibold text-gray-900">
+                      {formatDisplayCurrency(
+                        order?.shippingFee || SHIPPING_FEE
+                      )}
+                    </span>
+                  </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between pt-3">
                       <span className="font-semibold text-gray-900">Total</span>
