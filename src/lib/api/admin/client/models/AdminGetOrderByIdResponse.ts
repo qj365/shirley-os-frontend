@@ -36,6 +36,8 @@ export type AdminGetOrderByIdResponse = {
   trackingNumber: string | null;
   orderAt: string | null;
   fulfillmentStatus: string | null;
+  shippingFee: number;
+  subTotal: number;
   total: number;
   orderCode: string | null;
   id: number;
