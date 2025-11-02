@@ -4,9 +4,9 @@ services:
   frontend:
     build: .
     image: shirleys-food-frontend:latest
-    container_name: shirleys-food-frontend
+    container_name: shirleys-food-frontend-production
     ports:
       - '127.0.0.1:4002:3000'
     env_file:
-      - /environments/production/.env
+      - ../../.env
     restart: unless-stopped
