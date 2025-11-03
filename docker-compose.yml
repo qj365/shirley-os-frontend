@@ -7,7 +7,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_FIRE_BASE_CONFIG: ${NEXT_PUBLIC_FIRE_BASE_CONFIG}
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISH_KEY}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
     image: shirleys-food-frontend:latest
     container_name: shirleys-food-frontend-production
     ports:
