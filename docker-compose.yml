@@ -1,12 +1,15 @@
-version: "3.8"
+version: '3.8'
 
 services:
   frontend:
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_FIRE_BASE_CONFIG: ${NEXT_PUBLIC_FIRE_BASE_CONFIG}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISH_KEY}
     image: shirleys-food-frontend:latest
     container_name: shirleys-food-frontend-production
     ports:
-      - "127.0.0.1:4002:3000"
-    env_file:
-      - ../../.env
+      - '127.0.0.1:4002:3000'
     restart: unless-stopped
