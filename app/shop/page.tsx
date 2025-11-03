@@ -21,12 +21,8 @@ async function fetchAllProducts() {
 }
 
 export default async function ShopPage() {
-  console.log('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL);
-
   const categories = await fetchCategories();
   const allProducts = await fetchAllProducts();
-  console.log('allProducts', allProducts);
-  console.log('categories', categories);
 
   return (
     <div className="relative w-full bg-white">
