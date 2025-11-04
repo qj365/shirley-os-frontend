@@ -51,21 +51,26 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const categoryId = params.category;
 
   const categories = await fetchCategories();
-  const allProducts = await fetchAllProducts();
 
-  // Fetch initial category products if category is in URL
+  // Only fetch one API based on categoryId
+  let allProducts: Awaited<ReturnType<typeof fetchAllProducts>> = [];
   let initialCategoryProducts: GetProductsByCategoryResponse[] = [];
   let initialPagination = {
     hasMore: false,
     nextCursor: undefined as string | undefined,
   };
+
   if (categoryId) {
+    // If categoryId exists, only fetch products by category
     const categoryData = await fetchProductsByCategory(categoryId);
     initialCategoryProducts = categoryData.products;
     initialPagination = {
       hasMore: categoryData.hasMore,
       nextCursor: categoryData.nextCursor,
     };
+  } else {
+    // If no categoryId, only fetch all products
+    allProducts = await fetchAllProducts();
   }
 
   return (

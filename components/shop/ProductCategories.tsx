@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { GetCategoriesResponse } from '@/src/lib/api/customer';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +14,12 @@ import { MAX_VISIBLE_PRODUCT_CATEGORIES } from '@/utils/constants';
 export default function ProductCategories({
   categories,
   selectedCategoryId,
+  onCategorySelect,
 }: {
   categories: GetCategoriesResponse[];
   selectedCategoryId?: string;
+  onCategorySelect?: (categoryId: string | undefined) => void;
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const visible = categories.slice(0, MAX_VISIBLE_PRODUCT_CATEGORIES);
   const hidden = categories.slice(MAX_VISIBLE_PRODUCT_CATEGORIES);
@@ -35,33 +36,23 @@ export default function ProductCategories({
     return `/shop${queryString ? `?${queryString}` : ''}`;
   };
 
-  // Handle category click with scroll preservation
-  // Using window.history.pushState for better control in production
+  // Handle category click - client-side only, no URL navigation
   const handleCategoryClick = (
     e: React.MouseEvent<HTMLButtonElement>,
     categoryId: string | undefined
   ) => {
     e.preventDefault();
+
+    // Update URL silently using pushState (for shareable URLs) but don't trigger navigation
+    // This allows URLs to be shareable but prevents scroll issues
     const url = buildCategoryUrl(categoryId);
-    const scrollY = window.scrollY;
+    window.history.pushState({ category: categoryId }, '', url);
 
-    // Use window.history.pushState for better control - this doesn't trigger scroll
-    // Then use router.replace to sync with Next.js router without scrolling
-    window.history.pushState({ scroll: scrollY }, '', url);
-
-    // Force Next.js router to update without navigation
-    router.replace(url, { scroll: false });
-
-    // Immediately restore scroll position
-    window.scrollTo({ top: scrollY, behavior: 'instant' });
-
-    // Backup restore attempts for production
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: scrollY, behavior: 'instant' });
-      setTimeout(() => {
-        window.scrollTo({ top: scrollY, behavior: 'instant' });
-      }, 50);
-    });
+    // Notify parent component to handle the category change client-side
+    // This will NOT trigger SSR re-render, so no scroll issue
+    if (onCategorySelect) {
+      onCategorySelect(categoryId);
+    }
   };
 
   return (

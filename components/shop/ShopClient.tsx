@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   api,
@@ -49,50 +49,63 @@ export default function ShopClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  // Update state when props change (after navigation)
+  // Track if this is initial mount or props change from server
+  const [isInitialMount, setIsInitialMount] = useState(true);
+
+  // Update state when props change (after navigation from server)
+  // Only update on initial mount or when initialCategoryId changes externally
   useEffect(() => {
     setCategories(initialCategories);
     setAllProducts(initialAllProducts);
-    if (initialCategoryId !== selectedCategoryId) {
-      setSelectedCategoryId(initialCategoryId);
-      setCategoryProducts(initialCategoryProducts);
-      setCategoryPagination(initialPagination);
 
-      // Restore scroll position from sessionStorage if available
-      // This helps with production builds where timing might be different
-      const savedScroll = sessionStorage.getItem('shopScrollPosition');
-      if (savedScroll) {
-        const scrollY = parseInt(savedScroll, 10);
-        // Restore scroll after a short delay to ensure DOM is ready
-        const timer = setTimeout(() => {
-          window.scrollTo({ top: scrollY, behavior: 'instant' });
-          sessionStorage.removeItem('shopScrollPosition');
-        }, 100);
-        return () => clearTimeout(timer);
+    // Only sync with initialCategoryId on initial mount or when it changes from server
+    if (isInitialMount || initialCategoryId !== selectedCategoryId) {
+      // Only update if this is truly a server-side change, not user interaction
+      if (isInitialMount) {
+        setSelectedCategoryId(initialCategoryId);
+        setCategoryProducts(initialCategoryProducts);
+        setCategoryPagination(initialPagination);
+        setIsInitialMount(false);
+      } else if (
+        initialCategoryId !== undefined &&
+        initialCategoryId !== selectedCategoryId
+      ) {
+        // Server-side change (page refresh or navigation)
+        setSelectedCategoryId(initialCategoryId);
+        setCategoryProducts(initialCategoryProducts);
+        setCategoryPagination(initialPagination);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialCategories,
     initialAllProducts,
     initialCategoryId,
     initialCategoryProducts,
     initialPagination,
-    selectedCategoryId,
+    isInitialMount,
+    // selectedCategoryId intentionally excluded to prevent conflicts with client-side changes
   ]);
 
-  // Also restore scroll when categoryProducts update (client-side fetch)
-  useEffect(() => {
-    if (!loading && categoryProducts.length > 0) {
-      const savedScroll = sessionStorage.getItem('shopScrollPosition');
-      if (savedScroll) {
-        const scrollY = parseInt(savedScroll, 10);
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: scrollY, behavior: 'instant' });
-          sessionStorage.removeItem('shopScrollPosition');
-        });
-      }
+  // Scroll position is automatically maintained since we don't use router navigation
+  // No scroll restoration needed for client-side category changes
+
+  // Fetch all products (optional - can be used to refresh data when clicking "All")
+
+  const fetchAllProducts = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await api.product.getAllProducts();
+      setAllProducts(response);
+    } catch (err) {
+      console.error('Error fetching all products:', err);
+      setError('Failed to load products');
+    } finally {
+      setLoading(false);
     }
-  }, [categoryProducts, loading]);
+  }, []);
 
   // Fetch products by category
   const fetchProductsByCategory = useCallback(
@@ -130,19 +143,42 @@ export default function ShopClient({
     []
   );
 
-  // Sync selectedCategoryId with URL query parameter (for browser back/forward)
+  // Track if we're handling a client-side category change
+  const isClientSideChangeRef = useRef(false);
+
+  // Track previous searchParams to detect external URL changes (browser back/forward)
+  const prevSearchParamsRef = useRef(searchParams.toString());
+
+  // Sync selectedCategoryId with URL query parameter (for browser back/forward only)
+  // This only handles external URL changes, not client-side category clicks
   useEffect(() => {
+    // Skip if this is a client-side change
+    if (isClientSideChangeRef.current) {
+      isClientSideChangeRef.current = false;
+      prevSearchParamsRef.current = searchParams.toString();
+      return;
+    }
+
     const categoryFromUrl = searchParams.get('category');
-    // Only update if URL changed and it's different from current state
-    // and different from initial props (which means it was already fetched server-side)
-    if (categoryFromUrl !== selectedCategoryId) {
-      // If it matches initialCategoryId, props will handle it
+    const currentSearchParams = searchParams.toString();
+
+    // Only sync if URL changed externally (browser back/forward), not from client-side pushState
+    const isExternalChange =
+      prevSearchParamsRef.current !== currentSearchParams;
+    prevSearchParamsRef.current = currentSearchParams;
+
+    // Only sync if URL changed externally and it's different from current state
+    if (isExternalChange && categoryFromUrl !== selectedCategoryId) {
+      // If it matches initialCategoryId, use server-fetched data
       if (categoryFromUrl === initialCategoryId) {
         setSelectedCategoryId(categoryFromUrl || undefined);
         setCategoryProducts(initialCategoryProducts);
+        setCategoryPagination(initialPagination);
       } else if (categoryFromUrl && categoryFromUrl !== initialCategoryId) {
-        // Only fetch if URL changed and it's not the initial category
+        // URL changed externally (browser back/forward) - fetch client-side
         setSelectedCategoryId(categoryFromUrl);
+        setCategoryProducts([]);
+        setCategoryPagination({ hasMore: false });
         fetchProductsByCategory(categoryFromUrl);
       } else if (!categoryFromUrl) {
         // Reset to show all products
@@ -151,8 +187,14 @@ export default function ShopClient({
         setCategoryPagination({ hasMore: false });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [
+    searchParams,
+    selectedCategoryId,
+    initialCategoryId,
+    initialCategoryProducts,
+    initialPagination,
+    fetchProductsByCategory,
+  ]);
 
   // Load more products for current category
   const handleLoadMore = () => {
@@ -260,6 +302,28 @@ export default function ShopClient({
       <ProductCategories
         categories={categories}
         selectedCategoryId={selectedCategoryId}
+        onCategorySelect={categoryId => {
+          // Handle category change client-side only
+          // No navigation = no scroll issue
+
+          // Mark this as a client-side change to prevent URL sync override
+          isClientSideChangeRef.current = true;
+
+          if (categoryId) {
+            setSelectedCategoryId(categoryId);
+            setCategoryProducts([]);
+            setCategoryPagination({ hasMore: false });
+            fetchProductsByCategory(categoryId);
+          } else {
+            // Click "All" - reset to show all products
+            // Optionally refresh data to get latest products
+            setSelectedCategoryId(undefined);
+            setCategoryProducts([]);
+            setCategoryPagination({ hasMore: false });
+
+            fetchAllProducts();
+          }
+        }}
       />
 
       {/* Error message */}
