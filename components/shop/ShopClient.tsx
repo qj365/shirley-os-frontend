@@ -57,6 +57,19 @@ export default function ShopClient({
       setSelectedCategoryId(initialCategoryId);
       setCategoryProducts(initialCategoryProducts);
       setCategoryPagination(initialPagination);
+
+      // Restore scroll position from sessionStorage if available
+      // This helps with production builds where timing might be different
+      const savedScroll = sessionStorage.getItem('shopScrollPosition');
+      if (savedScroll) {
+        const scrollY = parseInt(savedScroll, 10);
+        // Restore scroll after a short delay to ensure DOM is ready
+        const timer = setTimeout(() => {
+          window.scrollTo({ top: scrollY, behavior: 'instant' });
+          sessionStorage.removeItem('shopScrollPosition');
+        }, 100);
+        return () => clearTimeout(timer);
+      }
     }
   }, [
     initialCategories,
@@ -66,6 +79,20 @@ export default function ShopClient({
     initialPagination,
     selectedCategoryId,
   ]);
+
+  // Also restore scroll when categoryProducts update (client-side fetch)
+  useEffect(() => {
+    if (!loading && categoryProducts.length > 0) {
+      const savedScroll = sessionStorage.getItem('shopScrollPosition');
+      if (savedScroll) {
+        const scrollY = parseInt(savedScroll, 10);
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: scrollY, behavior: 'instant' });
+          sessionStorage.removeItem('shopScrollPosition');
+        });
+      }
+    }
+  }, [categoryProducts, loading]);
 
   // Fetch products by category
   const fetchProductsByCategory = useCallback(

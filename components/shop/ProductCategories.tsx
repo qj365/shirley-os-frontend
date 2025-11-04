@@ -2,8 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { GetCategoriesResponse } from '@/src/lib/api/customer';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +18,7 @@ export default function ProductCategories({
   categories: GetCategoriesResponse[];
   selectedCategoryId?: string;
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const visible = categories.slice(0, MAX_VISIBLE_PRODUCT_CATEGORIES);
   const hidden = categories.slice(MAX_VISIBLE_PRODUCT_CATEGORIES);
@@ -35,6 +35,35 @@ export default function ProductCategories({
     return `/shop${queryString ? `?${queryString}` : ''}`;
   };
 
+  // Handle category click with scroll preservation
+  // Using window.history.pushState for better control in production
+  const handleCategoryClick = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    categoryId: string | undefined
+  ) => {
+    e.preventDefault();
+    const url = buildCategoryUrl(categoryId);
+    const scrollY = window.scrollY;
+
+    // Use window.history.pushState for better control - this doesn't trigger scroll
+    // Then use router.replace to sync with Next.js router without scrolling
+    window.history.pushState({ scroll: scrollY }, '', url);
+
+    // Force Next.js router to update without navigation
+    router.replace(url, { scroll: false });
+
+    // Immediately restore scroll position
+    window.scrollTo({ top: scrollY, behavior: 'instant' });
+
+    // Backup restore attempts for production
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
+      setTimeout(() => {
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
+      }, 50);
+    });
+  };
+
   return (
     <ul className="mb-12 flex flex-wrap gap-3 sm:mb-16 sm:gap-4">
       {[
@@ -46,10 +75,9 @@ export default function ProductCategories({
       ].map((category, index) => {
         const isSelected = selectedCategoryId == category.id?.toString();
         return (
-          <Link
+          <button
             key={index}
-            href={buildCategoryUrl(category.id?.toString())}
-            scroll={false}
+            onClick={e => handleCategoryClick(e, category.id?.toString())}
             className={`${
               isSelected
                 ? 'btn-gradient--yellow'
@@ -57,7 +85,7 @@ export default function ProductCategories({
             } block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-300 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg`}
           >
             {category.name}
-          </Link>
+          </button>
         );
       })}
 
@@ -75,17 +103,16 @@ export default function ProductCategories({
             {hidden.map(cat => {
               const isSelected = selectedCategoryId == cat?.id.toString();
               return (
-                <DropdownMenuItem key={cat.id} asChild>
-                  <Link
-                    href={buildCategoryUrl(cat.id.toString())}
-                    scroll={false}
+                <DropdownMenuItem key={cat.id}>
+                  <button
+                    onClick={e => handleCategoryClick(e, cat.id.toString())}
                     className={cn(
                       isSelected && '!text-[#FFBA0A]',
                       'inline-block w-full text-left text-sm font-semibold text-black hover:cursor-pointer hover:text-[#FFBA0A] lg:text-base xl:text-lg'
                     )}
                   >
                     {cat.name}
-                  </Link>
+                  </button>
                 </DropdownMenuItem>
               );
             })}
