@@ -1,27 +1,38 @@
+'use client';
+
 import { cn } from '@/lib/utils';
 import { GetCategoriesResponse } from '@/src/lib/api/customer';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { MAX_VISIBLE_PRODUCT_CATEGORIES } from '@/utils/constants';
 
 export default function ProductCategories({
   categories,
   selectedCategoryId,
-  onCategorySelect,
 }: {
   categories: GetCategoriesResponse[];
   selectedCategoryId?: string;
-  onCategorySelect: (categoryId: string | undefined) => void;
 }) {
-  const MAX_VISIBLE = 6;
-  const visible = categories.slice(0, MAX_VISIBLE);
-  const hidden = categories.slice(MAX_VISIBLE);
+  const searchParams = useSearchParams();
+  const visible = categories.slice(0, MAX_VISIBLE_PRODUCT_CATEGORIES);
+  const hidden = categories.slice(MAX_VISIBLE_PRODUCT_CATEGORIES);
 
-  const handleCategoryClick = (categoryId: string | undefined) => {
-    onCategorySelect(categoryId);
+  // Build URL with category query parameter
+  const buildCategoryUrl = (categoryId: string | undefined) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (categoryId) {
+      params.set('category', categoryId);
+    } else {
+      params.delete('category');
+    }
+    const queryString = params.toString();
+    return `/shop${queryString ? `?${queryString}` : ''}`;
   };
 
   return (
@@ -32,19 +43,23 @@ export default function ProductCategories({
           id: undefined,
         },
         ...visible,
-      ].map((category, index) => (
-        <button
-          key={index}
-          onClick={() => handleCategoryClick(category.id?.toString())}
-          className={`${
-            selectedCategoryId == category.id?.toString()
-              ? 'btn-gradient--yellow'
-              : 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-gradient-to-r hover:from-[#F3C03F] hover:to-[#FFBA0A] hover:text-black'
-          } block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-300 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg`}
-        >
-          {category.name}
-        </button>
-      ))}
+      ].map((category, index) => {
+        const isSelected = selectedCategoryId == category.id?.toString();
+        return (
+          <Link
+            key={index}
+            href={buildCategoryUrl(category.id?.toString())}
+            scroll={false}
+            className={`${
+              isSelected
+                ? 'btn-gradient--yellow'
+                : 'text-opacity-90 hover:text-opacity-100 bg-[#E4E4E4] text-black hover:bg-gradient-to-r hover:from-[#F3C03F] hover:to-[#FFBA0A] hover:text-black'
+            } block rounded-full border-[2px] border-transparent px-6 py-2 text-base font-semibold whitespace-nowrap !shadow-none transition-all duration-300 hover:cursor-pointer sm:px-5 sm:py-2 sm:text-sm lg:px-6 lg:py-2 lg:text-base xl:text-lg`}
+          >
+            {category.name}
+          </Link>
+        );
+      })}
 
       {hidden.length > 0 && (
         <DropdownMenu>
@@ -57,20 +72,23 @@ export default function ProductCategories({
             align="start"
             className="border-none bg-white shadow"
           >
-            {hidden.map(cat => (
-              <DropdownMenuItem key={cat.id}>
-                <button
-                  onClick={() => handleCategoryClick(cat.id.toString())}
-                  className={cn(
-                    selectedCategoryId == cat?.id.toString() &&
-                      '!text-[#FFBA0A]',
-                    'inline-block w-full text-left text-sm font-semibold text-black hover:cursor-pointer hover:text-[#FFBA0A] lg:text-base xl:text-lg'
-                  )}
-                >
-                  {cat.name}
-                </button>
-              </DropdownMenuItem>
-            ))}
+            {hidden.map(cat => {
+              const isSelected = selectedCategoryId == cat?.id.toString();
+              return (
+                <DropdownMenuItem key={cat.id} asChild>
+                  <Link
+                    href={buildCategoryUrl(cat.id.toString())}
+                    scroll={false}
+                    className={cn(
+                      isSelected && '!text-[#FFBA0A]',
+                      'inline-block w-full text-left text-sm font-semibold text-black hover:cursor-pointer hover:text-[#FFBA0A] lg:text-base xl:text-lg'
+                    )}
+                  >
+                    {cat.name}
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       )}

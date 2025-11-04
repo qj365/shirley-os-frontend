@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   api,
   GetCategoriesResponse,
@@ -18,80 +18,114 @@ import EmptyShop from './EmptyShop';
 interface ShopClientProps {
   initialCategories: GetCategoriesResponse[];
   initialAllProducts: GetAllProductsResponse;
+  initialCategoryId?: string;
+  initialCategoryProducts?: GetProductsByCategoryResponse[];
+  initialPagination?: {
+    nextCursor?: string;
+    hasMore: boolean;
+  };
 }
 
 export default function ShopClient({
   initialCategories,
   initialAllProducts,
+  initialCategoryId,
+  initialCategoryProducts = [],
+  initialPagination = { hasMore: false },
 }: ShopClientProps) {
+  const searchParams = useSearchParams();
   const [selectedCategoryId, setSelectedCategoryId] = useState<
     string | undefined
-  >(undefined);
+  >(initialCategoryId);
   const [categories, setCategories] = useState(initialCategories);
   const [allProducts, setAllProducts] = useState(initialAllProducts);
   const [categoryProducts, setCategoryProducts] = useState<
     GetProductsByCategoryResponse[]
-  >([]);
+  >(initialCategoryProducts);
   const [categoryPagination, setCategoryPagination] = useState<{
     nextCursor?: string;
     hasMore: boolean;
-  }>({ hasMore: false });
+  }>(initialPagination);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
+  // Update state when props change (after navigation)
+  useEffect(() => {
+    setCategories(initialCategories);
+    setAllProducts(initialAllProducts);
+    if (initialCategoryId !== selectedCategoryId) {
+      setSelectedCategoryId(initialCategoryId);
+      setCategoryProducts(initialCategoryProducts);
+      setCategoryPagination(initialPagination);
+    }
+  }, [
+    initialCategories,
+    initialAllProducts,
+    initialCategoryId,
+    initialCategoryProducts,
+    initialPagination,
+    selectedCategoryId,
+  ]);
+
   // Fetch products by category
-  const fetchProductsByCategory = async (
-    categoryId: string,
-    cursor?: string,
-    append = false
-  ) => {
-    setLoading(true);
-    setError('');
+  const fetchProductsByCategory = useCallback(
+    async (categoryId: string, cursor?: string, append = false) => {
+      setLoading(true);
+      setError('');
 
-    try {
-      const response = await api.product.getProductsByCategory({
-        categoryId: Number(categoryId),
-        cursor,
-        pageSize: DEFAULT_PAGE_SIZE,
-      });
+      try {
+        const response = await api.product.getProductsByCategory({
+          categoryId: Number(categoryId),
+          cursor,
+          pageSize: DEFAULT_PAGE_SIZE,
+        });
 
-      if (append) {
-        setCategoryProducts(prev => [...prev, ...response.data]);
-      } else {
-        setCategoryProducts(response.data);
+        if (append) {
+          setCategoryProducts(prev => [...prev, ...response.data]);
+        } else {
+          setCategoryProducts(response.data);
+        }
+
+        setCategoryPagination({
+          nextCursor: response.nextCursor,
+          hasMore: !!response.nextCursor,
+        });
+      } catch (err) {
+        console.error('Error fetching products by category:', err);
+        setError('Failed to load products');
+        // On error, set products to empty array to show empty shop
+        setCategoryProducts([]);
+        setCategoryPagination({ hasMore: false });
+      } finally {
+        setLoading(false);
       }
+    },
+    []
+  );
 
-      setCategoryPagination({
-        nextCursor: response.nextCursor,
-        hasMore: !!response.nextCursor,
-      });
-    } catch (err) {
-      console.error('Error fetching products by category:', err);
-      setError('Failed to load products');
-      // On error, set products to empty array to show empty shop
-      setCategoryProducts([]);
-      setCategoryPagination({ hasMore: false });
-    } finally {
-      setLoading(false);
+  // Sync selectedCategoryId with URL query parameter (for browser back/forward)
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get('category');
+    // Only update if URL changed and it's different from current state
+    // and different from initial props (which means it was already fetched server-side)
+    if (categoryFromUrl !== selectedCategoryId) {
+      // If it matches initialCategoryId, props will handle it
+      if (categoryFromUrl === initialCategoryId) {
+        setSelectedCategoryId(categoryFromUrl || undefined);
+        setCategoryProducts(initialCategoryProducts);
+      } else if (categoryFromUrl && categoryFromUrl !== initialCategoryId) {
+        // Only fetch if URL changed and it's not the initial category
+        setSelectedCategoryId(categoryFromUrl);
+        fetchProductsByCategory(categoryFromUrl);
+      } else if (!categoryFromUrl) {
+        // Reset to show all products
+        setSelectedCategoryId(undefined);
+        setCategoryProducts([]);
+        setCategoryPagination({ hasMore: false });
+      }
     }
-  };
-
-  // Handle category selection
-  const handleCategorySelect = (categoryId: string | undefined) => {
-    setSelectedCategoryId(categoryId);
-
-    if (categoryId) {
-      // Reset products list to empty before fetching new data
-      setCategoryProducts([]);
-      setCategoryPagination({ hasMore: false });
-      // Fetch products for specific category
-      fetchProductsByCategory(categoryId);
-    } else {
-      // Reset to show all products
-      setCategoryProducts([]);
-      setCategoryPagination({ hasMore: false });
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Load more products for current category
   const handleLoadMore = () => {
@@ -199,7 +233,6 @@ export default function ShopClient({
       <ProductCategories
         categories={categories}
         selectedCategoryId={selectedCategoryId}
-        onCategorySelect={handleCategorySelect}
       />
 
       {/* Error message */}
