@@ -1,7 +1,8 @@
 import ShopClient from '@/components/shop/ShopClient';
 import Recipes from '@/components/shop/recipes';
 import ShopHeroSection from '@/components/shop/shopHeroSection';
-import { api } from '@/src/lib/api/customer';
+import { api, GetProductsByCategoryResponse } from '@/src/lib/api/customer';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 async function fetchCategories() {
   try {
@@ -20,9 +21,57 @@ async function fetchAllProducts() {
   }
 }
 
-export default async function ShopPage() {
+async function fetchProductsByCategory(categoryId: string) {
+  try {
+    const response = await api.product.getProductsByCategory({
+      categoryId: Number(categoryId),
+      pageSize: DEFAULT_PAGE_SIZE,
+    });
+    return {
+      products: response.data,
+      nextCursor: response.nextCursor,
+      hasMore: !!response.nextCursor,
+    };
+  } catch (e) {
+    console.error('Error fetching products by category ', e);
+    return {
+      products: [],
+      nextCursor: undefined,
+      hasMore: false,
+    };
+  }
+}
+
+interface ShopPageProps {
+  searchParams: Promise<{ category?: string }>;
+}
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
+  const params = await searchParams;
+  const categoryId = params.category;
+
   const categories = await fetchCategories();
-  const allProducts = await fetchAllProducts();
+
+  // Only fetch one API based on categoryId
+  let allProducts: Awaited<ReturnType<typeof fetchAllProducts>> = [];
+  let initialCategoryProducts: GetProductsByCategoryResponse[] = [];
+  let initialPagination = {
+    hasMore: false,
+    nextCursor: undefined as string | undefined,
+  };
+
+  if (categoryId) {
+    // If categoryId exists, only fetch products by category
+    const categoryData = await fetchProductsByCategory(categoryId);
+    initialCategoryProducts = categoryData.products;
+    initialPagination = {
+      hasMore: categoryData.hasMore,
+      nextCursor: categoryData.nextCursor,
+    };
+  } else {
+    // If no categoryId, only fetch all products
+    allProducts = await fetchAllProducts();
+  }
 
   return (
     <div className="relative w-full bg-white">
@@ -33,6 +82,9 @@ export default async function ShopPage() {
       <ShopClient
         initialCategories={categories}
         initialAllProducts={allProducts}
+        initialCategoryId={categoryId}
+        initialCategoryProducts={initialCategoryProducts}
+        initialPagination={initialPagination}
       />
 
       <Recipes />

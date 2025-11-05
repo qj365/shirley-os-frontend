@@ -2,13 +2,14 @@ version: '3.8'
 
 services:
   frontend:
-    build: .
-    # container_name: shirleys-foods-web
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_FIRE_BASE_CONFIG: ${NEXT_PUBLIC_FIRE_BASE_CONFIG}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+    image: shirleys-food-frontend:latest
+    container_name: shirleys-food-frontend-production
     ports:
-      - "${FRONTEND_PORT}:3000"
-    # volumes:
-    #   - .:/app
-    #   - /app/node_modules  # Prevent node_modules override from host
-    env_file:
-      - .env
+      - '127.0.0.1:4002:3000'
     restart: unless-stopped

@@ -22,7 +22,14 @@ export * from 'firebase/auth';
 
 const firebaseConfig = process.env.NEXT_PUBLIC_FIRE_BASE_CONFIG
   ? JSON.parse(process.env.NEXT_PUBLIC_FIRE_BASE_CONFIG)
-  : {};
+  : {
+      apiKey: 'AIzaSyC_D0hZ952wqlB7__5Ni54CjeYkfqZjvHM',
+      authDomain: 'shirleysfoods-8a4cc.firebaseapp.com',
+      projectId: 'shirleysfoods-8a4cc',
+      storageBucket: 'shirleysfoods-8a4cc.firebasestorage.app',
+      messagingSenderId: '704710995807',
+      appId: '1:704710995807:web:3453e01e6fe05a04be10ea',
+    };
 
 /* cSpell:enable */
 // Initialize Firebase
