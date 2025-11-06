@@ -50,6 +50,7 @@ export default async function ProductDetail({
         <ProductsCarousel
           categoryName="More Like This"
           products={relatedProducts}
+          isRelatedProducts
         />
       </section>
     </div>

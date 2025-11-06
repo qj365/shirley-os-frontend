@@ -3,4 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { GetProductsByCategoryResponse } from './GetProductsByCategoryResponse';
-export type GetRelatedProductsResponse = Array<GetProductsByCategoryResponse>;
+export type GetRelatedProductsResponse = Array<(GetProductsByCategoryResponse & {
+  category: {
+    name: string;
+    id: number;
+  };
+})>;

@@ -143,17 +143,6 @@ export default function ProductDetailMainInfo({
   // Only update image when user has selected options and there's exactly one matching variant
   // and it's not from carousel interaction and the variant actually changed
   React.useEffect(() => {
-    console.log('Variant effect triggered:', {
-      hasUserSelectedOptions,
-      matchedVariantsLength: matchedVariants.length,
-      hasImages: !!images,
-      hasOnVariantImageChange: !!onVariantImageChange,
-      isFromCarousel,
-      currentVariantId: matchedVariants[0]?.id,
-      lastMatchedVariantId,
-      currentSelectedImageIndex,
-    });
-
     if (
       hasUserSelectedOptions &&
       matchedVariants.length === 1 &&
@@ -167,18 +156,10 @@ export default function ProductDetailMainInfo({
 
       // Only update if the variant actually changed (not due to carousel interaction)
       if (currentVariantId !== lastMatchedVariantId) {
-        console.log(
-          'Calling onVariantImageChange with index:',
-          imageIndex,
-          'current:',
-          currentSelectedImageIndex
-        );
         if (imageIndex !== -1) {
           onVariantImageChange(imageIndex);
           setLastMatchedVariantId(currentVariantId);
         }
-      } else {
-        console.log('Variant ID same, skipping update');
       }
     }
   }, [
@@ -265,6 +246,7 @@ export default function ProductDetailMainInfo({
         image: matched.image,
         stock: matched.stock,
         minOrder: 1,
+        categoryName: product.category?.name || '',
       });
 
       toast.success('Added to cart successfully!');

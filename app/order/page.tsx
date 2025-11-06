@@ -41,7 +41,7 @@ export default function CheckoutPage() {
 
             {/* Right column - Order summary */}
             <div className="lg:col-span-5">
-              <CartSummary showSummary={currentStep === 3} />
+              <CartSummary showSummary />
             </div>
           </div>
         </div>

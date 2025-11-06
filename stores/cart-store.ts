@@ -14,6 +14,7 @@ export interface CartItem {
   image: string;
   stock: number;
   minOrder: number;
+  categoryName: string;
 }
 
 interface CartStore {

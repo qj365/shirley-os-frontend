@@ -1,6 +1,6 @@
 'use client';
 
-import type React from 'react';
+import * as React from 'react';
 
 import CartItem from '@/components/shared/cart-item';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,13 @@ import {
 import { useCartStore } from '@/stores/cart-store';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 import { ShoppingCart } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
-import { SHIPPING_FEE } from '@/utils/constants';
+import {
+  SHIPPING_FEE,
+  REQUIRED_CATEGORIES_FOR_COMBO,
+  PRODUCT_LIST_ITEM_COMBO,
+} from '@/utils/constants';
 
 export function CartSheet({
   children,
@@ -30,6 +34,7 @@ export function CartSheet({
   onOpenChange?: (open: boolean) => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const items = useCartStore(state => state.items);
   const removeItem = useCartStore(state => state.removeItem);
   const updateQuantity = useCartStore(state => state.updateQuantity);
@@ -38,6 +43,82 @@ export function CartSheet({
 
   const totalQuantity = getTotalItems();
   const subtotal = getSubtotal();
+
+  // Check if we're on the checkout page - disable cart editing if so
+  const isCheckoutPage = pathname?.startsWith('/order') ?? false;
+
+  // No-op functions to prevent cart editing on checkout page
+  const handleUpdateQuantity = isCheckoutPage
+    ? () => {
+        // Do nothing - cart editing is disabled on checkout page
+      }
+    : updateQuantity;
+
+  const handleRemoveItem = isCheckoutPage
+    ? () => {
+        // Do nothing - cart editing is disabled on checkout page
+      }
+    : removeItem;
+
+  // Check category combo requirements
+  const categoryComboValidation = React.useMemo(() => {
+    // Helper function to compare category names case-insensitively
+    const normalizeCategoryName = (name: string) => name.toLowerCase().trim();
+    const normalizedRequiredCategories = REQUIRED_CATEGORIES_FOR_COMBO.map(
+      normalizeCategoryName
+    );
+
+    // Get all unique categories in cart (normalized)
+    const categoriesInCart = new Set(
+      items
+        .map(item => item.categoryName)
+        .filter(Boolean)
+        .map(normalizeCategoryName)
+    );
+
+    // Find required categories that are present in cart
+    const presentRequiredCategories = REQUIRED_CATEGORIES_FOR_COMBO.filter(
+      category => categoriesInCart.has(normalizeCategoryName(category))
+    );
+
+    // For each required category, count the total quantity (not number of variants)
+    // This allows: 1 variant with quantity 3, or multiple variants with total quantity 3
+    const categoryQuantityCounts = new Map<string, number>();
+    items.forEach(item => {
+      if (!item.categoryName) return;
+      const normalizedItemCategory = normalizeCategoryName(item.categoryName);
+      if (normalizedRequiredCategories.includes(normalizedItemCategory)) {
+        // Use the original required category name as key for consistency
+        const matchingRequiredCategory = REQUIRED_CATEGORIES_FOR_COMBO.find(
+          reqCat => normalizeCategoryName(reqCat) === normalizedItemCategory
+        );
+        if (matchingRequiredCategory) {
+          const currentQuantity =
+            categoryQuantityCounts.get(matchingRequiredCategory) || 0;
+          // Sum up the quantities, not count variants
+          categoryQuantityCounts.set(
+            matchingRequiredCategory,
+            currentQuantity + item.quantity
+          );
+        }
+      }
+    });
+
+    // Find categories that don't meet the minimum requirement
+    // Check if total quantity >= PRODUCT_LIST_ITEM_COMBO
+    const insufficientCategories = presentRequiredCategories.filter(
+      category => {
+        const totalQuantity = categoryQuantityCounts.get(category) || 0;
+        return totalQuantity < PRODUCT_LIST_ITEM_COMBO;
+      }
+    );
+
+    return {
+      hasInsufficientCategories: insufficientCategories.length > 0,
+      insufficientCategories,
+      categoryQuantityCounts,
+    };
+  }, [items]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -90,10 +171,10 @@ export function CartSheet({
                 <CartItem
                   key={item.id}
                   item={item}
-                  onUpdateQuantity={updateQuantity}
-                  onRemoveItem={removeItem}
-                  showQuantityControls={true}
-                  showRemoveButton={true}
+                  onUpdateQuantity={handleUpdateQuantity}
+                  onRemoveItem={handleRemoveItem}
+                  showQuantityControls={!isCheckoutPage}
+                  showRemoveButton={!isCheckoutPage}
                 />
               ))}
             </div>
@@ -133,11 +214,21 @@ export function CartSheet({
                 </div>
               </div>
 
-              {/* Minimum Quantity notice  (requires >= 3  total quantity of all items in cart) */}
-              {items.length > 0 && totalQuantity < 3 && (
+              {/* Category Combo Requirement Notice */}
+              {categoryComboValidation.hasInsufficientCategories && (
                 <div className="rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-5">
                   <p className="text-center text-sm text-yellow-900">
-                    {`Add ${3 - totalQuantity} more product to your cart. Minimum order is 3 items`}
+                    {categoryComboValidation.insufficientCategories
+                      .map(category => {
+                        const currentQuantity =
+                          categoryComboValidation.categoryQuantityCounts.get(
+                            category
+                          ) || 0;
+                        const needed =
+                          PRODUCT_LIST_ITEM_COMBO - currentQuantity;
+                        return `Add ${needed} more item${needed > 1 ? 's' : ''} from "${category}" category (minimum ${PRODUCT_LIST_ITEM_COMBO} items required)`;
+                      })
+                      .join('. ')}
                   </p>
                 </div>
               )}
@@ -171,40 +262,54 @@ export function CartSheet({
               })()}
 
               {/* Checkout Button */}
-              <Button
-                onClick={() => {
-                  if (totalQuantity < 3) {
-                    toast.info(
-                      `Add ${3 - totalQuantity} more product to your cart. Minimum order is 3 items`
-                    );
-                    return;
-                  }
+              {!isCheckoutPage && (
+                <Button
+                  onClick={() => {
+                    // Check category combo requirements
+                    if (categoryComboValidation.hasInsufficientCategories) {
+                      const messages =
+                        categoryComboValidation.insufficientCategories.map(
+                          category => {
+                            const currentQuantity =
+                              categoryComboValidation.categoryQuantityCounts.get(
+                                category
+                              ) || 0;
+                            const needed =
+                              PRODUCT_LIST_ITEM_COMBO - currentQuantity;
+                            return `Add ${needed} more item${needed > 1 ? 's' : ''} from "${category}" category (minimum ${PRODUCT_LIST_ITEM_COMBO} items required)`;
+                          }
+                        );
+                      toast.info(messages.join('. '));
+                      return;
+                    }
 
-                  const minOrder = 1;
-                  const minOrderRequired = items.some(
-                    item => item.quantity < minOrder
-                  );
-
-                  if (minOrderRequired) {
-                    const minOrderItems = items.filter(
+                    const minOrder = 1;
+                    const minOrderRequired = items.some(
                       item => item.quantity < minOrder
                     );
-                    toast.info(
-                      `Please increase quantities to meet minimum order requirements: ${minOrderItems.map(item => `${item.productName} (min: ${minOrder})`).join(', ')}`
-                    );
-                    return;
-                  }
 
-                  onOpenChange?.(false);
-                  router.push('/order');
-                }}
-                disabled={
-                  totalQuantity < 3 || items.some(item => item.quantity < 1)
-                }
-                className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Proceed to Order
-              </Button>
+                    if (minOrderRequired) {
+                      const minOrderItems = items.filter(
+                        item => item.quantity < minOrder
+                      );
+                      toast.info(
+                        `Please increase quantities to meet minimum order requirements: ${minOrderItems.map(item => `${item.productName} (min: ${minOrder})`).join(', ')}`
+                      );
+                      return;
+                    }
+
+                    onOpenChange?.(false);
+                    router.push('/order');
+                  }}
+                  disabled={
+                    categoryComboValidation.hasInsufficientCategories ||
+                    items.some(item => item.quantity < 1)
+                  }
+                  className="h-12 w-full rounded-full border-2 border-[#FFD56A] bg-gradient-to-br from-[#F3C03F] to-[#FFBA0A] text-base font-semibold shadow-inner shadow-black/25 transition-all hover:from-[#F3C03F]/90 hover:to-[#FFBA0A]/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Proceed to Order
+                </Button>
+              )}
             </div>
           </SheetFooter>
         )}
