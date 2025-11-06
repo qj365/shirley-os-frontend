@@ -13,25 +13,18 @@ export default function ProductDetail({ data }: Props) {
   const [isFromCarousel, setIsFromCarousel] = useState(false);
 
   const handleVariantImageChange = (imageIndex: number) => {
-    console.log('Variant image change:', imageIndex);
     setSelectedImageIndex(imageIndex);
   };
 
   const handleCarouselIndexChange = (imageIndex: number) => {
-    console.log(
-      'Carousel interaction detected, setting isFromCarousel to true'
-    );
     setIsFromCarousel(true);
     setSelectedImageIndex(imageIndex);
     // Reset the flag after a short delay
     setTimeout(() => {
-      console.log('Resetting isFromCarousel to false');
       setIsFromCarousel(false);
     }, 100);
   };
 
-  console.log(selectedImageIndex, 'selectedImageIndex');
-  console.log(isFromCarousel, 'isFromCarousel');
   return (
     <div className="container pb-7">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-20">

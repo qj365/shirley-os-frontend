@@ -1,26 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useMediaQuery } from '@/components/landing/hook';
+import { Button } from '@/components/ui/button';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { useMediaQuery } from '@/components/landing/hook';
-import { Button } from '@/components/ui/button';
-import { GetProductsByCategoryResponse } from '@/src/lib/api/customer';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import ProductListItem from './ProductLisItem';
 import { cn } from '@/lib/utils';
+import { GetProductsByCategoryResponse } from '@/src/lib/api/customer';
+import { REQUIRED_CATEGORIES_FOR_COMBO } from '@/utils/constants';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import EmptyShop from './EmptyShop';
+import ProductListItem from './ProductLisItem';
 
 export default function ProductsCarousel({
   categoryName,
   products,
+  isRelatedProducts = false,
 }: {
   categoryName: string;
   products: GetProductsByCategoryResponse[];
+  isRelatedProducts?: boolean;
 }) {
   const isMobile = useMediaQuery('(max-width: 639px)');
   const isTablet = useMediaQuery('(min-width: 640px) and (max-width: 1023px)');
@@ -102,7 +105,21 @@ export default function ProductsCarousel({
                     'pb-4'
                   )}
                 >
-                  <ProductListItem product={item} />
+                  <ProductListItem
+                    product={item}
+                    isShowComboPrice={REQUIRED_CATEGORIES_FOR_COMBO.includes(
+                      !isRelatedProducts
+                        ? categoryName.toLowerCase()
+                        : (
+                            item as GetProductsByCategoryResponse & {
+                              category: {
+                                name: string;
+                                id: number;
+                              };
+                            }
+                          )?.category?.name.toLowerCase()
+                    )}
+                  />
                 </CarouselItem>
               )
             )}

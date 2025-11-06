@@ -55,7 +55,7 @@ export default function ChangePasswordModal({
   const handleSubmit = async (data: ChangePasswordFormData) => {
     setError('');
     setSuccessMessage('');
-    console.log(data);
+
     if (!passwordStrength.is_strong) {
       setError('Please use a stronger password');
       return;

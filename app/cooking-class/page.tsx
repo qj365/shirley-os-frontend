@@ -21,7 +21,7 @@ async function fetchCookingClasses() {
 
 export default async function CookingClassesPage() {
   const cookingClassesData = await fetchCookingClasses();
-  console.log(cookingClassesData);
+
   return (
     <>
       <CookingClassesHeroSection />

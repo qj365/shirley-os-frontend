@@ -4,12 +4,17 @@ import { GetProductsByCategoryResponse } from '@/src/lib/api/customer';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
 import Link from 'next/link';
 import { ImageWithFallback } from '../ui/image-with-fallback';
+import { PRODUCT_LIST_ITEM_COMBO } from '@/utils/constants';
 
 interface Props {
   product: GetProductsByCategoryResponse;
+  isShowComboPrice?: boolean;
 }
 
-export default function ProductListItem({ product }: Props) {
+export default function ProductListItem({
+  product,
+  isShowComboPrice = false,
+}: Props) {
   const productDetailUrl = `/shop/${product?.slug}`;
 
   return (
@@ -36,7 +41,14 @@ export default function ProductListItem({ product }: Props) {
 
         <div className="mb-3 flex flex-wrap items-center gap-2 text-[#7C7C7C] sm:mb-4">
           <span className="text-base font-bold text-black sm:text-lg">
-            From <span>{formatDisplayCurrency(product?.price)}</span>
+            From{' '}
+            <span>
+              {formatDisplayCurrency(
+                isShowComboPrice
+                  ? product?.price * PRODUCT_LIST_ITEM_COMBO
+                  : product?.price
+              )}
+            </span>
           </span>
         </div>
 

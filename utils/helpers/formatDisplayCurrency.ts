@@ -1,3 +1,9 @@
+export function roundTo(n: number, digits = 2) {
+  const multi = 10 ** digits;
+  const num = Number.parseFloat((n * multi).toFixed(11));
+  return (Math.sign(num) * Math.round(Math.abs(num))) / multi;
+}
+
 export default function formatDisplayCurrency(price: number, currency = 'GBP') {
   const config: Intl.NumberFormatOptions = {
     style: 'currency',
@@ -18,6 +24,6 @@ export default function formatDisplayCurrency(price: number, currency = 'GBP') {
   }
 
   return price !== undefined
-    ? new Intl.NumberFormat(locale, config).format(price)
+    ? new Intl.NumberFormat(locale, config).format(roundTo(price || 0, 2))
     : '-';
 }

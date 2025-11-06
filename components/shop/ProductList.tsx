@@ -4,6 +4,7 @@ import { GetProductsByCategoryResponse } from '@/src/lib/api/customer';
 import { Button } from '../ui/button';
 import { Spinner } from '../ui/spinner';
 import ProductListItem from './ProductLisItem';
+import { REQUIRED_CATEGORIES_FOR_COMBO } from '@/utils/constants';
 
 export default function ProductList({
   categoryName,
@@ -26,7 +27,12 @@ export default function ProductList({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {products.map(product => (
             <div key={product.id}>
-              <ProductListItem product={product} />
+              <ProductListItem
+                product={product}
+                isShowComboPrice={REQUIRED_CATEGORIES_FOR_COMBO.includes(
+                  categoryName.toLowerCase()
+                )}
+              />
             </div>
           ))}
         </div>
