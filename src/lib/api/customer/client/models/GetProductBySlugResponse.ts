@@ -19,6 +19,7 @@ export type GetProductBySlugResponse = {
   }>;
   variantOptions: PrismaJson_VariantOptions;
   category: {
+    name: string;
     id: number;
   };
 };
