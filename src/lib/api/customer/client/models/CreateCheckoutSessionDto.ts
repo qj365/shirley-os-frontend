@@ -4,6 +4,8 @@
 /* eslint-disable */
 export type CreateCheckoutSessionDto = {
   items: Array<{
+    subscriptionInterval?: 'WEEKS_2' | 'WEEKS_4' | 'WEEKS_6' | 'WEEKS_8';
+    isSubscription?: boolean;
     quantity: number;
     productVariantId: number;
   }>;
