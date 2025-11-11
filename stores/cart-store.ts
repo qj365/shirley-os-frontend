@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export const SUBSCRIPTION_FREQUENCIES = [2, 4, 6, 8] as const;
+export type SubscriptionFrequency = (typeof SUBSCRIPTION_FREQUENCIES)[number];
+export type CartPaymentPlan = 'one_time' | 'subscription';
+
 export interface CartItem {
   id: string; // unique ID for cart item (variantId + timestamp)
   productId: number;
@@ -15,6 +19,8 @@ export interface CartItem {
   stock: number;
   minOrder: number;
   categoryName: string;
+  paymentPlan: CartPaymentPlan;
+  deliveryFrequencyWeeks: SubscriptionFrequency | null;
 }
 
 interface CartStore {
@@ -22,6 +28,11 @@ interface CartStore {
   addItem: (item: Omit<CartItem, 'id'>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  updateItemPayment: (
+    id: string,
+    paymentPlan: CartPaymentPlan,
+    deliveryFrequencyWeeks?: SubscriptionFrequency | null
+  ) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getSubtotal: () => number;
@@ -36,6 +47,12 @@ export const useCartStore = create<CartStore>()(
       addItem: item => {
         const items = get().items;
 
+        const normalizedPaymentPlan = item.paymentPlan ?? 'one_time';
+        const normalizedFrequency =
+          normalizedPaymentPlan === 'subscription'
+            ? (item.deliveryFrequencyWeeks ?? SUBSCRIPTION_FREQUENCIES[0])
+            : null;
+
         // Check minimum order requirement (default is 1)
         const minOrder = 1;
         if (item.quantity < minOrder) {
@@ -49,7 +66,9 @@ export const useCartStore = create<CartStore>()(
           i =>
             i.productId === item.productId &&
             JSON.stringify(i.variantOptionIds.sort()) ===
-              JSON.stringify(item.variantOptionIds.sort())
+              JSON.stringify(item.variantOptionIds.sort()) &&
+            i.paymentPlan === normalizedPaymentPlan &&
+            (i.deliveryFrequencyWeeks ?? null) === normalizedFrequency
         );
 
         if (existingItem) {
@@ -71,6 +90,8 @@ export const useCartStore = create<CartStore>()(
           const newItem: CartItem = {
             ...item,
             id: `${item.variantId}-${Date.now()}`,
+            paymentPlan: normalizedPaymentPlan,
+            deliveryFrequencyWeeks: normalizedFrequency,
           };
           set({ items: [...items, newItem] });
         }
@@ -109,6 +130,30 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
+      updateItemPayment: (id, paymentPlan, deliveryFrequencyWeeks) => {
+        set({
+          items: get().items.map(item => {
+            if (item.id !== id) {
+              return item;
+            }
+
+            const normalizedPlan = paymentPlan ?? 'one_time';
+            const normalizedFrequency =
+              normalizedPlan === 'subscription'
+                ? (deliveryFrequencyWeeks ??
+                  item.deliveryFrequencyWeeks ??
+                  SUBSCRIPTION_FREQUENCIES[0])
+                : null;
+
+            return {
+              ...item,
+              paymentPlan: normalizedPlan,
+              deliveryFrequencyWeeks: normalizedFrequency,
+            };
+          }),
+        });
+      },
+
       clearCart: () => {
         set({ items: [] });
       },
@@ -118,10 +163,10 @@ export const useCartStore = create<CartStore>()(
       },
 
       getSubtotal: () => {
-        return get().items.reduce(
-          (total, item) => total + item.price * item.quantity,
-          0
-        );
+        return get().items.reduce((total, item) => {
+          const multiplier = item.paymentPlan === 'subscription' ? 0.9 : 1;
+          return total + item.price * multiplier * item.quantity;
+        }, 0);
       },
 
       getItemById: id => {
@@ -130,6 +175,40 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'cart-storage',
+      version: 2,
+      migrate: state => {
+        if (!state || typeof state !== 'object') return state;
+
+        const persisted = state as {
+          items?: Array<
+            Omit<CartItem, 'paymentPlan' | 'deliveryFrequencyWeeks'> & {
+              paymentPlan?: CartPaymentPlan;
+              deliveryFrequencyWeeks?: SubscriptionFrequency | null;
+            }
+          >;
+        };
+
+        if (!Array.isArray(persisted.items)) {
+          return state;
+        }
+
+        return {
+          ...state,
+          items: persisted.items.map(item => {
+            const paymentPlan: CartPaymentPlan = item.paymentPlan ?? 'one_time';
+            const deliveryFrequencyWeeks =
+              paymentPlan === 'subscription'
+                ? (item.deliveryFrequencyWeeks ?? SUBSCRIPTION_FREQUENCIES[0])
+                : null;
+
+            return {
+              ...item,
+              paymentPlan,
+              deliveryFrequencyWeeks,
+            };
+          }),
+        };
+      },
     }
   )
 );

@@ -1,8 +1,6 @@
 'use client';
 
-import { User } from 'firebase/auth';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 
 // Email Step Component
 interface Props {
@@ -11,7 +9,6 @@ interface Props {
   onSubmit: (e: React.FormEvent) => void;
   validationError?: string;
   isCartEmpty: boolean;
-  user: User | null;
 }
 
 const EmailInfoFormStep: React.FC<Props> = ({
@@ -20,28 +17,11 @@ const EmailInfoFormStep: React.FC<Props> = ({
   onSubmit,
   validationError,
   isCartEmpty,
-  user,
 }) => {
-  const handleLoginClick = () => {
-    // Save current path to redirect back after login
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('redirectAfterLogin', '/checkout');
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-semibold">Contact Information</h2>
-        {!user && (
-          <Link
-            href="/login"
-            onClick={handleLoginClick}
-            className="md: flex items-center gap-2 rounded-full text-sm font-semibold text-black hover:text-yellow-500 md:text-base"
-          >
-            Log in
-          </Link>
-        )}
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
@@ -56,7 +36,6 @@ const EmailInfoFormStep: React.FC<Props> = ({
               className="w-full bg-transparent text-base font-semibold text-black outline-none placeholder:text-[#797979]"
               placeholder="your@email.com"
               required
-              disabled={!!user} // Disable input if logged in
             />
           </div>
           {validationError && (

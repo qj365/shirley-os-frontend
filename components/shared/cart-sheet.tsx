@@ -38,6 +38,7 @@ export function CartSheet({
   const items = useCartStore(state => state.items);
   const removeItem = useCartStore(state => state.removeItem);
   const updateQuantity = useCartStore(state => state.updateQuantity);
+  const updateItemPayment = useCartStore(state => state.updateItemPayment);
   const getTotalItems = useCartStore(state => state.getTotalItems);
   const getSubtotal = useCartStore(state => state.getSubtotal);
 
@@ -59,6 +60,8 @@ export function CartSheet({
         // Do nothing - cart editing is disabled on checkout page
       }
     : removeItem;
+
+  const handleUpdatePayment = isCheckoutPage ? undefined : updateItemPayment;
 
   // Check category combo requirements
   const categoryComboValidation = React.useMemo(() => {
@@ -175,6 +178,7 @@ export function CartSheet({
                   onRemoveItem={handleRemoveItem}
                   showQuantityControls={!isCheckoutPage}
                   showRemoveButton={!isCheckoutPage}
+                  onUpdatePayment={handleUpdatePayment}
                 />
               ))}
             </div>

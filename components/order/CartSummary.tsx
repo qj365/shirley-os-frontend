@@ -20,6 +20,7 @@ export default function CartSummary({ showSummary = false }: Props) {
   const items = useCartStore(state => state.items);
   const updateQuantity = useCartStore(state => state.updateQuantity);
   const removeItem = useCartStore(state => state.removeItem);
+  const updateItemPayment = useCartStore(state => state.updateItemPayment);
   const getSubtotal = useCartStore(state => state.getSubtotal);
 
   // Check if cart is empty
@@ -58,6 +59,7 @@ export default function CartSummary({ showSummary = false }: Props) {
                 showQuantityControls={true}
                 showRemoveButton={true}
                 showShortContent={true}
+                onUpdatePayment={updateItemPayment}
               />
             ))}
           </div>
@@ -109,7 +111,9 @@ export default function CartSummary({ showSummary = false }: Props) {
                 onRemoveItem={removeItem}
                 showQuantityControls={false}
                 showRemoveButton={false}
+                showPaymentOption={false}
                 showShortContent={true}
+                onUpdatePayment={undefined}
               />
             ))}
           </div>

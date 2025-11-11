@@ -1,6 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { GetProductBySlugResponse } from '@/src/lib/api/customer';
 import formatDisplayCurrency from '@/utils/helpers/formatDisplayCurrency';
@@ -8,7 +16,13 @@ import { Minus, Plus } from 'lucide-react';
 import * as React from 'react';
 import { toast } from 'sonner';
 import ProductDetailDescription from './ProductDetailDescription';
-import { useCartStore } from '@/stores/cart-store';
+import {
+  CartPaymentPlan,
+  SUBSCRIPTION_FREQUENCIES,
+  SubscriptionFrequency,
+  useCartStore,
+} from '@/stores/cart-store';
+import { Switch } from '../ui/switch';
 
 type Props = {
   product: GetProductBySlugResponse;
@@ -16,6 +30,13 @@ type Props = {
   isFromCarousel?: boolean;
   currentSelectedImageIndex?: number;
 };
+
+const SUBSCRIPTION_FEATURES = [
+  'Lowest price option',
+  '10% off all recurring orders',
+  'Easily swap & skip deliveries',
+  'Cancel quickly anytime',
+];
 
 export default function ProductDetailMainInfo({
   product,
@@ -33,34 +54,52 @@ export default function ProductDetailMainInfo({
     Record<number, number | null>
   >(() => Object.fromEntries(variantOptions.map(opt => [opt.id, null])));
   const [quantity, setQuantity] = React.useState(1);
+  const [paymentPlan, setPaymentPlan] =
+    React.useState<CartPaymentPlan>('one_time');
+  const [deliveryFrequency, setDeliveryFrequency] =
+    React.useState<SubscriptionFrequency>(SUBSCRIPTION_FREQUENCIES[1]);
+
+  const safeProductVariants = React.useMemo(
+    () => (productVariants ?? []).filter(variant => variant.stock >= 1),
+    [productVariants]
+  );
+
+  const isSubscription = paymentPlan === 'subscription';
 
   const matchedVariants = React.useMemo(() => {
     const selectedIds = Object.values(selectedOptions).filter(Boolean);
-    if (selectedIds.length === 0) return productVariants;
+    if (selectedIds.length === 0) return safeProductVariants;
 
-    return productVariants.filter(
+    return safeProductVariants.filter(
       variant =>
         selectedIds.every(id =>
           variant?.variantOptionIds.includes(id as number)
         ) && variant.stock >= 1
     );
-  }, [selectedOptions, productVariants]);
+  }, [selectedOptions, safeProductVariants]);
 
   const displayPrice =
     matchedVariants.length === 1
       ? matchedVariants[0].price
-      : Math.min(
-          ...productVariants.filter(v => v.stock >= 1).map(v => v.price)
-        );
+      : safeProductVariants.length > 0
+        ? Math.min(...safeProductVariants.map(v => v.price))
+        : 0;
 
   const displayCompare =
     matchedVariants.length === 1
       ? matchedVariants[0].compareAtPrice
-      : Math.max(
-          ...productVariants
-            .filter(v => v.stock >= 1)
-            .map(v => v.compareAtPrice)
-        );
+      : safeProductVariants.length > 0
+        ? Math.max(...safeProductVariants.map(v => v.compareAtPrice))
+        : 0;
+
+  const selectedVariant =
+    matchedVariants.length === 1 ? matchedVariants[0] : null;
+
+  const unitPrice =
+    selectedVariant?.price ??
+    (Number.isFinite(displayPrice) ? displayPrice : 0);
+  const oneTimeTotal = unitPrice * quantity;
+  const subscriptionTotal = oneTimeTotal * 0.9;
 
   // --- disable logic ---
   const disabledOptions = React.useMemo(() => {
@@ -74,7 +113,7 @@ export default function ProductDetailMainInfo({
         const selectedIds = Object.values(hypotheticalSelection).filter(
           Boolean
         );
-        const valid = productVariants.some(
+        const valid = safeProductVariants.some(
           v =>
             selectedIds.every(id =>
               v?.variantOptionIds.includes(id as number)
@@ -84,7 +123,7 @@ export default function ProductDetailMainInfo({
       });
     });
     return result;
-  }, [selectedOptions, productVariants, variantOptions]);
+  }, [selectedOptions, safeProductVariants, variantOptions]);
 
   // --- auto-select options when there is exactly one variant (run once per product) ---
   const lastAutoSelectProductIdRef = React.useRef<number | null>(null);
@@ -201,7 +240,7 @@ export default function ProductDetailMainInfo({
         return;
       }
 
-      const matched = productVariants.find(
+      const matched = safeProductVariants.find(
         v =>
           selectedIds.every(id => v?.variantOptionIds.includes(id as number)) &&
           v.stock >= 1
@@ -247,6 +286,8 @@ export default function ProductDetailMainInfo({
         stock: matched.stock,
         minOrder: 1,
         categoryName: product.category?.name || '',
+        paymentPlan,
+        deliveryFrequencyWeeks: isSubscription ? deliveryFrequency : null,
       });
 
       toast.success('Added to cart successfully!');
@@ -350,6 +391,7 @@ export default function ProductDetailMainInfo({
             <span className="sr-only">Increase quantity</span>
           </Button>
         </div>
+
         <Button
           className="btn-gradient--yellow flex-1 !text-lg !font-semibold hover:opacity-80"
           onClick={handleAddToCart}
@@ -357,6 +399,104 @@ export default function ProductDetailMainInfo({
         >
           Add To Cart
         </Button>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <div
+          className={cn(
+            !isSubscription ? 'bg-[#FFF3D6]' : 'bg-[#F2F2F2]',
+            'rounded-xl p-4'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={!isSubscription}
+              onCheckedChange={() => setPaymentPlan('one_time')}
+            />
+            <div className="flex flex-col gap-1">
+              <p className="text-lg font-semibold min-md:text-xl">One-Time</p>
+              <span className="text-base font-semibold">
+                {formatDisplayCurrency(oneTimeTotal)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            isSubscription ? 'bg-[#FFF3D6]' : 'bg-[#F2F2F2]',
+            'space-y-4 rounded-xl p-4'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={isSubscription}
+              onCheckedChange={() => setPaymentPlan('subscription')}
+            />
+            <div className="flex flex-col gap-1">
+              <p className="text-lg font-semibold min-md:text-xl">
+                Subscribe &amp; Save 10%
+              </p>
+              <span className="text-base font-semibold">
+                {formatDisplayCurrency(subscriptionTotal)}{' '}
+                <span className="text-sm text-gray-500 line-through">
+                  {' '}
+                  {formatDisplayCurrency(oneTimeTotal)}
+                </span>
+              </span>
+            </div>
+          </div>
+          <div>
+            <p className="text-lg font-semibold">How subscription work:</p>
+            <ul>
+              {SUBSCRIPTION_FEATURES.map(feature => (
+                <li key={feature} className="flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/image/subscription_checked.png`}
+                    alt={feature}
+                    className={cn(
+                      'h-4 w-6 object-contain',
+                      isSubscription ? 'opacity-100' : 'opacity-50'
+                    )}
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div
+            className={cn(
+              'space-y-0.5',
+              !isSubscription && 'pointer-events-none opacity-50'
+            )}
+          >
+            <Label className="text-sm font-semibold text-gray-700">
+              Deliver every
+            </Label>
+            <Select
+              value={String(deliveryFrequency)}
+              onValueChange={value =>
+                setDeliveryFrequency(Number(value) as SubscriptionFrequency)
+              }
+            >
+              <SelectTrigger className="h-11 rounded-xl border-none bg-white text-sm font-medium shadow-none !ring-0 !ring-offset-0">
+                <SelectValue placeholder="Choose frequency" />
+              </SelectTrigger>
+              <SelectContent className="border-none bg-white shadow-md">
+                {SUBSCRIPTION_FREQUENCIES.map(weeks => (
+                  <SelectItem
+                    key={weeks}
+                    value={String(weeks)}
+                    className="cursor-pointer hover:bg-gray-100"
+                  >
+                    Every {weeks} week{weeks > 1 ? 's' : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -6,16 +6,22 @@ import {
   validatePostalCode,
 } from '@/lib/checkout-validation';
 import { api } from '@/src/lib/api/customer';
+import type { CreateCheckoutSessionDto } from '@/src/lib/api/customer/client/models/CreateCheckoutSessionDto';
 import { useAuthStore } from '@/stores/auth-store';
-import { useCartStore } from '@/stores/cart-store';
+import {
+  SUBSCRIPTION_FREQUENCIES,
+  type SubscriptionFrequency,
+  useCartStore,
+} from '@/stores/cart-store';
+import { toastErrorMessage } from '@/utils/helpers/toastErrorMessage';
 import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import BillingInfoFormStep from './BillingInfoFormStep';
 import EmailInfoFormStep from './EmailInfoFormStep';
 import PaymentInfoFormStep from './PaymentInfoFormStep';
 import ShippingInfoFormStep from './ShippingInfoFormStep';
-import { toastErrorMessage } from '@/utils/helpers/toastErrorMessage';
 
 // Initialize Stripe
 
@@ -50,7 +56,7 @@ export const CheckoutForm: React.FC<Props> = ({
 }) => {
   const { items } = useCartStore();
   const { user } = useAuthStore();
-
+  const router = useRouter();
   // Check if cart is empty
   const isCartEmpty = items.length === 0;
 
@@ -63,6 +69,7 @@ export const CheckoutForm: React.FC<Props> = ({
       setEmail(user.email);
     }
   }, [user, email]);
+
   const [shippingAddress, setShippingAddress] = useState<AddressFormData>({
     first_name: '',
     last_name: '',
@@ -94,6 +101,25 @@ export const CheckoutForm: React.FC<Props> = ({
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
     {}
   );
+
+  const [isShowCheckoutForm, setIsShowCheckoutForm] = useState<boolean | null>(
+    null
+  );
+
+  const getSubscriptionInterval = (
+    frequency: SubscriptionFrequency | null
+  ): CreateCheckoutSessionDto['items'][number]['subscriptionInterval'] =>
+    frequency
+      ? (`WEEKS_${frequency}` as CreateCheckoutSessionDto['items'][number]['subscriptionInterval'])
+      : undefined;
+
+  useEffect(() => {
+    if (user) {
+      setIsShowCheckoutForm(true);
+    } else {
+      setIsShowCheckoutForm(false);
+    }
+  }, [user]);
 
   // Step 0: Email validation and submission
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -192,11 +218,22 @@ export const CheckoutForm: React.FC<Props> = ({
 
     try {
       // Prepare request body according to CreateCheckoutSessionDto
-      const requestBody = {
-        items: items.map(item => ({
-          productVariantId: item.variantId,
-          quantity: item.quantity,
-        })),
+      const requestBody: CreateCheckoutSessionDto = {
+        items: items.map(item => {
+          const isSubscription = item.paymentPlan === 'subscription';
+          const subscriptionInterval = isSubscription
+            ? getSubscriptionInterval(
+                item.deliveryFrequencyWeeks ?? SUBSCRIPTION_FREQUENCIES[0]
+              )
+            : undefined;
+
+          return {
+            productVariantId: item.variantId,
+            quantity: item.quantity,
+            isSubscription,
+            subscriptionInterval,
+          };
+        }),
         shippingInfo: {
           name: `${shippingAddress.first_name} ${shippingAddress.last_name}`,
           email: email,
@@ -254,7 +291,6 @@ export const CheckoutForm: React.FC<Props> = ({
             onSubmit={handleEmailSubmit}
             validationError={validationErrors.email}
             isCartEmpty={isCartEmpty}
-            user={user}
           />
         );
       case 1:
@@ -294,6 +330,44 @@ export const CheckoutForm: React.FC<Props> = ({
         return null;
     }
   };
+
+  const handleLoginClick = () => {
+    // Save current path to redirect back after login
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('redirectAfterLogin', '/order');
+      router.push('/login');
+    }
+  };
+
+  const handleContinueAsGuestClick = () => {
+    setIsShowCheckoutForm(true);
+    setCurrentStep(0);
+  };
+
+  if (isShowCheckoutForm === null) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (!isShowCheckoutForm && !user) {
+    return (
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          className="btn-gradient--yellow px-8 py-2 text-center text-base font-semibold transition-all hover:to-[#FFBA0A]/90 active:scale-95"
+          onClick={handleLoginClick}
+        >
+          Login
+        </button>
+        <button
+          type="button"
+          className="rounded-full bg-black px-8 py-2 text-base font-semibold text-white shadow-inner shadow-black/25 transition-all hover:opacity-80 active:scale-95"
+          onClick={handleContinueAsGuestClick}
+        >
+          Continue as guest
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
