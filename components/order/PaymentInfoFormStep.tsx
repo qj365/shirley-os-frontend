@@ -6,6 +6,7 @@ import {
   PaymentElement,
 } from '@stripe/react-stripe-js/checkout';
 import { loadStripe } from '@stripe/stripe-js';
+import { useEffect, useState } from 'react';
 import PayButton from './PayButton';
 
 const stripe = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -21,6 +22,12 @@ export default function PaymentInfoFormStep({
   goToPreviousStep,
   isCartEmpty,
 }: Props) {
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
+
+  useEffect(() => {
+    setIsPaymentElementReady(false);
+  }, [clientSecret]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -37,8 +44,12 @@ export default function PaymentInfoFormStep({
       {!isCartEmpty && (
         <CheckoutProvider stripe={stripe} options={{ clientSecret }}>
           <form>
-            <PaymentElement options={{ layout: 'accordion' }} />
-            <PayButton />
+            <PaymentElement
+              options={{ layout: 'accordion' }}
+              onReady={() => setIsPaymentElementReady(true)}
+              onLoadError={() => setIsPaymentElementReady(false)}
+            />
+            {isPaymentElementReady && <PayButton />}
           </form>
         </CheckoutProvider>
       )}
