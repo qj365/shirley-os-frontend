@@ -22,6 +22,7 @@ import {
   SubscriptionFrequency,
   useCartStore,
 } from '@/stores/cart-store';
+import { useAuthStore } from '@/stores/auth-store';
 import { Switch } from '../ui/switch';
 
 type Props = {
@@ -46,6 +47,7 @@ export default function ProductDetailMainInfo({
 }: Props) {
   const { name, productVariants, variantOptions, images, id } = product || {};
   const addItem = useCartStore(state => state.addItem);
+  const { appUser } = useAuthStore();
 
   const isOutOfStock = productVariants?.every(item => item.stock < 1);
 
@@ -227,6 +229,12 @@ export default function ProductDetailMainInfo({
       [groupId]: prev[groupId] === optionId ? null : optionId,
     }));
   };
+
+  React.useEffect(() => {
+    if (!appUser && paymentPlan === 'subscription') {
+      setPaymentPlan('one_time');
+    }
+  }, [appUser, paymentPlan]);
 
   // --- handler Add To Cart ---
   const handleAddToCart = () => {
@@ -422,81 +430,83 @@ export default function ProductDetailMainInfo({
           </div>
         </div>
 
-        <div
-          className={cn(
-            isSubscription ? 'bg-[#FFF3D6]' : 'bg-[#F2F2F2]',
-            'space-y-4 rounded-xl p-4'
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={isSubscription}
-              onCheckedChange={() => setPaymentPlan('subscription')}
-            />
-            <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold min-md:text-xl">
-                Subscribe &amp; Save 10%
-              </p>
-              <span className="text-base font-semibold">
-                {formatDisplayCurrency(subscriptionTotal)}{' '}
-                <span className="text-sm text-gray-500 line-through">
-                  {' '}
-                  {formatDisplayCurrency(oneTimeTotal)}
-                </span>
-              </span>
-            </div>
-          </div>
-          <div>
-            <p className="text-lg font-semibold">How subscription work:</p>
-            <ul>
-              {SUBSCRIPTION_FEATURES.map(feature => (
-                <li key={feature} className="flex items-center gap-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/image/subscription_checked.png`}
-                    alt={feature}
-                    className={cn(
-                      'h-4 w-6 object-contain',
-                      isSubscription ? 'opacity-100' : 'opacity-50'
-                    )}
-                  />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {!!appUser && (
           <div
             className={cn(
-              'space-y-0.5',
-              !isSubscription && 'pointer-events-none opacity-50'
+              isSubscription ? 'bg-[#FFF3D6]' : 'bg-[#F2F2F2]',
+              'space-y-4 rounded-xl p-4'
             )}
           >
-            <Label className="text-sm font-semibold text-gray-700">
-              Deliver every
-            </Label>
-            <Select
-              value={String(deliveryFrequency)}
-              onValueChange={value =>
-                setDeliveryFrequency(Number(value) as SubscriptionFrequency)
-              }
-            >
-              <SelectTrigger className="h-11 rounded-xl border-none bg-white text-sm font-medium shadow-none !ring-0 !ring-offset-0">
-                <SelectValue placeholder="Choose frequency" />
-              </SelectTrigger>
-              <SelectContent className="border-none bg-white shadow-md">
-                {SUBSCRIPTION_FREQUENCIES.map(weeks => (
-                  <SelectItem
-                    key={weeks}
-                    value={String(weeks)}
-                    className="cursor-pointer hover:bg-gray-100"
-                  >
-                    Every {weeks} week{weeks > 1 ? 's' : ''}
-                  </SelectItem>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={isSubscription}
+                onCheckedChange={() => setPaymentPlan('subscription')}
+              />
+              <div className="flex flex-col gap-1">
+                <p className="text-lg font-semibold min-md:text-xl">
+                  Subscribe &amp; Save 10%
+                </p>
+                <span className="text-base font-semibold">
+                  {formatDisplayCurrency(subscriptionTotal)}{' '}
+                  <span className="text-sm text-gray-500 line-through">
+                    {' '}
+                    {formatDisplayCurrency(oneTimeTotal)}
+                  </span>
+                </span>
+              </div>
+            </div>
+            <div>
+              <p className="text-lg font-semibold">How subscription work:</p>
+              <ul>
+                {SUBSCRIPTION_FEATURES.map(feature => (
+                  <li key={feature} className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/image/subscription_checked.png`}
+                      alt={feature}
+                      className={cn(
+                        'h-4 w-6 object-contain',
+                        isSubscription ? 'opacity-100' : 'opacity-50'
+                      )}
+                    />
+                    {feature}
+                  </li>
                 ))}
-              </SelectContent>
-            </Select>
+              </ul>
+            </div>
+            <div
+              className={cn(
+                'space-y-0.5',
+                !isSubscription && 'pointer-events-none opacity-50'
+              )}
+            >
+              <Label className="text-sm font-semibold text-gray-700">
+                Deliver every
+              </Label>
+              <Select
+                value={String(deliveryFrequency)}
+                onValueChange={value =>
+                  setDeliveryFrequency(Number(value) as SubscriptionFrequency)
+                }
+              >
+                <SelectTrigger className="h-11 rounded-xl border-none bg-white text-sm font-medium shadow-none !ring-0 !ring-offset-0">
+                  <SelectValue placeholder="Choose frequency" />
+                </SelectTrigger>
+                <SelectContent className="border-none bg-white shadow-md">
+                  {SUBSCRIPTION_FREQUENCIES.map(weeks => (
+                    <SelectItem
+                      key={weeks}
+                      value={String(weeks)}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
+                      Every {weeks} week{weeks > 1 ? 's' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

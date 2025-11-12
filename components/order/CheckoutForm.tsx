@@ -59,6 +59,9 @@ export const CheckoutForm: React.FC<Props> = ({
   const router = useRouter();
   // Check if cart is empty
   const isCartEmpty = items.length === 0;
+  const hasSubscriptionItems = items.some(
+    item => item.paymentPlan === 'subscription'
+  );
 
   // Form states
   const [email, setEmail] = useState('');
@@ -349,6 +352,23 @@ export const CheckoutForm: React.FC<Props> = ({
   }
 
   if (!isShowCheckoutForm && !user) {
+    if (hasSubscriptionItems) {
+      return (
+        <div className="flex flex-col gap-3">
+          <p className="text-center text-sm text-gray-600">
+            Your cart contains subscription products. Please log in to continue.
+          </p>
+          <button
+            type="button"
+            className="btn-gradient--yellow px-8 py-2 text-center text-base font-semibold transition-all hover:to-[#FFBA0A]/90 active:scale-95"
+            onClick={handleLoginClick}
+          >
+            Login
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col gap-3">
         <button
